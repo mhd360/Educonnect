@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('/styles/typography.css');
+
+:root {
+    --color-primary: #ff1164;
+    --color-primary-light: #ff327a;
+    --color-primary-dark: #bf0043;
+    
+    --color-gray-3: #161616;
+    --color-gray-2: #242424;
+    --color-gray-1: #404040;
+    --color-gray-4: #303030;
+    --color-gray-5: #f4f6fa85;
+    --color-gray-6: #ffffff;
+    
+    --color-shadow-1: rgba(255, 255, 255, 0.35);
+    /* --color-shadow-1: rgba(0, 0, 0, 0.35); */
+    --color-shadow-2: rgb(255, 30, 109);
+
+    --color-sun: #ffdd67;
+}
+
+.light-mode:root{
+    --color-primary: #ff1164;
+    --color-primary-dark: #ff327a;
+    --color-primary-light: #c90248;
+    
+    --color-gray-6: #161616;
+    --color-gray-5: #111318;
+    --color-gray-4: #dadada;
+    --color-gray-2: #cbcbcb;
+    --color-gray-1: #bababa;
+    --color-gray-3: #ffffff;
+    
+    --color-shadow-1: rgba(0, 0, 0, 0.35);
+    /* --color-shadow-1: rgba(255, 255, 255, 0.35); */
+    --color-shadow-2: rgb(255, 30, 109);
+
+    --color-sun: #ffdd67;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    /* background: linear-gradient(to top, var(--color-gray-1), var(--color-gray-3)); */
+    background-color: var(--color-gray-3);
+    height: 100%;
+}
+
+

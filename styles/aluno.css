@@ -1,0 +1,288 @@
+.container {
+    height: fit-content;
+    width: fit-content;
+}
+
+.header {
+    width: 100%;
+    height: 90px;
+    /* background-color: var(--color-gray-2); */
+    background: linear-gradient(to left, var(--color-gray-2), var(--color-gray-3));
+    /* box-shadow: 0 0.5rem 1rem var(--color-gray-2); */
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+}
+
+.logo {
+    color: var(--color-gray-6);
+    padding: 1.5rem;
+}
+
+
+.menu {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+}
+
+.logout {
+    width: fit-content;
+    color: var(--color-gray-6);
+    text-decoration: none;
+}
+
+.logout:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.theme-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 100%;
+    background-color: transparent;
+    margin: 0 2rem;
+}
+
+.main-container {
+    display: flex;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    min-height: 90vh;
+    width: 85%;
+    max-width: 900px;
+    gap: 3rem;
+}
+
+.first-container {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    justify-content: space-between;
+}
+
+.welcome-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: space-between;
+    gap: 2.5rem;
+}
+
+.welcome-name {
+    /* margin: 2rem 0 2rem 2rem; */
+    text-align: left;
+    color: var(--color-gray-6);
+}
+
+.welcome-text {
+    color: var(--color-gray-6);
+}
+
+span {
+    color: var(--color-primary);
+}
+
+.avg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background-color: var(--color-gray-2);
+    height: 100%;
+    width: auto;
+    padding: 1rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-2);
+}
+
+.avg-text {
+    color: var(--color-gray-6);
+}
+
+.avg-number {
+    color: var(--color-gray-6);
+}
+
+.line {
+    width: 65%;
+    height: 1px;
+    border-radius: 50px;
+    background-color: var(--color-gray-1);
+    /* opacity: 50%; */
+    margin-top: 1rem;
+}
+
+.section-title {
+    color: var(--color-gray-6);
+    align-self: start;
+    margin: 2.5rem auto 0;
+    /* margin-top: 1rem;
+    margin-left: 4rem; */
+}
+
+.info-container {
+    width: 100%;
+    height: fit-content;
+    background-color: var(--color-gray-2);
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-2);
+    padding: 1rem 2rem;
+}
+table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.table-title {
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+}
+
+th, td {
+    color: var(--color-gray-6);
+    padding: 0.5rem 1rem;
+    border-right: 2px solid var(--color-gray-4);
+    border-bottom: 2px solid var(--color-gray-4);
+    margin-top: 1rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+th:last-child, td:last-child {
+  border-right: none;
+}
+
+/* .chart-wrap{
+  position: relative;
+  width: 100%;
+  height: 260px;           
+}
+
+
+.grades-chart{
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin-bottom: 2rem;
+} */
+
+.chart-section {
+    width: 100%;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: var(--color-gray-2);
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-2);
+    padding: 1rem;
+    color: var(--color-gray-6);
+}
+
+.chart-header {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 0 0 1rem;
+    align-items: center;
+}
+
+.subject-select {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--color-primary);
+    color: var(--color-gray-6);
+    border: 1px solid transparent;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50px;
+}
+
+.subject-select:hover {
+    cursor: pointer;
+    background-color: var(--color-primary-dark);
+    border: 1px solid var(--color-gray-6);
+    box-shadow: 0 0 20px var(--color-shadow-2);
+}
+
+.subject-select:focus {
+    outline: none;
+}
+
+.chart-container {
+    height: 100%;
+    width: 85%;
+    margin: 0 auto;
+}
+
+
+/* CARD do gráfico */
+/* .grades-card{
+  background:#111318;
+  color:#fff;
+  border-radius:1.5rem;
+  padding:1rem;
+  box-shadow:0 0 20px rgb(255, 30, 109);
+} */
+
+/* separa header do gráfico com a mesma “divisória” */
+/* .chart-header{
+  display:flex; gap:.75rem; align-items:center;
+  padding:.25rem .25rem .75rem;
+  border-bottom:1px solid #303030;
+} */
+
+/* select no mesmo tema */
+/* #subjectSelect{
+  background:#111318;
+  color:#fff;
+  border:1px solid #303030;
+  border-radius:.75rem;
+  padding:.4rem .6rem;
+}
+#subjectSelect:focus{ outline:2px solid rgba(255,30,109,.35); } */
+
+/* wrapper para altura fixa */
+/* .chart-wrap{
+  position:relative;
+  width:100%;
+  height:260px;
+  margin-top:.75rem;
+} */
+
+/* canvas ocupa o wrapper */
+/* .grades-chart{
+  width:100%;
+  height:100%;
+  display:block;
+} */
+
+
+footer {
+    width: 100vw;
+    position: relative;
+    bottom: 0;
+    color: var(--color-gray-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+footer p {
+    margin: 0 auto 1.5rem;
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/reset.css">
+    <link rel="stylesheet" href="styles/typography.css">
+    <link rel="stylesheet" href="styles/globalStyles.css">
+    <link rel="stylesheet" href="styles/aluno.css">
+    <title>EC - Página do aluno</title>
+</head>
+
+<body>
+    <header class="header container">
+        <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+        <div class="menu">
+            <button class="theme-btn" id="theme-btn"><img src="icons/white_sun.svg" alt="ícone de sol"
+                    id="theme-img"></button>
+            <a class="text2 logout" href="/index.html">sair</a>
+        </div>
+    </header>
+    <main class="container main-container">
+        <section class="container first-container">
+            <div class="container welcome-container">
+                <h2 class="title1 welcome-name">Olá, <span>[nome]</span>!</h2>
+                <p class="text2 welcome-text">Bem vindo(a) ao seu painel de notas.</p>
+            </div>
+            <div class="container avg-container">
+                <h2 class="title2 avg-text">Média geral</h2>
+                <h1 class="title1 avg-number">7.7</h1>
+            </div>
+        </section>
+        <!-- <div class="line"></div> -->
+        <h2 class="title2 section-title">Boletim</h2>
+        <section class="container info-container">
+            <table id="gradesTable">
+                <tr class="table-header">
+                    <th class="title3 table-title">Disciplina</th>
+                    <th class="title3 table-title">P1</th>
+                    <th class="title3 table-title">P2</th>
+                    <th class="title3 table-title">P3</th>
+                    <th class="title3 table-title">FINAL</th>
+                </tr>
+                <tr>
+                    <td class="text1">Lógica</td>
+                    <td>8.5</td>
+                    <td>7.8</td>
+                    <td>6.5</td>
+                    <td class="text1">8.2</td>
+                </tr>
+                <tr>
+                    <td class="text1">Python</td>
+                    <td>7.2</td>
+                    <td>9.0</td>
+                    <td>4.2</td>
+                    <td class="text1">8.1</td>
+                </tr>
+                <tr>
+                    <td class="text1">SQL</td>
+                    <td>6.8</td>
+                    <td>8.3</td>
+                    <td>7.2</td>
+                    <td class="text1">7.6</td>
+                </tr>
+                <tr>
+                    <td class="text1">APIs</td>
+                    <td>4.5</td>
+                    <td>7.0</td>
+                    <td>8.2</td>
+                    <td class="text1">5.8</td>
+                </tr>
+                <tr>
+                    <td class="text1">React</td>
+                    <td>9.0</td>
+                    <td>8.7</td>
+                    <td>6.7</td>
+                    <td class="text1">8.9</td>
+                </tr>
+            </table>
+        </section>
+        <!-- <div class="line"></div> -->
+        <h2 class="title2 section-title">Tabela visual</h2>
+        <section class="chart-section container">
+            <div class="chart-header">
+                <label class="title3" for="subjectSelect">Escolha a matéria:</label>
+                <select class="text2 subject-select" id="subjectSelect"></select>
+            </div>
+            <div class="chart-container">
+                <canvas class="text2" id="gradesChart"></canvas>
+            </div>
+        </section>
+    </main>
+    <!-- <footer>
+        <p class="text4">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
+    </footer> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+    <script src="js/grades-chart.js" defer></script>
+    <script src="js/app.js" defer></script>
+</body>
+
+</html>
