@@ -116,8 +116,8 @@
             titleColor: textColor,
             bodyColor: textColor,
             displayColors: false,
-            titleFont: { size: baseFont + 2 },
-            bodyFont: { size: baseFont + 1 },
+            titleFont: { size: baseFont },
+            bodyFont: { size: baseFont },
             callbacks: { label: (c) => ` ${c.parsed.y.toFixed(1)}` }
           }
         },

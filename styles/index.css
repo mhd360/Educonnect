@@ -4,6 +4,7 @@ body {
 }
 html{
     height: 100%;
+    font-size: 80%;
 }
 
 .container {
@@ -13,7 +14,7 @@ html{
 
 .header {
     width: 100vw;
-    height: 90px;
+    height: 6rem;
     /* background-color: var(--color-gray-2); */
     background: linear-gradient(to left, var(--color-gray-2), var(--color-gray-3));
     /* box-shadow: 0 0.5rem 1rem var(--color-gray-2); */
@@ -48,7 +49,7 @@ span {
     justify-content: space-between;
     align-items: center;
     width: 85%;
-    max-width: 480px;
+    max-width: 400px;
     height: 40%;
     margin: 3rem auto;
     padding: 2.5rem;
