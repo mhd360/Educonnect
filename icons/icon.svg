@@ -1,0 +1,13 @@
+<!-- favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-label="Favicon">
+  <title>Favicon</title>
+  <!-- tile arredondado rosa -->
+  <rect x="8" y="8" width="48" height="48" rx="12" fill="#ff1e6d"/>
+  <!-- linha das notas (P1,P2,P3) -->
+  <path d="M18 40 L28 32 L38 36 L46 24" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- pontos -->
+  <circle cx="18" cy="40" r="2.5" fill="#ffffff"/>
+  <circle cx="28" cy="32" r="2.5" fill="#ffffff"/>
+  <circle cx="38" cy="36" r="2.5" fill="#ffffff"/>
+  <circle cx="46" cy="24" r="2.5" fill="#ffffff"/>
+</svg>
