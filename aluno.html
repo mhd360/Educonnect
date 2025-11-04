@@ -25,6 +25,7 @@
                 <li><a href="#inicio" class="text2 nav-link">Início</a></li>
                 <li><a href="#boletim" class="text2 nav-link">Boletim</a></li>
                 <li><a href="#grafico" class="text2 nav-link">Gráfico</a></li>
+                <li><a href="#calendario" class="text2 nav-link">Calendário</a></li>
             </ul>
         </nav>
 
@@ -37,27 +38,27 @@
 
     <main class="container main-container">
 
-        <section id="inicio" class="container welcome-section with-offset">
+        <section class="container welcome-section with-offset">
 
-            <div class="container info-aluno-container">
-                <div class="container welcome-container">
-                    <h2 class="title1 welcome-name">Olá, <span>[nome]</span>!</h2>
-                    <p class="text2 welcome-text">Bem vindo(a) ao painel do estudante.</p>
+            <div class="container welcome-first with-offset">
+
+                <div class="container info-aluno-container">
+                    <div class="container welcome-container">
+                        <h2 class="title1 welcome-name">Olá, <span>Aluno</span>!</h2>
+                        <p class="text2 welcome-text">Bem vindo(a) ao painel do estudante.</p>
+                    </div>
+
+                    <div class="container avg-container">
+                        <h2 class="title2 avg-text">Média geral</h2>
+                        <h1 class="title1 avg-number">0.0</h1>
+                    </div>
+
                 </div>
-
-                <div class="container avg-container">
-                    <h2 class="title2 avg-text">Média geral</h2>
-                    <h1 class="title1 avg-number">0.0</h1>
-                </div>
-
             </div>
-        </section>
 
+            <div class="container events-section">
 
-
-            <section class="container events-section">
-
-                <h2 class="title1 section-title with-offset">Próximos eventos:</h2>
+                <h2 id="inicio" class="titleMid section-title with-offset">Próximos eventos:</h2>
 
                 <div class=" container events-container">
 
@@ -87,10 +88,11 @@
 
                 </div>
 
-            </section>
+            </div>
+        </section>
 
         <!-- <div class="line"></div> -->
-        <h2 id="boletim" class="title1 section-title with-offset">Boletim</h2>
+        <h2 id="boletim" class="titleMid section-title with-offset">Boletim</h2>
         <section class="container info-container">
             <table id="gradesTable">
                 <tr class="table-header">
@@ -138,10 +140,10 @@
             </table>
         </section>
         <!-- <div class="line"></div> -->
-        <h2 id="grafico" class="title1 section-title with-offset">Gráfico visual</h2>
+        <h2 id="grafico" class="titleMid section-title with-offset">Gráfico visual</h2>
         <section class="chart-section container">
             <div class="chart-header">
-                <label class="title3" for="subjectSelect">Escolha a disciplina:</label>
+                <label class="title3" for="subjectSelect">Selecione a disciplina:</label>
                 <select class="text2 subject-select" id="subjectSelect"></select>
             </div>
             <div class="chart-container">

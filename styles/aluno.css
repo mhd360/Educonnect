@@ -71,6 +71,13 @@ html {
 }
 
 .welcome-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.welcome-first {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -99,7 +106,6 @@ html {
 .welcome-name,
 .welcome-text,
 .avg-text,
-.avg-number,
 .next-event-title,
 .next-event-text,
 .next-event-date,
@@ -122,7 +128,11 @@ span {
     width: auto;
     padding: 1rem;
     border-radius: 1.5rem;
-    box-shadow: 0 0 20px var(--color-shadow-2);
+    box-shadow: 0 0 20px var(--color-shadow-1);
+}
+
+.avg-number {
+    color: var(--color-primary);
 }
 
 .events-section {
@@ -138,7 +148,7 @@ span {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 75%;
+    width: 85%;
 }
 
 .next-event-container {
@@ -201,7 +211,7 @@ span {
     height: fit-content;
     background-color: var(--color-gray-2);
     border-radius: 1.5rem;
-    box-shadow: 0 0 20px var(--color-shadow-2);
+    box-shadow: 0 0 20px var(--color-shadow-1);
     padding: 1rem 2rem;
 }
 
@@ -244,9 +254,10 @@ td:last-child {
     gap: 2rem;
     background-color: var(--color-gray-2);
     border-radius: 1.5rem;
-    box-shadow: 0 0 20px var(--color-shadow-2);
+    box-shadow: 0 0 20px var(--color-shadow-1);
     padding: 1rem;
     color: var(--color-gray-6);
+    align-items: center;
 }
 
 .chart-header {
