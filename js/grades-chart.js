@@ -74,9 +74,11 @@
 
   // --- Cores / estilo ---
   const css = getComputedStyle(document.documentElement);
-  const brand = (css.getPropertyValue('--color-primary') || css.getPropertyValue('--brand-color') || '#ff1e6d').trim();
-  const gridColor = '#303030';
-  const textColor = '#ffffff';
+  const brand = (css.getPropertyValue('--color-primary') || '#ff1e6d').trim();
+  const textColor = (css.getPropertyValue('--color-gray-6') || '#ffffff').trim();
+  const gridColor = (css.getPropertyValue('--color-gray-4') || '#303030').trim();
+
+console.log(textColor)
 
   const baseFont = 14;
   Chart.defaults.font.size = baseFont;
@@ -195,3 +197,4 @@ if (table.tBodies[0]) {
   observer.observe(table.tBodies[0], { subtree: true, characterData: true, childList: true });
 }
 }) ();
+

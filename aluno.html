@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="icons/logo_EC.png" type="image/png">
     <link rel="stylesheet" href="styles/reset.css">
     <link rel="stylesheet" href="styles/typography.css">
     <link rel="stylesheet" href="styles/globalStyles.css">
@@ -13,27 +13,84 @@
 </head>
 
 <body>
-    <header class="header container">
-        <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+    <header class="header site-header container">
+
+        <div class="brand">
+            <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+            <!-- TROCAR POR LOGO ^^^^-->
+        </div>
+
+        <nav class="header-nav" aria-label="Navegação principal">
+            <ul>
+                <li><a href="#inicio" class="text2 nav-link">Início</a></li>
+                <li><a href="#boletim" class="text2 nav-link">Boletim</a></li>
+                <li><a href="#grafico" class="text2 nav-link">Gráfico</a></li>
+            </ul>
+        </nav>
+
         <div class="menu">
             <button class="theme-btn" id="theme-btn"><img src="icons/white_sun.svg" alt="ícone de sol"
                     id="theme-img"></button>
             <a class="text2 logout" href="/index.html">sair</a>
         </div>
     </header>
+
     <main class="container main-container">
-        <section class="container first-container">
-            <div class="container welcome-container">
-                <h2 class="title1 welcome-name">Olá, <span>[nome]</span>!</h2>
-                <p class="text2 welcome-text">Bem vindo(a) ao seu painel de notas.</p>
-            </div>
-            <div class="container avg-container">
-                <h2 class="title2 avg-text">Média geral</h2>
-                <h1 class="title1 avg-number">7.7</h1>
+
+        <section id="inicio" class="container welcome-section with-offset">
+
+            <div class="container info-aluno-container">
+                <div class="container welcome-container">
+                    <h2 class="title1 welcome-name">Olá, <span>[nome]</span>!</h2>
+                    <p class="text2 welcome-text">Bem vindo(a) ao painel do estudante.</p>
+                </div>
+
+                <div class="container avg-container">
+                    <h2 class="title2 avg-text">Média geral</h2>
+                    <h1 class="title1 avg-number">0.0</h1>
+                </div>
+
             </div>
         </section>
+
+
+
+            <section class="container events-section">
+
+                <h2 class="title1 section-title with-offset">Próximos eventos:</h2>
+
+                <div class=" container events-container">
+
+                    <div class="container next-event-container">
+                        <div class="container next-event-header">
+                            <h1 class="title1 next-event-date">23/12</h1>
+                            <p class="text2 next-event-time">11:00</p>
+                        </div>
+                        <h2 class="title2 next-event-description">Entrega: Atividade 2 - Python</h2>
+                    </div>
+
+                    <div class="container next-event-container">
+                        <div class="container next-event-header">
+                            <h1 class="title1 next-event-date">23/12</h1>
+                            <p class="text2 next-event-time">14:00</p>
+                        </div>
+                        <h2 class="title2 next-event-description">Prova 3 - React</h2>
+                    </div>
+
+                    <div class="container next-event-container">
+                        <div class="container next-event-header">
+                            <h1 class="title1 next-event-date">25/12</h1>
+                            <p class="text2 next-event-time">Dia todo</p>
+                        </div>
+                        <h2 class="title2 next-event-description">Recesso</h2>
+                    </div>
+
+                </div>
+
+            </section>
+
         <!-- <div class="line"></div> -->
-        <h2 class="title2 section-title">Boletim</h2>
+        <h2 id="boletim" class="title1 section-title with-offset">Boletim</h2>
         <section class="container info-container">
             <table id="gradesTable">
                 <tr class="table-header">
@@ -81,20 +138,24 @@
             </table>
         </section>
         <!-- <div class="line"></div> -->
-        <h2 class="title2 section-title">Tabela visual</h2>
+        <h2 id="grafico" class="title1 section-title with-offset">Gráfico visual</h2>
         <section class="chart-section container">
             <div class="chart-header">
                 <label class="title3" for="subjectSelect">Escolha a disciplina:</label>
                 <select class="text2 subject-select" id="subjectSelect"></select>
             </div>
             <div class="chart-container">
-                <canvas class="text2" id="gradesChart"></canvas>
+                <canvas id="gradesChart"></canvas>
             </div>
         </section>
     </main>
-    <!-- <footer>
-        <p class="text4">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
-    </footer> -->
+    <footer>
+        <div class="container faq-section">
+            <p class="text3">Encontrou algum problema? Entre em contato conosco:</p>
+            <a class="text3 faq-link" href="/">FAQ</a>
+        </div>
+        <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
     <script src="js/grades-chart.js" defer></script>
     <script src="js/app.js" defer></script>
