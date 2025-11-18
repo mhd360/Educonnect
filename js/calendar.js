@@ -15,7 +15,7 @@
   if (!elDays || !elMonth) return;
 
   // ===== Configuráveis =====
-  const MAX_PILLS_PER_DAY = 3; // <- mude aqui se quiser mostrar mais/menos bolinhas por dia
+  const MAX_PILLS_PER_DAY = 2; // <- mude aqui se quiser mostrar mais/menos bolinhas por dia
 
   // ===== Eventos (exemplo). Formato: { date:'YYYY-MM-DD', time:'HH:MM'|'Dia todo', title, desc }
   const EVENTS = [

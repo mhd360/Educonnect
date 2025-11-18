@@ -1,10 +1,18 @@
 body {
-    overflow: hidden;
+    overflow: auto;
     height: 100%;
 }
 html{
     height: 100%;
     font-size: 80%;
+}
+
+main{
+  min-height: calc(100vh - 6rem);   /* 6rem = altura do header */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* padding: 2rem 0;                  respiro em telas pequenas */
 }
 
 .container {
@@ -13,7 +21,7 @@ html{
 }
 
 .header {
-    width: 100vw;
+    width: 100%;
     height: 6rem;
     /* background-color: var(--color-gray-2); */
     background: linear-gradient(to left, var(--color-gray-2), var(--color-gray-3));
@@ -48,10 +56,10 @@ span {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    width: 85%;
-    max-width: 400px;
-    height: 40%;
-    margin: 3rem auto;
+    width: min(90vw, 420px);
+    max-width: 420px;
+    height: auto;
+    margin: 0 auto;
     padding: 2.5rem;
     background-color: var(--color-gray-2);
     border-radius: 1.5rem;
