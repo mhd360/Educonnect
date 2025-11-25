@@ -1,0 +1,914 @@
+/* ========= BASE ========= */
+
+html {
+    font-size: 80%;
+    scroll-behavior: smooth;
+}
+
+.container {
+    height: fit-content;
+    width: fit-content;
+}
+
+.with-offset {
+    scroll-margin-top: 7.5rem;
+}
+
+/* ========= HEADER / NAV (mesmo visual do aluno) ========= */
+
+.header {
+    width: 100%;
+    height: 6rem;
+    background: linear-gradient(to left, var(--color-gray-2), var(--color-gray-3));
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+}
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 6rem;
+    padding: 0 1.25rem;
+    backdrop-filter: saturate(120%) blur(8px);
+    background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .30));
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.logo {
+    color: var(--color-gray-6);
+    padding: 1.5rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.header-nav {
+    justify-self: center;
+}
+
+.header-nav ul {
+    display: flex;
+    gap: 1.75rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-link {
+    position: relative;
+    text-decoration: none;
+    color: var(--color-gray-6);
+    padding: .25rem 0;
+}
+
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform .2s ease-out;
+    border-radius: 1px;
+}
+
+.nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+.nav-link.active {
+    color: var(--color-primary);
+}
+
+.nav-link.active::after {
+    transform: scaleX(1);
+}
+
+.menu {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.theme-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 100%;
+    background-color: transparent;
+    margin: 0 2rem 0 0;
+}
+
+.logout {
+    width: fit-content;
+    color: var(--color-gray-6);
+    text-decoration: none;
+}
+
+.logout:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* responsivo nav */
+
+@media (max-width: 900px) {
+    .site-header {
+        grid-template-columns: 1fr auto 1fr;
+        padding: 0 .75rem;
+    }
+
+    .header-nav ul {
+        gap: 1rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .header-nav ul::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* ========= LAYOUT PRINCIPAL ========= */
+
+.main-container {
+    display: flex;
+    margin: 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    min-height: 90vh;
+    width: 85%;
+    max-width: 900px;
+    gap: 3rem;
+}
+
+.welcome-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.welcome-first {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8rem;
+}
+
+.info-aluno-container {
+    display: flex;
+    justify-content: space-between;
+    width: 85%;
+}
+
+.welcome-container {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.welcome-name,
+.welcome-text {
+    color: var(--color-gray-6);
+}
+
+.welcome-name span {
+    color: var(--color-primary);
+}
+
+.avg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    background-color: var(--color-gray-2);
+    padding: 1rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+}
+
+.avg-text {
+    color: var(--color-gray-6);
+}
+
+.avg-number {
+    color: var(--color-primary);
+}
+
+/* ========= PRÓXIMOS EVENTOS + BOTÃO ========= */
+
+.events-section {
+    display: flex;
+    flex-direction: column;
+    width: 85%;
+    align-items: center;
+    gap: 3rem;
+    margin-top: 4rem;
+}
+
+.section-title {
+    color: var(--color-gray-6);
+    align-self: start;
+    margin: 2.5rem auto 0;
+}
+
+.events-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 85%;
+}
+
+.next-event-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--color-gray-2);
+    height: 12rem;
+    width: 12rem;
+    padding: 1rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+}
+
+.next-event-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0 auto;
+}
+
+.next-event-date,
+.next-event-time,
+.next-event-description {
+    text-align: center;
+}
+
+.next-event-date,
+.next-event-time {
+    color: var(--color-primary);
+}
+
+.next-event-description {
+    color: var(--color-gray-6);
+    line-height: 120%;
+}
+
+.events-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.login-btn--pill {
+    width: auto;
+    padding: .7rem 2rem;
+    margin: 0;
+    border-radius: 999px;
+}
+
+/* ========= CONTAINERS GENÉRICOS ========= */
+
+.info-container {
+    width: 100%;
+    background-color: var(--color-gray-2);
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+    padding: 1rem 2rem;
+}
+
+/* ========= CALENDÁRIO (mesmo do aluno) ========= */
+
+.calendar-section {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.calendar-header {
+    width: 60%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-gray-2);
+    padding: .75rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+    color: var(--color-gray-6);
+}
+
+.cal-btn {
+    background: transparent;
+    border: 1px solid var(--color-gray-4);
+    padding: .35rem .75rem;
+    border-radius: .75rem;
+    color: var(--color-gray-6);
+}
+
+.cal-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+.calendar-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .1rem;
+}
+
+.calendar-grid {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: .25rem;
+    background: var(--color-gray-2);
+    border-radius: 1rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+    padding: 1rem;
+    width: 80%;
+}
+
+.cal-weekday {
+    display: grid;
+    place-items: center;
+    color: var(--color-gray-6);
+    font-weight: 600;
+    padding: .5rem 0;
+}
+
+.cal-days {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: .25rem;
+    margin-top: .25rem;
+}
+
+.cal-day {
+    min-height: 65px;
+    background: var(--color-gray-3);
+    border: 1px solid var(--color-gray-4);
+    border-radius: .75rem;
+    padding: .5rem;
+    color: var(--color-gray-6);
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+.cal-day:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 18px rgba(255, 17, 100, .25);
+    cursor: pointer;
+}
+
+.cal-day.is-today {
+    outline: 2px solid var(--color-primary);
+}
+
+.cal-day.is-out {
+    opacity: .45;
+}
+
+.cal-day__num {
+    margin-bottom: .25rem;
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.cal-day__events {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .5rem;
+    align-items: center;
+}
+
+.cal-pill {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .7rem;
+    line-height: 1;
+    color: var(--color-primary);
+}
+
+.cal-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    box-shadow: 0 0 8px var(--color-shadow-2);
+}
+
+.cal-time {
+    opacity: .95;
+}
+
+/* ========= MODAIS (detalhes dia + novo evento) ========= */
+
+.cal-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, .55);
+    display: none;
+}
+
+.cal-modal[aria-hidden="false"] {
+    display: block;
+}
+
+.cal-modal__dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 640px);
+    max-height: calc(100vh - 4rem);
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: var(--color-gray-2);
+    color: var(--color-gray-6);
+    border-radius: 1.5rem;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 0 30px var(--color-shadow-1);
+}
+
+.cal-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cal-modal-header-text h2,
+.cal-modal-header-text h3 {
+    margin-bottom: .25rem;
+}
+
+.cal-modal-header-text p {
+    color: var(--color-gray-5);
+}
+
+.cal-modal__close {
+    background: transparent;
+    border: none;
+    color: var(--color-gray-6);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.cal-modal__close:hover {
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+/* lista de eventos no modal de detalhes */
+.cal-events {
+    list-style: none;
+    padding: 0;
+    margin: .5rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.cal-event {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid var(--color-gray-4);
+    border-radius: .75rem;
+    padding: .5rem .75rem;
+    background: var(--color-gray-3);
+}
+
+.cal-event__title {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* ========= EVENTOS NO MODAL (PROFESSOR) ========= */
+
+.cal-modal__item {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid var(--color-gray-4);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-gray-3);
+}
+
+.cal-modal__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.cal-modal__main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cal-event__time {
+    font-weight: 600;
+    color: var(--color-gray-6);
+}
+
+.cal-event__title {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.cal-event__desc {
+    color: var(--color-gray-5);
+}
+
+.cal-modal__actions {
+    display: flex;
+    align-items: flex-start;
+}
+
+.cal-modal__icon-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 999px;
+    color: var(--color-gray-6);
+}
+
+.cal-modal__icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.cal-modal__delete-btn::before {
+    content: "🗑";
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.cal-modal__confirm {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--color-gray-2);
+    display: none;
+}
+
+.cal-modal__confirm.is-open {
+    display: block;
+}
+
+.cal-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.cal-btn-secondary,
+.cal-btn-danger {
+    border-radius: 999px;
+    padding: 0.35rem 1.1rem;
+    border: 1px solid transparent;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.cal-btn-secondary {
+    background: transparent;
+    color: var(--color-gray-6);
+    border-color: var(--color-gray-5);
+}
+
+.cal-btn-secondary:hover {
+    border-color: var(--color-gray-6);
+}
+
+.cal-btn-danger {
+    background: var(--color-primary);
+    color: var(--color-gray-6);
+}
+
+.cal-btn-danger:hover {
+    background: var(--color-primary-dark);
+}
+
+/* ========= FIM EVENTOS NO MODAL (PROFESSOR) ========= */
+
+
+.cal-event__time {
+    opacity: .9;
+}
+
+
+
+/* ========= FORMULÁRIO NOVO EVENTO ========= */
+
+.cal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: .5rem;
+    padding: 1rem;
+}
+
+.cal-form-subtitle {
+    margin-top: 1.5rem;
+    /* margin-bottom: .25rem; */
+}
+
+.group-subtitle {
+    margin: 0;
+}
+
+.date-subtitle {
+    align-self: center;
+}
+
+.cal-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+}
+
+.group-select-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.cal-input {
+    flex: 1 1 140px;
+    height: 4rem;
+    margin: 0;
+}
+
+/* pilulas / textarea */
+
+.cal-modal input[type="text"],
+.cal-modal input[type="date"],
+.cal-modal input[type="time"],
+.cal-modal textarea
+.cal-modal select {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: var(--color-gray-3);
+    color: var(--color-gray-6);
+    padding: .5rem .9rem;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+
+/* ícones date / time claros */
+.cal-modal input[type="date"]::-webkit-calendar-picker-indicator,
+.cal-modal input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+}
+
+/* checkbox "dia todo" */
+
+.cal-all-day {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    color: var(--color-gray-6);
+}
+
+.cal-modal input[disabled] {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.create-event-text {
+    /* margin-top: 1rem; */
+    background-color: var(--color-gray-4);
+    padding: 0.8rem 1.2rem;
+    border-radius: 50px;
+    border: 1px solid transparent;
+    border-color: transparent;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--color-gray-6);
+    max-height: 4rem;
+    /* width: 100%; */
+}
+.create-event-text:focus {
+    outline: none;
+    box-shadow: 0 0 15px var(--color-shadow-2);
+    background-color: var(--color-primary-dark);
+}
+
+
+
+
+/* ações do formulário */
+
+.cal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: .5rem;
+}
+
+.cal-btn-secondary {
+    background: transparent;
+    border: none;
+    color: var(--color-gray-6);
+    padding: .5rem .9rem;
+    margin-right: 1.5rem;
+}
+
+.cal-btn-secondary:hover {
+    color: var(--color-primary);
+}
+
+.cal-btn-primary {
+    padding: .7rem 2rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+
+.cal-btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    border: 1px solid var(--color-gray-6);
+}
+
+/* ========= FILTROS / TABELA DE ALUNOS ========= */
+
+.filters-bar {
+    width: 100%;
+    padding-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    height: fit-content;
+}
+
+.input-chip {
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background-color: var(--color-gray-3);
+    color: var(--color-gray-6);
+    min-width: 220px;
+    font-family: "Montserrat", sans-serif;
+}
+
+.input-chip:focus {
+    outline: none;
+    box-shadow: 0 0 15px var(--color-shadow-2);
+    border-color: var(--color-primary);
+}
+
+/* reaproveita o select do aluno */
+.subject-select {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--color-primary);
+    color: var(--color-gray-6);
+    border: 1px solid transparent;
+    padding: 0.25rem 0.8rem;
+    border-radius: 50px;
+    width: fit-content;
+    height: 2.5rem;
+    /* margin: 0 auto; */
+}
+
+.subject-select:hover {
+    cursor: pointer;
+    background-color: var(--color-primary-dark);
+    border: 1px solid var(--color-gray-6);
+    box-shadow: 0 0 20px var(--color-shadow-2);
+}
+
+.subject-select:focus {
+    outline: none;
+}
+
+.create-event-text {
+    height: 4rem;
+}
+
+/* tabela de alunos / atividades (mesmo estilo do aluno) */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.table-title {
+    color: var(--color-primary);
+}
+
+th,
+td {
+    color: var(--color-gray-6);
+    padding: 0.5rem 1rem;
+    border-right: 2px solid var(--color-gray-4);
+    border-bottom: 2px solid var(--color-gray-4);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+/* ========= ATIVIDADES ========= */
+
+.activities-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.activity-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.activities-hint {
+    color: var(--color-gray-5);
+    margin-top: 0.5rem;
+}
+
+/* ========= FOOTER ========= */
+
+footer {
+    padding-top: 2rem;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+footer p {
+    margin: 0 auto;
+}
+
+.faq-section {
+    display: flex;
+    color: var(--color-gray-6);
+    gap: 1rem;
+}
+
+.faq-link {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.faq-link:hover {
+    color: var(--color-gray-6);
+    text-decoration: underline;
+}
+
+.direitos {
+    color: var(--color-gray-5);
+}

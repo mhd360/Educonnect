@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="../icons/logo_EC.png" type="image/png" />
+    <link rel="stylesheet" href="../styles/reset.css" />
+    <link rel="stylesheet" href="../styles/typography.css" />
+    <link rel="stylesheet" href="../styles/globalStyles.css" />
+    <link rel="stylesheet" href="../styles/professor.css" />
+    <title>EC - Página do professor</title>
+</head>
+
+<body>
+    <header class="header site-header container">
+        <div class="brand">
+            <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+        </div>
+
+        <nav class="header-nav" aria-label="Navegação principal">
+            <ul>
+                <li><a href="#inicio" class="text2 nav-link">Início</a></li>
+                <li><a href="#calendario" class="text2 nav-link">Calendário</a></li>
+                <li><a href="#alunos" class="text2 nav-link">Alunos</a></li>
+                <li><a href="#atividades" class="text2 nav-link">Atividades</a></li>
+            </ul>
+        </nav>
+
+        <div class="menu">
+            <button class="theme-btn" id="theme-btn">
+                <img src="../icons/white_sun.svg" alt="ícone de sol" id="theme-img" />
+            </button>
+            <a class="text2 logout" href="./index.html">sair</a>
+        </div>
+    </header>
+
+    <main class="container main-container">
+
+        <!-- INÍCIO -->
+        <section id="inicio" class="container welcome-section with-offset">
+            <div class="container welcome-first with-offset">
+                <div class="container info-aluno-container">
+                    <div class="container welcome-container">
+                        <h2 class="title1 welcome-name">Olá, <span>Professor</span>!</h2>
+                        <p class="text2 welcome-text">
+                            Bem vindo(a) ao painel do professor.
+                        </p>
+                    </div>
+
+                    <div class="container avg-container">
+                        <h2 class="title2 avg-text">Média dos alunos</h2>
+                        <h1 class="title1 avg-number" id="profStudentsAvg">0.0</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container events-section">
+                <h2 class="titleMid section-title">Próximos eventos</h2>
+
+                <div class="container events-container" id="profEventsContainer">
+                    <!-- cards via JS -->
+                </div>
+
+                <div class="container events-actions">
+                    <button id="btnNewEvent" class="text2 login-btn login-btn--pill">
+                        Novo evento
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALENDÁRIO (logo após início) -->
+        <h2 id="calendario" class="titleMid section-title with-offset">Calendário</h2>
+        <section class="calendar-section container with-offset">
+            <div class="calendar-header">
+                <button class="cal-btn" id="calPrev" aria-label="Mês anterior">‹</button>
+                <div class="calendar-title">
+                    <span class="title2" id="calMonth">Mês</span>
+                    <span class="text3" id="calYear">Ano</span>
+                </div>
+                <button class="cal-btn" id="calNext" aria-label="Próximo mês">›</button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="cal-weekday">Dom</div>
+                <div class="cal-weekday">Seg</div>
+                <div class="cal-weekday">Ter</div>
+                <div class="cal-weekday">Qua</div>
+                <div class="cal-weekday">Qui</div>
+                <div class="cal-weekday">Sex</div>
+                <div class="cal-weekday">Sáb</div>
+                <div id="calDays" class="cal-days"></div>
+            </div>
+        </section>
+
+        <!-- Modal de detalhes de eventos (igual aluno) -->
+        <div class="cal-modal" id="calModal" aria-hidden="true">
+            <div class="cal-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="calModalTitle">
+                <div class="cal-modal-header">
+                    <div class="cal-modal-header-text">
+                        <h3 class="title3" id="calModalTitle">Eventos do dia</h3>
+                        <p class="text2" id="calModalDate"></p>
+                    </div>
+                    <button class="cal-modal__close" id="calModalClose" aria-label="Fechar">✕</button>
+                </div>
+                <ul class="cal-events" id="calModalList"></ul>
+            </div>
+        </div>
+
+        <!-- Modal para criar evento -->
+        <div class="cal-modal" id="eventModal" aria-hidden="true">
+            <div class="cal-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+                <div class="cal-modal-header">
+                    <div class="cal-modal-header-text">
+                        <h2 class="title2" id="eventModalTitle">Novo evento</h2>
+                    </div>
+                    <button class="cal-modal__close" id="eventModalClose" aria-label="Fechar">✕</button>
+                </div>
+
+                <form id="eventForm" class="cal-form">
+                    <div class="group-select-container">
+                        <p class="text1 cal-form-subtitle group-subtitle">Selecione o grupo:</p>
+                        <!-- 1) Grupo de alunos (mesmo estilo do select de matéria) -->
+                        <select id="eventGroup" class="text3 subject-select">
+                            <option value="Todos">Todos os alunos</option>
+                            <option value="SQL">Alunos de SQL</option>
+                            <option value="Python">Alunos de Python</option>
+                            <option value="React">Alunos de React</option>
+                            <option value="low">Média geral abaixo de 6</option>
+                            <option value="high">Média geral igual ou acima de 6</option>
+                        </select>
+                    </div>
+
+                    <!-- 2) Título -->
+                    <p class="text1 cal-form-subtitle date-subtitle">Título:</p>
+
+                    <input type="text" id="eventTitle" class="text2 create-event-text" placeholder="Título do evento"
+                        maxlength="40" required />
+
+                    <!-- 3) Data / Horário / Dia todo -->
+                    <p class="text1 cal-form-subtitle date-subtitle">Data e hora:</p>
+
+                    <div class="cal-form-row">
+                        <input type="date" id="eventDate" class="text3 cal-input" required />
+
+                        <input type="time" id="eventTime" class="text3 cal-input" />
+
+                        <label class="cal-all-day">
+                            <input type="checkbox" id="eventAllDay" checked />
+                            <p class="text3">Dia todo</p>
+                        </label>
+                    </div>
+
+                    <!-- 4) Observações -->
+                    <p class="text1 cal-form-subtitle date-subtitle">Descrição:</p>
+
+                    <input type="text" id="eventDesc" class="text2 cal-input create-event-text"
+                        placeholder="Observações / descrição (opcional)" />
+
+                    <!-- 5) Ações -->
+                    <div class="cal-form-actions">
+                        <button type="button" id="eventCancel" class="text3 cal-btn-secondary">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="text2 login-btn cal-btn-primary">
+                            Criar evento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- ALUNOS / NOTAS -->
+        <h2 id="alunos" class="titleMid section-title with-offset">Alunos e notas</h2>
+        <section class="container info-container">
+            <div class="filters-bar">
+                <div class="filters-row">
+                    <input id="filterSearch" class="input-chip" type="text"
+                        placeholder="Buscar por nome ou matrícula" />
+
+                    <select id="filterSubject" class="text3 subject-select">
+                        <option value="">Todas as disciplinas</option>
+                    </select>
+
+                    <select id="filterGroup" class="text3 subject-select">
+                        <option value="">Todos os alunos</option>
+                        <option value="low">Média geral &lt; 6</option>
+                        <option value="high">Média geral ≥ 6</option>
+                    </select>
+                </div>
+            </div>
+
+            <table id="profStudentsTable">
+                <tr class="table-header">
+                    <th class="title3 table-title">Aluno</th>
+                    <th class="title3 table-title">Matrícula</th>
+                    <th class="title3 table-title">Disciplina</th>
+                    <th class="title3 table-title">P1</th>
+                    <th class="title3 table-title">P2</th>
+                    <th class="title3 table-title">P3</th>
+                    <th class="title3 table-title">Média</th>
+                    <th class="title3 table-title">Ações</th>
+                </tr>
+            </table>
+        </section>
+
+        <!-- ATIVIDADES -->
+        <h2 id="atividades" class="titleMid section-title with-offset">Atividades</h2>
+        <section class="container info-container activities-section">
+            <form id="activityForm" class="activity-form">
+                <select id="activitySubject" class="text3 subject-select" required></select>
+                <input type="text" id="activityTitle" class="input-chip" placeholder="Título da atividade" required />
+                <input type="date" id="activityDueDate" class="input-chip" required />
+                <input type="text" id="activityDescription" class="input-chip" placeholder="Descrição (opcional)" />
+                <button type="submit" class="text2 login-btn login-btn--pill">
+                    Criar atividade
+                </button>
+            </form>
+
+            <table id="profActivitiesTable">
+                <tr class="table-header">
+                    <th class="title3 table-title">Disciplina</th>
+                    <th class="title3 table-title">Título</th>
+                    <th class="title3 table-title">Data de entrega</th>
+                    <th class="title3 table-title">Descrição</th>
+                </tr>
+            </table>
+            <p class="text3 activities-hint">
+                As datas de entrega das atividades também aparecem no calendário dos alunos.
+            </p>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container faq-section">
+            <p class="text3">Encontrou algum problema? Entre em contato conosco:</p>
+            <a class="text3 faq-link" href="/">FAQ</a>
+        </div>
+        <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="../js/data.js" defer></script>
+    <script src="../js/login.js" defer></script>
+    <script src="../js/professor-page.js" defer></script>
+    <script src="../js/app.js" defer></script>
+    <script src="../js/calendar.js" defer></script>
+</body>
+
+</html>

@@ -1,200 +1,188 @@
-// grades-chart.js (robusto p/ P1, P2, P3 + espaço nas pontas)
+// grades-chart.js – lê a tabela #gradesTable e monta o gráfico de notas
 (() => {
-  const toNum = (s) => {
-    const n = parseFloat(String(s).trim().replace(',', '.'));
-    return Number.isFinite(n) ? n : null;
-  };
-
-  const table = document.getElementById('gradesTable');
+  const table  = document.getElementById('gradesTable');
   const select = document.getElementById('subjectSelect');
   const canvas = document.getElementById('gradesChart');
 
   if (!table || !select || !canvas || !window.Chart) return;
 
-  // --- Descobrir índices pelas colunas do THEAD (com fallback) ---
-  const thTexts = Array.from(table.querySelectorAll('thead th')).map(th =>
+  // pega a cor primária do tema (CSS variable)
+  const rootStyle    = getComputedStyle(document.documentElement);
+  const primaryColor = (rootStyle.getPropertyValue('--color-primary') || '#ff1164').trim();
+
+  const toNum = (s) => {
+    const n = parseFloat(String(s).trim().replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  };
+
+  // ===== header (linha com class="table-header") =====
+  const headerRow = table.querySelector('tr.table-header');
+  if (!headerRow) return;
+
+  const thTexts = Array.from(headerRow.querySelectorAll('th')).map(th =>
     th.textContent.trim().toUpperCase()
   );
 
   const findIdx = (keys) => thTexts.findIndex(t => keys.includes(t));
 
-  let idxSubj = findIdx(['MATÉRIA', 'MATERIA', 'DISCIPLINA', 'MAT', 'Disciplina']);
-  let idxP1 = findIdx(['P1']);
-  let idxP2 = findIdx(['P2']);
-  let idxP3 = findIdx(['P3']);
+  let idxSubj = findIdx(['DISCIPLINA', 'MATÉRIA', 'MATERIA', 'MAT']);
+  let idxP1   = findIdx(['P1']);
+  let idxP2   = findIdx(['P2']);
+  let idxP3   = findIdx(['P3']);
 
-  // Fallback para ordem padrão: Matéria, P1, P2, P3, FINAL
+  // fallback padrão: Disciplina, P1, P2, P3, FINAL
   if (idxSubj === -1) idxSubj = 0;
-  if (idxP1 === -1) idxP1 = 1;
-  if (idxP2 === -1) idxP2 = 2;
-  if (idxP3 === -1) idxP3 = 3;
+  if (idxP1   === -1) idxP1   = 1;
+  if (idxP2   === -1) idxP2   = 2;
+  if (idxP3   === -1) idxP3   = 3;
 
-  // Labels presentes (só inclui se existir coluna de fato na linha)
   const LABELS = ['P1', 'P2', 'P3'].filter((_, i) => {
     const idx = [idxP1, idxP2, idxP3][i];
     return idx >= 0;
   });
 
-  // --- Ler a tabela -> { Matéria: [P1, P2, P3] } ---
+  // ===== lê a tabela -> { Disciplina: [P1,P2,P3] } =====
   const readTable = () => {
-    const rows = table.querySelectorAll('tbody tr');
+    let rows = Array.from(table.querySelectorAll('tbody tr'));
+    if (!rows.length) {
+      rows = Array.from(table.querySelectorAll('tr'))
+        .filter(tr => !tr.classList.contains('table-header'));
+    }
+
     const map = {};
+
     rows.forEach(tr => {
       const tds = tr.querySelectorAll('td');
       if (!tds.length) return;
 
-      const subjCell = tds[idxSubj] || tds[0];
-      const subj = subjCell ? subjCell.textContent.trim() : `Matéria ${Object.keys(map).length + 1}`;
+      const subj = (tds[idxSubj] ? tds[idxSubj].textContent.trim() : '').trim() || 'Disciplina';
 
       const vals = [];
-      const indices = [idxP1, idxP2, idxP3];
-
-      indices.forEach((idx) => {
-        if (idx != null && idx >= 0 && tds[idx]) {
-          const v = toNum(tds[idx].textContent);
-          if (v != null) vals.push(v);
-        }
-      });
+      if (idxP1 >= 0 && tds[idxP1]) {
+        const v1 = toNum(tds[idxP1].textContent);
+        if (v1 != null) vals.push(v1);
+      }
+      if (idxP2 >= 0 && tds[idxP2]) {
+        const v2 = toNum(tds[idxP2].textContent);
+        if (v2 != null) vals.push(v2);
+      }
+      if (idxP3 >= 0 && tds[idxP3]) {
+        const v3 = toNum(tds[idxP3].textContent);
+        if (v3 != null) vals.push(v3);
+      }
 
       map[subj] = vals;
     });
+
     return map;
   };
 
-  const datasetBySubject = readTable();
+  let dataBySubject = readTable();
 
-  // --- Popular o <select> ---
-  select.innerHTML = '';
-  Object.keys(datasetBySubject).forEach((subj, i) => {
-    const opt = document.createElement('option');
-    opt.value = subj; opt.textContent = subj;
-    if (i === 0) opt.selected = true;
-    select.appendChild(opt);
-  });
+  // ===== select de disciplinas =====
+  const populateSelect = () => {
+    select.innerHTML = '';
+    const subjects = Object.keys(dataBySubject);
 
-  // --- Cores / estilo ---
-  const css = getComputedStyle(document.documentElement);
-  const brand = (css.getPropertyValue('--color-primary') || '#ff1e6d').trim();
-  const textColor = (css.getPropertyValue('--color-gray-6') || '#ffffff').trim();
-  const gridColor = (css.getPropertyValue('--color-gray-4') || '#303030').trim();
+    subjects.forEach((name, i) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (i === 0) opt.selected = true;
+      select.appendChild(opt);
+    });
+  };
 
-console.log(textColor)
-
+  // ===== opções do gráfico (estilo igual ao tema) =====
   const baseFont = 14;
-  Chart.defaults.font.size = baseFont;
-  Chart.defaults.color = textColor;
-  Chart.defaults.font.family = 'Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
 
-  const ctx = canvas.getContext('2d');
-
-  const makeConfig = (subject) => {
-    const labels = LABELS.slice();
-    const data = (datasetBySubject[subject] || []).slice();
-
-    const cfg = {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: `Notas - ${subject}`,
-          data,
-          borderColor: brand,
-          backgroundColor: brand + '33',
-          pointBackgroundColor: brand,
-          pointBorderColor: brand,
-          pointRadius: 5,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#111318',
-            borderColor: gridColor,
-            borderWidth: 1,
-            titleColor: textColor,
-            bodyColor: textColor,
-            displayColors: false,
-            titleFont: { size: baseFont },
-            bodyFont: { size: baseFont },
-            callbacks: { label: (c) => ` ${c.parsed.y.toFixed(1)}` }
-          }
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111318',
+        borderColor: '#282C34',
+        borderWidth: 1,
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        displayColors: false,
+        titleFont: { size: baseFont },
+        bodyFont: { size: baseFont },
+        callbacks: {
+          label: (c) => ` ${c.parsed.y.toFixed(1)}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'category',
+        offset: true, // espaço antes do primeiro e depois do último ponto
+        ticks: {
+          font: { size: baseFont }
         },
-        scales: {
-          x: {
-            type: 'category',
-            offset: true,
-            min: -0.5,
-            max: LABELS.length - 0.5,
-            grid: { color: gridColor, drawTicks: false },
-            ticks: { color: textColor, font: { size: baseFont } }
-          },
-          y: {
-            min: 0, max: 10,
-            grid: { color: gridColor, drawTicks: false },
-            ticks: { stepSize: 2, color: textColor, font: { size: baseFont } }
-          }
+        grid: { display: false }
+      },
+      y: {
+        suggestedMin: 0,
+        suggestedMax: 10,
+        ticks: {
+          stepSize: 2,              // mostra 0, 2, 4, 6, 8, 10
+          font: { size: baseFont }
         }
       }
     }
+  };
 
-    // Só aplica min/max se houver labels
-    if(labels.length > 0) {
-        cfg.options.scales.x.min = -0.5;
-    cfg.options.scales.x.max = labels.length - 0.5;
-  }
+  // ===== criação/atualização do gráfico =====
+  let chart = null;
 
-  return cfg;
-};
+  const updateChart = () => {
+    const subj = select.value;
+    const vals = dataBySubject[subj] || [];
 
-// Evitar múltiplas instâncias
-if (window.__gradesChart) { try { window.__gradesChart.destroy(); } catch { } }
-let chart = new Chart(ctx, makeConfig(select.value));
-window.__gradesChart = chart;
+    const ctx = canvas.getContext('2d');
 
-// Troca de matéria
-select.addEventListener('change', () => {
-  const subj = select.value;
-  chart.data.labels = LABELS;
-  chart.data.datasets[0].label = `Notas - ${subj}`;
-  chart.data.datasets[0].data = datasetBySubject[subj] || [];
+    if (chart) {
+      chart.data.labels = LABELS;
+      chart.data.datasets[0].data = vals;
+      chart.update();
+      return;
+    }
 
-  if (LABELS.length > 0) {
-    chart.options.scales.x.min = -0.5;
-    chart.options.scales.x.max = LABELS.length - 0.5;
-  } else {
-    delete chart.options.scales.x.min;
-    delete chart.options.scales.x.max;
-  }
-  chart.update();
-});
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: LABELS,
+        datasets: [{
+          data: vals,
+          borderWidth: 3,
+          pointRadius: 5,
+          tension: 0.25,
+          borderColor: primaryColor,
+          backgroundColor: primaryColor,
+          pointBackgroundColor: primaryColor,
+          pointBorderColor: '#ffffff',
+          pointHoverRadius: 6
+        }]
+      },
+      options: chartOptions
+    });
+  };
 
-// Observar mudanças na tabela (se editar valores/linhas)
-const observer = new MutationObserver(() => {
-  const newMap = readTable();
-  // sincroniza mantendo referências
-  Object.keys(datasetBySubject).forEach(k => delete datasetBySubject[k]);
-  Object.assign(datasetBySubject, newMap);
+  // inicializa
+  populateSelect();
+  updateChart();
 
-  const subj = select.value;
-  chart.data.labels = LABELS;
-  chart.data.datasets[0].data = datasetBySubject[subj] || [];
+  // muda disciplina
+  select.addEventListener('change', updateChart);
 
-  if (LABELS.length > 0) {
-    chart.options.scales.x.min = -0.5;
-    chart.options.scales.x.max = LABELS.length - 0.5;
-  } else {
-    delete chart.options.scales.x.min;
-    delete chart.options.scales.x.max;
-  }
-  chart.update();
-});
-
-if (table.tBodies[0]) {
-  observer.observe(table.tBodies[0], { subtree: true, characterData: true, childList: true });
-}
-}) ();
-
+  // se a tabela mudar (ex.: futuras edições), atualiza gráfico
+  const obs = new MutationObserver(() => {
+    dataBySubject = readTable();
+    populateSelect();
+    updateChart();
+  });
+  obs.observe(table, { subtree: true, childList: true, characterData: true });
+})();

@@ -1,183 +1,347 @@
+// calendar.js – monta o calendário e lista eventos
 (() => {
-  // ===== Config inicial =====
-  const elDays  = document.getElementById('calDays');
+  const elDays = document.getElementById('calDays');
   const elMonth = document.getElementById('calMonth');
-  const elYear  = document.getElementById('calYear');
+  const elYear = document.getElementById('calYear');
   const btnPrev = document.getElementById('calPrev');
   const btnNext = document.getElementById('calNext');
 
-  // Modal (lista de eventos do dia)
-  const modal  = document.getElementById('calModal');
+  const modal = document.getElementById('calModal');
   const mClose = document.getElementById('calModalClose');
-  const mDate  = document.getElementById('calModalDate');
-  const mList  = document.getElementById('calModalList');
+  const mDate = document.getElementById('calModalDate');
+  const mList = document.getElementById('calModalList');
 
-  if (!elDays || !elMonth) return;
+  if (!elDays || !elMonth || !elYear) return;
 
-  // ===== Configuráveis =====
-  const MAX_PILLS_PER_DAY = 2; // <- mude aqui se quiser mostrar mais/menos bolinhas por dia
+  const MAX_PILLS_PER_DAY = 2;
 
-  // ===== Eventos (exemplo). Formato: { date:'YYYY-MM-DD', time:'HH:MM'|'Dia todo', title, desc }
-  const EVENTS = [
-    { date: '2025-12-23', time: '11:00',   title: 'Entrega: Atividade 2 - Python', desc: 'Entrega via portal.' },
-    { date: '2025-12-23', time: '14:00',   title: 'Prova 3 - React',               desc: 'Conteúdo: hooks e roteamento.' },
-    { date: '2025-12-25', time: 'Dia todo',title: 'Recesso',                       desc: 'Sem aulas.' },
+  // autenticacao: identifica se é professor
+  const auth = window.ECAuth;
+  const currentUser = auth?.getCurrentUser?.();
+  const IS_PROFESSOR = !!(currentUser && currentUser.role === 'professor');
+
+  // eventos: tenta ler do ECData; se não houver, usa padrão
+  const allData = window.ECData?.getAll?.();
+  let EVENTS = allData?.events || [
+    { date: '2025-12-23', time: '11:00', title: 'Entrega: Atividade 2 - Python', desc: 'Entrega via portal.' },
+    { date: '2025-12-23', time: '14:00', title: 'Prova 3 - React', desc: 'Conteúdo: hooks e roteamento.' },
+    { date: '2025-12-25', time: 'Dia todo', title: 'Recesso', desc: 'Sem aulas.' }
   ];
 
-  // Índice por data
-  const byDate = EVENTS.reduce((acc, ev) => {
-    (acc[ev.date] ||= []).push(ev);
-    return acc;
-  }, {});
+  let byDate = {};
+  function rebuildIndex() {
+    byDate = EVENTS.reduce((acc, ev) => {
+      (acc[ev.date] ||= []).push(ev);
+      return acc;
+    }, {});
+  }
+  rebuildIndex();
 
-  // ===== helpers =====
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const fmtDate = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
-  const MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
-  // Ordenação: "Dia todo" primeiro, depois horários crescentes HH:MM
-  function timeKey(t){
-    if (!t) return 1e9;
-    const s = String(t).toLowerCase().trim();
-    if (s.includes('dia todo')) return -1;
-    const m = s.match(/^(\d{1,2}):(\d{2})$/);
+  function pad2(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function fmtDateKey(y, m, d) {
+    return y + '-' + pad2(m) + '-' + pad2(d);
+  }
+
+  const MONTHS = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+  ];
+
+  function timeKey(t) {
+    if (t === 'Dia todo') return 0;
+    const m = /^(\d{2}):(\d{2})$/.exec(t || '');
     if (!m) return 1e9;
-    return parseInt(m[1],10)*60 + parseInt(m[2],10);
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
   }
 
-  // formato dd/mm/aaaa para o modal
-  function brazilFmt(key){
-    const [y,m,d] = key.split('-');
-    return `${d}/${m}/${y}`;
-  }
+  function deleteEvent(ev) {
+    if (!allData || !Array.isArray(EVENTS)) return;
 
-  let view = new Date(); // mês em exibição
+    const idx = EVENTS.indexOf(ev);
+    if (idx === -1) return;
 
-  function render(){
-    const year  = view.getFullYear();
-    const month = view.getMonth(); // 0..11
-
-    elMonth.textContent = MONTHS[month][0].toUpperCase() + MONTHS[month].slice(1);
-    elYear.textContent  = String(year);
-
-    const first = new Date(year, month, 1);
-    const last  = new Date(year, month + 1, 0);
-    const daysInMonth = last.getDate();
-    const startOffset = first.getDay(); // domingo = 0
-
-    elDays.innerHTML = '';
-
-    // Dias do mês anterior para preencher a 1ª linha
-    const prevLast = new Date(year, month, 0).getDate();
-    for(let i=0; i<startOffset; i++){
-      const num = prevLast - (startOffset - 1 - i);
-      elDays.appendChild(makeDay(num, true, year, month-1));
+    // remove da lista em memória
+    EVENTS.splice(idx, 1);
+    if (allData && Array.isArray(allData.events)) {
+      allData.events = EVENTS;
     }
 
-    // Dias do mês atual
-    for(let d=1; d<=daysInMonth; d++){
-      elDays.appendChild(makeDay(d, false, year, month));
+    // persiste
+    if (window.ECData && typeof window.ECData.save === 'function') {
+      window.ECData.save();
     }
 
-    // Completa a grade até múltiplo de 7
-    const cells = elDays.children.length;
-    const toFill = (Math.ceil(cells/7)*7) - cells;
-    for(let i=1; i<=toFill; i++){
-      elDays.appendChild(makeDay(i, true, year, month+1));
+    // reindexa e redesenha
+    rebuildIndex();
+    render();
+
+    // avisa outras páginas (professor) para atualizarem cards de "Próximos eventos"
+    if (typeof window.ECOnEventsChanged === 'function') {
+      window.ECOnEventsChanged();
     }
   }
 
-  function makeDay(dayNumber, isOut, y, mZeroBased){
+  // função global usada por outras páginas (ex.: professor) para recarregar calendário
+  window.ECRefreshCalendar = function () {
+    if (window.ECData && typeof window.ECData.getAll === 'function') {
+      const fresh = window.ECData.getAll();
+      if (fresh && Array.isArray(fresh.events)) {
+        EVENTS = fresh.events;
+        rebuildIndex();
+        render();
+      }
+    }
+  };
+
+  function brazilFmt(key) {
+    const parts = key.split('-');
+    if (parts.length !== 3) return key;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  let view = new Date();
+
+  function makeDay(dayNumber, isOut, yearRef, monthZeroBased) {
+    const y = yearRef;
+    const m = monthZeroBased + 1;
+    const key = fmtDateKey(y, m, dayNumber);
+
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'cal-day' + (isOut ? ' is-out' : '');
-    btn.setAttribute('data-day', dayNumber);
-    btn.setAttribute('tabindex','0');
-
-    const y2 = (new Date(y, mZeroBased, 1)).getFullYear();
-    const m2 = (new Date(y, mZeroBased, 1)).getMonth() + 1;
-    const key = fmtDate(y2, m2, dayNumber);
+    btn.className = 'cal-day';
+    if (isOut) btn.classList.add('is-out');
 
     const head = document.createElement('div');
     head.className = 'cal-day__num text3';
     head.textContent = dayNumber;
     btn.appendChild(head);
 
-    // Hoje?
     const today = new Date();
-    if (!isOut &&
-        dayNumber === today.getDate() &&
-        ((mZeroBased % 12 + 12) % 12) === today.getMonth() &&
-        y2 === today.getFullYear()){
+    if (
+      !isOut &&
+      dayNumber === today.getDate() &&
+      monthZeroBased === today.getMonth() &&
+      y === today.getFullYear()
+    ) {
       btn.classList.add('is-today');
     }
 
-    // ---- Indicadores (bolinha + horário), limitados com "+N" ----
-    const evsSorted = (byDate[key] || []).slice().sort((a,b)=> timeKey(a.time) - timeKey(b.time));
-    const total = evsSorted.length;
-
-    if (total){
+    const list = byDate[key];
+    if (list && list.length) {
       const wrap = document.createElement('div');
       wrap.className = 'cal-day__events';
 
-      const show = evsSorted.slice(0, MAX_PILLS_PER_DAY);
-      show.forEach(ev => {
-        const pill = document.createElement('span');
-        pill.className = 'cal-pill';
-        pill.innerHTML = `<span class="cal-dot"></span><small class=" text3 cal-time">${ev.time || ''}</small>`;
-        wrap.appendChild(pill);
-      });
+      list
+        .slice()
+        .sort(function (a, b) { return timeKey(a.time) - timeKey(b.time); })
+        .slice(0, MAX_PILLS_PER_DAY)
+        .forEach(function (ev) {
+          const pill = document.createElement('span');
+          pill.className = 'cal-pill';
 
-      if (total > MAX_PILLS_PER_DAY){
-        const more = document.createElement('button');
-        more.type = 'button';
-        more.className = 'cal-pill cal-more';
-        more.innerHTML = `+${total - MAX_PILLS_PER_DAY}`;
-        more.addEventListener('click', (e) => { e.stopPropagation(); selectDay(key, evsSorted); });
+          const dot = document.createElement('span');
+          dot.className = 'cal-dot';
+
+          const time = document.createElement('span');
+          time.className = 'cal-time';
+          time.textContent = ev.time || '';
+
+          pill.appendChild(dot);
+          pill.appendChild(time);
+          wrap.appendChild(pill);
+        });
+
+      if (list.length > MAX_PILLS_PER_DAY) {
+        const more = document.createElement('span');
+        more.className = 'cal-pill';
+        more.textContent = '+' + (list.length - MAX_PILLS_PER_DAY);
         wrap.appendChild(more);
       }
 
       btn.appendChild(wrap);
-    }
 
-    // Abrir modal ao clicar no dia (mesmo sem eventos, mostra “Nenhum evento…”)
-    btn.addEventListener('click', () => selectDay(key, evsSorted));
+      btn.addEventListener('click', function () {
+        if (!modal || !mDate || !mList) return;
+
+        mDate.textContent = brazilFmt(key);
+        mList.innerHTML = '';
+
+        list
+          .slice()
+          .sort((a, b) => timeKey(a.time) - timeKey(b.time))
+          .forEach(ev => {
+            const li = document.createElement('li');
+            li.className = 'cal-modal__item';
+
+            const row = document.createElement('div');
+            row.className = 'cal-modal__row';
+
+            const main = document.createElement('div');
+            main.className = 'cal-modal__main';
+
+            const timeEl = document.createElement('span');
+            timeEl.className = 'cal-event__time';
+            timeEl.textContent = ev.time;
+
+            const titleEl = document.createElement('span');
+            titleEl.className = 'cal-event__title';
+            titleEl.textContent = ev.title;
+
+            main.appendChild(timeEl);
+            main.appendChild(titleEl);
+
+            if (ev.desc) {
+              const descEl = document.createElement('p');
+              descEl.className = 'cal-event__desc';
+              descEl.textContent = ev.desc;
+              main.appendChild(descEl);
+            }
+
+            row.appendChild(main);
+
+            let confirmBox = null;
+
+            // só professor vê o botão de excluir
+            if (IS_PROFESSOR) {
+              const actions = document.createElement('div');
+              actions.className = 'cal-modal__actions';
+
+              const delBtn = document.createElement('button');
+              delBtn.type = 'button';
+              delBtn.className = 'cal-modal__icon-btn cal-modal__delete-btn';
+              delBtn.setAttribute('aria-label', 'Excluir evento');
+              actions.appendChild(delBtn);
+
+              row.appendChild(actions);
+
+              confirmBox = document.createElement('div');
+              confirmBox.className = 'cal-modal__confirm';
+
+              const msg = document.createElement('p');
+              msg.className = 'text3 cal-confirm-text';
+              msg.textContent = 'Você realmente quer excluir o evento para você e para os alunos?';
+
+              const btnRow = document.createElement('div');
+              btnRow.className = 'cal-confirm-actions';
+
+              const cancelBtn = document.createElement('button');
+              cancelBtn.type = 'button';
+              cancelBtn.className = 'text3 cal-btn-secondary';
+              cancelBtn.textContent = 'Cancelar';
+
+              const okBtn = document.createElement('button');
+              okBtn.type = 'button';
+              okBtn.className = 'text3 cal-btn-danger';
+              okBtn.textContent = 'Excluir';
+
+              btnRow.appendChild(cancelBtn);
+              btnRow.appendChild(okBtn);
+
+              confirmBox.appendChild(msg);
+              confirmBox.appendChild(btnRow);
+
+              delBtn.addEventListener('click', () => {
+                confirmBox.classList.add('is-open');
+              });
+
+              cancelBtn.addEventListener('click', () => {
+                confirmBox.classList.remove('is-open');
+              });
+
+              okBtn.addEventListener('click', () => {
+                deleteEvent(ev);
+                confirmBox.classList.remove('is-open');
+                li.remove();
+
+                const updatedList = byDate[key] || [];
+                if (!updatedList.length) {
+                  modal.classList.remove('open');
+                }
+              });
+            }
+
+            li.appendChild(row);
+            if (confirmBox) {
+              li.appendChild(confirmBox);
+            }
+
+            mList.appendChild(li);
+          });
+
+        modal.classList.add('open');
+
+
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
 
     return btn;
   }
 
-  // ===== Modal =====
-  function openModal(){ modal.setAttribute('aria-hidden','false'); }
-  function closeModal(){ modal.setAttribute('aria-hidden','true'); }
-  mClose?.addEventListener('click', closeModal);
-  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  function render() {
 
-  // Monta a lista completa para a data
-  function selectDay(key, evs){
-    mDate.textContent = brazilFmt(key);
+    const year = view.getFullYear();
+    const month = view.getMonth();
 
-    mList.innerHTML = '';
-    if (!evs.length){
-      mList.innerHTML = `<li class="cal-event"><div class="cal-event__title">Nenhum evento neste dia.</div></li>`;
-    } else {
-      evs.forEach(ev => {
-        const li = document.createElement('li');
-        li.className = 'cal-event';
-        li.innerHTML = `
-          <div class="cal-event__title">${ev.title}</div>
-          <div class="cal-event__time text3">${ev.time}</div>
-          ${ev.desc ? `<div class="text2">${ev.desc}</div>` : ''}
-        `;
-        mList.appendChild(li);
-      });
+    const monthName = MONTHS[month] || '';
+    elMonth.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+    elYear.textContent = String(year);
+
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const daysInMonth = last.getDate();
+    const startOffset = first.getDay();
+
+    elDays.innerHTML = '';
+
+    const prevLast = new Date(year, month, 0).getDate();
+    for (let i = 0; i < startOffset; i++) {
+      const num = prevLast - (startOffset - 1 - i);
+      elDays.appendChild(makeDay(num, true, year, month - 1));
     }
-    openModal();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      elDays.appendChild(makeDay(d, false, year, month));
+    }
+
+    const cells = elDays.children.length;
+    const toFill = (Math.ceil(cells / 7) * 7) - cells;
+    for (let i = 1; i <= toFill; i++) {
+      elDays.appendChild(makeDay(i, true, year, month + 1));
+    }
   }
 
-  // Navegação
-  btnPrev?.addEventListener('click', () => { view.setMonth(view.getMonth()-1); render(); });
-  btnNext?.addEventListener('click', () => { view.setMonth(view.getMonth()+1); render(); });
+  if (btnPrev) {
+    btnPrev.addEventListener('click', function () {
+      view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      render();
+    });
+  }
+  if (btnNext) {
+    btnNext.addEventListener('click', function () {
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      render();
+    });
+  }
 
+  if (mClose && modal) {
+    mClose.addEventListener('click', function () {
+      modal.setAttribute('aria-hidden', 'true');
+    });
+  }
+  if (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) {
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+
+  // primeira renderização
   render();
+
 })();

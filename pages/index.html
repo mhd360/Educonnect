@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="icons/logo_EC.png" type="image/png">
-    <link rel="stylesheet" href="styles/reset.css">
-    <link rel="stylesheet" href="styles/typography.css">
-    <link rel="stylesheet" href="styles/globalStyles.css">
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="icon" href="../icons/logo_EC.png" type="image/png">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/typography.css">
+    <link rel="stylesheet" href="../styles/globalStyles.css">
+    <link rel="stylesheet" href="../styles/index.css">
     <title>EduConnect</title>
 </head>
 
@@ -16,7 +16,7 @@
     <header class="header container">
 
         <h1 class="title1 logo"><span>Edu</span>Connect</h1>
-        <button class="theme-btn" id="theme-btn"><img src="icons/white_sun.svg" alt="ícone de sol" id="theme-img"></button>
+        <button class="theme-btn" id="theme-btn"><img src="../icons/white_sun.svg" alt="ícone de sol" id="theme-img"></button>
 
     </header>
 
@@ -25,12 +25,17 @@
 
             <div class="login-container container">
                 <h2 class="title2 form-title">Acesse sua conta</h2>
-                <div class="form-container container">
-                    <input class="text2" type="text" name="matricula" id="email-form" placeholder="MATRÍCULA">
-                    <input class="text2" type="password" name="password" id="password-form" placeholder="SENHA">
-                    <a class="text2 login-btn" href="/aluno.html">Entrar</a>
+                <form class="form-container container" id="loginForm">
+                    <input class="text2" type="text" name="matricula" id="matricula" placeholder="MATRÍCULA" required>
+                    <input class="text2" type="password" name="password" id="password" placeholder="SENHA" required>
+                    <button type="submit" class="text2 login-btn">Entrar</button>
+                    <!-- <a class="text2 login-btn" href="./aluno.html">Entrar</a> -->
                     <a class="text3 forgot-password" href="/">Problemas para entrar</a>
-                </div>
+                </form>
+
+                <p class="text3 forgot-password" id="loginError" style="display:none; color:#ff327a;">
+                    Matrícula ou senha inválidos.
+                </p>
 
                 <div class="line"></div>
 
@@ -45,7 +50,9 @@
     <!-- <footer>
         <p class="text4">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
     </footer> -->
-    <script src="js/app.js" defer></script>
+    <script src="../js/app.js" defer></script>
+    <script src="../js/data.js" defer></script>
+    <script src="../js/login.js" defer></script>
 </body>
 
 </html>
