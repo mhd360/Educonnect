@@ -50,10 +50,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = data.users[matricula];
 
     if (!user || user.senha !== senha) {
-      if (errMsg) errMsg.style.display = 'block';
+      // Toast de erro (preferencial)
+      if (typeof Toastify === 'function') {
+        Toastify({
+          text: 'Matrícula ou senha inválidos.',
+          duration: 4000,
+          close: true,
+          gravity: 'top',
+          position: 'right',
+          stopOnFocus: true,
+          style: {
+            background: '#e53935', // vermelho
+            color: '#ffffff'
+          }
+        }).showToast();
+      } else if (errMsg) {
+        // fallback se Toastify não estiver disponível
+        errMsg.style.display = 'block';
+      }
       return;
     }
 
+    // login válido: garante que a mensagem de erro (fallback) não apareça
     if (errMsg) errMsg.style.display = 'none';
 
     // salva usuário logado
