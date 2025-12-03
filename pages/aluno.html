@@ -4,6 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            const saved = localStorage.getItem('ec-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+
     <link rel="icon" href="../icons/logo_EC.png" type="image/png">
     <link rel="stylesheet" href="../styles/reset.css">
     <link rel="stylesheet" href="../styles/typography.css">
@@ -58,7 +65,7 @@
 
             <div class="container events-section">
 
-                <h2  class="titleMid section-title with-offset">Próximos eventos</h2>
+                <h2 class="titleMid section-title with-offset">Próximos eventos</h2>
 
                 <div class=" container events-container">
 
@@ -198,6 +205,7 @@
         <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+    <script src="../js/theme.js" defer></script>
     <script src="../js/data.js" defer></script>
     <script src="../js/login.js" defer></script>
     <script src="../js/aluno-page.js" defer></script>

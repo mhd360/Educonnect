@@ -1,38 +1,38 @@
 // ============ TEMA CLARO/ESCURO ============
-document.addEventListener('DOMContentLoaded', () => {
-  const button = document.getElementById('theme-btn');
-  const icon = document.getElementById('theme-img');
+// document.addEventListener('DOMContentLoaded', () => {
+//   const button = document.getElementById('theme-btn');
+//   const icon = document.getElementById('theme-img');
 
-  if (!button || !icon) return;
+//   if (!button || !icon) return;
 
-  const ICON_BASE = '../icons/';
+//   const ICON_BASE = '../icons/';
 
-  function setIconForCurrentTheme() {
-    const isLight = document.documentElement.classList.contains('light-mode');
-    icon.src = isLight
-      ? ICON_BASE + 'black_moon.svg'
-      : ICON_BASE + 'white_sun.svg';
-  }
+//   function setIconForCurrentTheme() {
+//     const isLight = document.documentElement.classList.contains('light-mode');
+//     icon.src = isLight
+//       ? ICON_BASE + 'black_moon.svg'
+//       : ICON_BASE + 'white_sun.svg';
+//   }
 
-  button.addEventListener('click', () => {
-    document.documentElement.classList.toggle('light-mode');
-    setIconForCurrentTheme();
-  });
+//   button.addEventListener('click', () => {
+//     document.documentElement.classList.toggle('light-mode');
+//     setIconForCurrentTheme();
+//   });
 
-  button.addEventListener('mouseover', () => {
-    const isLight = document.documentElement.classList.contains('light-mode');
-    icon.src = isLight
-      ? ICON_BASE + 'mooncolor.svg'
-      : ICON_BASE + 'suncolor.svg';
-  });
+//   button.addEventListener('mouseover', () => {
+//     const isLight = document.documentElement.classList.contains('light-mode');
+//     icon.src = isLight
+//       ? ICON_BASE + 'mooncolor.svg'
+//       : ICON_BASE + 'suncolor.svg';
+//   });
 
-  button.addEventListener('mouseout', () => {
-    setIconForCurrentTheme();
-  });
+//   button.addEventListener('mouseout', () => {
+//     setIconForCurrentTheme();
+//   });
 
-  // inicia com o ícone correto
-  setIconForCurrentTheme();
-});
+//   // inicia com o ícone correto
+//   setIconForCurrentTheme();
+// });
 
 // ============ CÁLCULO DE MÉDIAS (BOLETIM) ============
 document.addEventListener('DOMContentLoaded', () => {
