@@ -47,6 +47,11 @@ html {
     padding: 1.5rem;
 }
 
+.logo span {
+  color: var(--color-primary);
+}
+
+
 .brand {
     display: flex;
     align-items: center;

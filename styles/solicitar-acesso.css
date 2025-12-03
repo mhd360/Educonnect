@@ -192,7 +192,7 @@ span {
 .back-link {
   color: var(--color-gray-5);
   text-decoration: none;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
 }
 
 .back-link:hover {
@@ -215,6 +215,7 @@ span {
   background: var(--color-primary-dark);
   box-shadow: 0 0 24px var(--color-shadow-2);
 }
+
 
 /* ===== RESPONSIVO ===== */
 

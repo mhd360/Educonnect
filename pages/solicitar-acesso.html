@@ -13,6 +13,8 @@
 
   <!-- Estilos específicos desta página -->
   <link rel="stylesheet" href="../styles/solicitar-acesso.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
 
 </head>
 
@@ -32,7 +34,7 @@
         Preencha seus dados para que possamos analisar seu cadastro.
       </p>
 
-      <form class="access-form" autocomplete="off">
+      <form class="access-form" autocomplete="off" novalidate>
         <!-- Tipo de cadastro -->
         <div class="form-row">
           <select id="tipoCadastro" class="text3 pill-input" required>
@@ -75,7 +77,9 @@
       </form>
     </section>
   </main>
+  <script src="../scripts/solicitar-acesso.js"></script>
   <script src="../js/solicitar-acesso.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 
 </html>
