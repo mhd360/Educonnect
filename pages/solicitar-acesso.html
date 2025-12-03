@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>EduConnect – Solicitar acesso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../icons/logo_EC.png" type="image/png">
+
+  <link rel="stylesheet" href="../styles/reset.css" />
+  <link rel="stylesheet" href="../styles/globalStyles.css" />
+  <link rel="stylesheet" href="../styles/typography.css" />
+
+  <!-- Estilos específicos desta página -->
+  <link rel="stylesheet" href="../styles/solicitar-acesso.css" />
+
+</head>
+
+<body class="ec-page ec-page--access">
+  <header class="header container">
+
+    <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+    <button class="theme-btn" id="theme-btn"><img src="../icons/white_sun.svg" alt="ícone de sol"
+        id="theme-img"></button>
+
+  </header>
+
+  <main class="access-main">
+    <section class="access-card">
+      <h1 class="title1 access-title">Solicitar acesso</h1>
+      <p class="text3 access-subtitle">
+        Preencha seus dados para que possamos analisar seu cadastro.
+      </p>
+
+      <form class="access-form" autocomplete="off">
+        <!-- Tipo de cadastro -->
+        <div class="form-row">
+          <select id="tipoCadastro" class="text3 pill-input" required>
+            <option value="" disabled selected>Tipo de cadastro</option>
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+          </select>
+        </div>
+
+        <!-- Nome / Sobrenome -->
+        <div class="form-row form-row--2">
+          <input type="text" id="firstName" class="text3 pill-input" placeholder="Primeiro nome" required />
+          <input type="text" id="lastName" class="text3 pill-input" placeholder="Sobrenome" required />
+        </div>
+
+        <!-- Data de nascimento -->
+        <div class="form-row">
+          <span class="text3 access-label">Data de nascimento</span>
+          <input type="date" id="birthDate" class="text3 pill-input" aria-label="Data de nascimento" required />
+        </div>
+
+        <!-- CPF -->
+        <div class="form-row">
+          <input type="text" id="cpf" class="text3 pill-input" placeholder="CPF" required />
+        </div>
+
+        <!-- E-mail / Telefone -->
+        <div class="form-row form-row--2">
+          <input type="email" id="email" class="text3 pill-input" placeholder="E-mail" required />
+          <input type="tel" id="phone" class="text3 pill-input" placeholder="Telefone de contato" required />
+        </div>
+
+        <div class="form-actions">
+          <a href="index.html" class="text3 back-link">Voltar para o login</a>
+
+          <button type="submit" class="primary-btn">
+            Enviar solicitação
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="../js/solicitar-acesso.js" defer></script>
+</body>
+
+</html>
