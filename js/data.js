@@ -27,18 +27,18 @@ const DEFAULT_DATA = {
   grades: {
     // chave = matrícula do aluno
     A1001: [
-      { disciplina: 'Lógica',  p1: 8.5, p2: 3.2, p3: 6.5 },
-      { disciplina: 'Python',  p1: 7.2, p2: 9.0, p3: 9.0 },
-      { disciplina: 'SQL',     p1: 6.8, p2: 8.3, p3: 10 },
-      { disciplina: 'APIs',    p1: 4.5, p2: 7.0, p3: 8.2 },
-      { disciplina: 'React',   p1: 9.0, p2: 8.7, p3: 6.7 }
+      { disciplina: 'Lógica', p1: 8.5, p2: 3.2, p3: 6.5 },
+      { disciplina: 'Python', p1: 7.2, p2: 9.0, p3: 9.0 },
+      { disciplina: 'SQL', p1: 6.8, p2: 8.3, p3: 10 },
+      { disciplina: 'APIs', p1: 4.5, p2: 7.0, p3: 8.2 },
+      { disciplina: 'React', p1: 9.0, p2: 8.7, p3: 6.7 }
     ],
     A1002: [
-      { disciplina: 'Lógica',  p1: 7.0, p2: 6.5, p3: 8.0 },
-      { disciplina: 'Python',  p1: 8.0, p2: 7.5, p3: 9.0 },
-      { disciplina: 'SQL',     p1: 5.7, p2: 6.0, p3: 6.7 },
-      { disciplina: 'APIs',    p1: 3.2, p2: 7.0, p3: 9.8 },
-      { disciplina: 'React',   p1: 7.4, p2: 5.3, p3: 4.5 }
+      { disciplina: 'Lógica', p1: 7.0, p2: 6.5, p3: 8.0 },
+      { disciplina: 'Python', p1: 8.0, p2: 7.5, p3: 9.0 },
+      { disciplina: 'SQL', p1: 5.7, p2: 6.0, p3: 6.7 },
+      { disciplina: 'APIs', p1: 3.2, p2: 7.0, p3: 9.8 },
+      { disciplina: 'React', p1: 7.4, p2: 5.3, p3: 4.5 }
     ]
   },
 
@@ -56,23 +56,67 @@ const DEFAULT_DATA = {
   // Eventos do calendário (compartilhado por turma)
   // futuramente podemos usar "target" para direcionar grupos específicos
   events: [
-    { id: 'EVT1', date: '2025-12-23', time: '11:00',    title: 'Entrega: Atividade 2 - Python', desc: 'Entrega via portal.' },
-    { id: 'EVT2', date: '2025-12-23', time: '14:00',    title: 'Prova 3 - React',               desc: 'Conteúdo: hooks e roteamento.' },
-    { id: 'EVT3', date: '2025-12-25', time: 'Dia todo', title: 'Recesso',                       desc: 'Sem aulas.' }
+    { id: 'EVT1', date: '2025-12-23', time: '11:00', title: 'Entrega: Atividade 2 - Python', desc: 'Entrega via portal.' },
+    { id: 'EVT2', date: '2025-12-23', time: '14:00', title: 'Prova 3 - React', desc: 'Conteúdo: hooks e roteamento.' },
+    { id: 'EVT3', date: '2025-12-25', time: 'Dia todo', title: 'Recesso', desc: 'Sem aulas.' }
   ]
 };
 
 // Carrega do localStorage ou usa DEFAULT_DATA
+function normalizeData(obj) {
+  if (!obj) return structuredClone(DEFAULT_DATA);
+
+  // garante que users seja um objeto (mapa), mesmo se tiver sido salvo como array
+  if (Array.isArray(obj.users)) {
+    const map = {};
+    obj.users.forEach((u) => {
+      if (u && u.matricula) {
+        map[u.matricula] = u;
+      }
+    });
+    obj.users = map;
+  }
+
+  // SE users não existir ou estiver quebrado, volta para o padrão (admin, P2001, A1001, A1002)
+  if (!obj.users || typeof obj.users !== 'object') {
+    obj.users = structuredClone(DEFAULT_DATA.users);
+  }
+
+  // garante mapeamento de matérias por professor
+  if (!obj.subjectsByTeacher) {
+    obj.subjectsByTeacher = structuredClone(DEFAULT_DATA.subjectsByTeacher);
+  }
+
+  // garante notas de exemplo
+  if (!obj.grades || Object.keys(obj.grades).length === 0) {
+    obj.grades = structuredClone(DEFAULT_DATA.grades);
+  }
+
+  // garante atividades de exemplo
+  if (!Array.isArray(obj.activities) || obj.activities.length === 0) {
+    obj.activities = structuredClone(DEFAULT_DATA.activities);
+  }
+
+  // garante eventos de exemplo
+  if (!Array.isArray(obj.events) || obj.events.length === 0) {
+    obj.events = structuredClone(DEFAULT_DATA.events);
+  }
+
+  return obj;
+}
+
+
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return structuredClone(DEFAULT_DATA);
-    return JSON.parse(raw);
+    return normalizeData(JSON.parse(raw));
   } catch (e) {
     console.error('Erro ao carregar dados:', e);
     return structuredClone(DEFAULT_DATA);
   }
 }
+
 
 function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>EduConnect – Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="../icons/logo_EC.png" type="image/png">
+    <!-- Aplica o tema salvo antes de qualquer CSS -->
+    <script>
+        (function () {
+            const saved = localStorage.getItem('ec-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+
+    <!-- CSS globais -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <link rel="stylesheet" href="../styles/reset.css" />
+    <link rel="stylesheet" href="../styles/globalStyles.css" />
+    <link rel="stylesheet" href="../styles/typography.css" />
+    <!-- CSS específico do admin -->
+    <link rel="stylesheet" href="../styles/admin.css" />
+
+    <!-- Toastify (mesmo que na página de solicitar acesso) -->
+</head>
+
+<body>
+    <header class="header site-header container">
+
+        <div class="brand">
+            <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+            <!-- TROCAR POR LOGO ^^^^-->
+        </div>
+
+        <nav class="header-nav" aria-label="Navegação principal">
+            <h2 class="title2 section-title">ADMINISTRADOR</h2>
+        </nav>
+
+        <div class="menu">
+            <button class="theme-btn" id="theme-btn"><img src="../icons/white_sun.svg" alt="ícone de sol"
+                    id="theme-img"></button>
+            <a class="text2 logout" href="./index.html">sair</a>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <!-- Resumo -->
+        <section class="admin-summary">
+            <div class="container admin-summary-card">
+                <h2 class="title2">Total de alunos</h2>
+                <p class="title1 admin-summary-number" id="adminTotalStudents">0</p>
+            </div>
+
+            <div class="container admin-summary-card">
+                <h2 class="title2">Total de professores</h2>
+                <p class="title1 admin-summary-number" id="adminTotalTeachers">0</p>
+            </div>
+
+            <div class="container admin-summary-card">
+                <h2 class="title2">Pedidos pendentes</h2>
+                <p class="title1 admin-summary-number" id="adminTotalPending">0</p>
+            </div>
+        </section>
+
+        <!-- Pedidos / Registros -->
+        <section class="admin-section">
+            <div class="admin-section-header">
+                <h2 class="title2 section-title">Registros</h2>
+            </div>
+
+            <div class="container admin-card">
+                <div class="admin-filters-row">
+                    <input type="text" id="adminRegSearch" class="text3 admin-input"
+                        placeholder="Buscar por matrícula, nome ou CPF" />
+                    <label class="text3 admin-filter-check">
+                        <input type="checkbox" id="adminRegPendOnly" />
+                        Mostrar apenas pendentes
+                    </label>
+                </div>
+
+                <table class="admin-table" id="adminRequestsTable">
+                    <thead>
+                        <tr class="table-header">
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- preenchido via JS -->
+                    </tbody>
+                </table>
+
+                <p class="text3 admin-empty" id="adminRequestsEmpty">
+                    Nenhum registro encontrado.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de detalhes do pedido -->
+    <div class="admin-modal" id="adminRequestModal" aria-hidden="true">
+        <div class="admin-modal-backdrop"></div>
+        <div class="admin-modal-content">
+            <button class="admin-modal-close" id="adminModalClose" type="button">
+                ✕
+            </button>
+            <h2 class="title2 modal-title">Detalhes do pedido</h2>
+
+            <div class="admin-modal-body">
+                <p class="text3"><strong>Tipo:</strong> <span id="modalTipo"></span></p>
+                <p class="text3"><strong>Nome:</strong> <span id="modalNome"></span></p>
+                <p class="text3"><strong>Data de nascimento:</strong> <span id="modalNascimento"></span></p>
+                <p class="text3"><strong>CPF:</strong> <span id="modalCpf"></span></p>
+                <p class="text3"><strong>E-mail:</strong> <span id="modalEmail"></span></p>
+                <p class="text3"><strong>Telefone:</strong> <span id="modalTelefone"></span></p>
+                <p class="text3"><strong>Status:</strong> <span id="modalStatus"></span></p>
+                <p class="text3"><strong>Matrícula:</strong> <span id="modalMatricula"></span></p>
+            </div>
+
+            <div class="admin-modal-actions">
+                <button type="button" class="btn-secondary" id="adminModalCancel">
+                    Fechar
+                </button>
+                <button type="button" class="primary-btn" id="adminGenerateMatBtn">
+                    Gerar matrícula
+                </button>
+                <button type="button" class="btn-secondary" id="adminDeactivateBtn">
+                    Inativar
+                </button>
+                <button type="button" class="primary-btn" id="adminReactivateBtn">
+                    Reativar
+                </button>
+                <button type="button" class="btn-danger" id="adminRemoveBtn">
+                    Remover do sistema
+                </button>
+            </div>
+
+        </div>
+    </div>
+        <!-- Modal de confirmação -->
+    <div class="admin-modal" id="adminConfirmModal" aria-hidden="true">
+        <div class="admin-modal-backdrop"></div>
+        <div class="admin-modal-content admin-modal-content--confirm">
+            <button class="admin-modal-close" id="adminConfirmClose" type="button">
+                ✕
+            </button>
+
+            <h2 class="title2 modal-title">Confirmar ação</h2>
+
+            <p class="text3 modal-confirm-text" id="adminConfirmMessage"></p>
+
+            <div class="admin-modal-actions">
+                <button type="button" class="btn-secondary" id="adminConfirmCancel">
+                    Cancelar
+                </button>
+                <button type="button" class="primary-btn" id="adminConfirmConfirm">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/theme.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/admin-page.js" defer></script>
+</body>
+
+</html>

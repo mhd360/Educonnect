@@ -1,44 +1,59 @@
 // js/professor-page.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const auth = window.ECAuth;
-    const dataApi = window.ECData;
+  const auth = window.ECAuth;
+  const dataApi = window.ECData;
 
-    if (!auth || !dataApi) return;
+  if (!auth || !dataApi) return;
 
-    const user = auth.getCurrentUser();
+  const user = auth.getCurrentUser();
 
-    // apenas professores acessam
-    if (!user || user.role !== 'professor') {
-        window.location.href = './index.html';
-        return;
+  // apenas professores acessam
+  if (!user || user.role !== 'professor') {
+    window.location.href = './index.html';
+    return;
+  }
+
+  // SEMPRE carrega os dados já normalizados
+  const data = dataApi.getAll();
+
+  function recalcProfAvgCard() {
+    if (window.ECRecalcProfAvg) {
+      window.ECRecalcProfAvg();
     }
+  }
 
-    const data = dataApi.getAll();
+  // --------- saudação / contagem de alunos ----------
+  const nameSpan = document.querySelector('.welcome-name span');
+  if (nameSpan) nameSpan.textContent = user.nome || 'Professor';
 
-    function recalcProfAvgCard() {
-        if (window.ECRecalcProfAvg) {
-            window.ECRecalcProfAvg();
-        }
-    }
+  // alunos = todos os usuários com role "aluno"
+  const students = Object.values(data.users || {}).filter(
+    (u) => u && u.role === 'aluno'
+  );
 
-    // --------- saudação / contagem de alunos ----------
-    const nameSpan = document.querySelector('.welcome-name span');
-    if (nameSpan) nameSpan.textContent = user.nome;
+  // todas as disciplinas presentes nas notas (fallback de apresentação)
+  const allSubjectsFromGrades = Object.values(data.grades || {}).flatMap(
+    (list) => (list || []).map((g) => g.disciplina)
+  );
+  const uniqueAllSubjects = [...new Set(allSubjectsFromGrades)];
 
-    const subjectsForTeacher = data.subjectsByTeacher[user.matricula] || [];
-    const studentsCountNode = document.getElementById('profStudentsCount');
+  // disciplinas do professor; se não houver, usa todas (dados de exemplo)
+  let subjectsForTeacher = data.subjectsByTeacher[user.matricula];
+  if (!subjectsForTeacher || !subjectsForTeacher.length) {
+    subjectsForTeacher = uniqueAllSubjects;
+  }
 
-    const students = Object.values(data.users).filter(u => u.role === 'aluno');
+  const studentsCountNode = document.getElementById('profStudentsCount');
 
-    const studentsWithThisTeacher = students.filter(stu => {
-        const grades = data.grades[stu.matricula] || [];
-        return grades.some(g => subjectsForTeacher.includes(g.disciplina));
-    });
+  const studentsWithThisTeacher = students.filter((stu) => {
+    const grades = data.grades[stu.matricula] || [];
+    return grades.some((g) => subjectsForTeacher.includes(g.disciplina));
+  });
 
-    if (studentsCountNode) {
-        studentsCountNode.textContent = String(studentsWithThisTeacher.length);
-    }
+  if (studentsCountNode) {
+    studentsCountNode.textContent = String(studentsWithThisTeacher.length);
+  }
 
     // =========================================================
     // PRÓXIMOS EVENTOS

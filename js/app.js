@@ -111,6 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
   window.ECRecalcGrades = recalc;
 });
 
+
+// Atualiza o nome na saudação (aluno e professor)
+document.addEventListener('DOMContentLoaded', () => {
+  const auth = window.ECAuth;
+  if (!auth || !auth.getCurrentUser) return;
+
+  const user = auth.getCurrentUser();
+  if (!user) return;
+
+  const span = document.querySelector('.welcome-name span');
+  if (span) {
+    span.textContent = user.nome || (user.role === 'aluno' ? 'Aluno' : 'Professor');
+  }
+});
+
 // Média geral dos alunos na página do professor
 (() => {
   const table = document.getElementById('profStudentsTable');
