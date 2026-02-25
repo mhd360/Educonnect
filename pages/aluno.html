@@ -1,65 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>
-    (function () {
-      const saved = localStorage.getItem("ec-theme") || "dark";
-      document.documentElement.setAttribute("data-theme", saved);
-    })();
-  </script>
 
-  <link rel="icon" href="../icons/logo_EC.png" type="image/png" />
-  <link rel="stylesheet" href="../styles/reset.css" />
-  <link rel="stylesheet" href="../styles/typography.css" />
-  <link rel="stylesheet" href="../styles/globalStyles.css" />
-  <link rel="stylesheet" href="../styles/aluno.css" />
-  <title>EC - Página do aluno</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            const saved = localStorage.getItem("ec-theme") || "dark";
+            document.documentElement.setAttribute("data-theme", saved);
+        })();
+    </script>
+
+    <link rel="icon" href="../icons/logo_EC.png" type="image/png" />
+    <link rel="stylesheet" href="../styles/reset.css" />
+    <link rel="stylesheet" href="../styles/typography.css" />
+    <link rel="stylesheet" href="../styles/globalStyles.css" />
+    <link rel="stylesheet" href="../styles/aluno.css" />
+    <title>EC - Página do aluno</title>
 </head>
 
 <body>
-  <header class="header site-header container">
-    <div class="brand">
-      <!-- <h1 class="title1 logo"><span>Edu</span>Connect</h1> -->
-       <img src="../icons/EC-Logo-png.png" alt="Logo EduConnect" height="40px">
-    </div>
+    <header class="header site-header container">
+        <div class="brand">
+            <h1 class="title1 logo"><span>Edu</span>Connect</h1>
+            <!-- <img src="../icons/EC-Logo-png.png" alt="Logo EduConnect" class="logo_img"> -->
+        </div>
 
-    <nav class="header-nav" aria-label="Navegação principal">
-      <ul>
-        <li><button type="button" class="text2 nav-link is-active" data-section="inicio">Início</button></li>
-        <li><button type="button" class="text2 nav-link nav-btn" data-section="boletim">Boletim</button></li>
-        <li><button type="button" class="text2 nav-link nav-btn" data-section="grafico">Gráfico</button></li>
-        <li><button type="button" class="text2 nav-link nav-btn" data-section="calendario">Calendário</button></li>
-      </ul>
-    </nav>
+        <nav class="header-nav" aria-label="Navegação principal">
+            <ul>
+                <li><a href="#inicio" class="text2 nav-link">Dashboard</a></li>
+                <li><a href="#notas" class="text2 nav-link">Notas</a></li>
+                <li><a href="#atividades" class="text2 nav-link">Atividades</a></li>
+                <li><a href="#calendario" class="text2 nav-link">Calendário</a></li>
+            </ul>
+        </nav>
 
-    <div class="menu">
-      <button class="theme-btn" id="theme-btn" type="button">
-        <img src="../icons/white_sun.svg" alt="ícone de sol" id="theme-img" />
-      </button>
-      <a class="text2 logout" href="./index.html">sair</a>
-    </div>
-  </header>
+        <div class="menu">
+            <button class="theme-btn" id="theme-btn" type="button">
+                <img src="../icons/white_sun.svg" alt="ícone de sol" id="theme-img" />
+            </button>
+            <a class="text2 logout" href="./index.html">sair</a>
+        </div>
+    </header>
 
-  <main class="container main-container">
-    <!-- Área dinâmica -->
-    <section id="alunoSectionHost" class="container with-offset" aria-live="polite">
-      <div class="text2">Carregando...</div>
-    </section>
-  </main>
+    <main class="container main-container">
+        <!-- Área dinâmica -->
+        <section id="alunoSectionHost" class="container with-offset" aria-live="polite">
+            <div class="text2">Carregando...</div>
+        </section>
+    </main>
 
-  <footer>
-    <div class="container faq-section">
-      <p class="text3">Encontrou algum problema? Entre em contato conosco:</p>
-      <a class="text3 faq-link" href="/">FAQ</a>
-    </div>
-    <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
-  </footer>
+    <footer>
+        <div class="container faq-section">
+            <p class="text3">Encontrou algum problema? Entre em contato conosco:</p>
+            <a class="text3 faq-link" href="/">FAQ</a>
+        </div>
+        <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
+    </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
-  <script src="../js/theme.js" defer></script>
-  <script src="../js/auth.js" defer></script>
-  <script src="../js/aluno-page.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/aluno-page.js" defer></script>
 </body>
+
 </html>

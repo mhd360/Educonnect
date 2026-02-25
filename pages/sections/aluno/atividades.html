@@ -1,0 +1,63 @@
+<h2 id="atividades" class="titleMid section-title with-offset">Atividades</h2>
+
+<section class="container atividades-section with-offset">
+  <!-- Filtro -->
+  <div class="container atividades-header">
+    <label class="title3" for="disciplinaSelect">Disciplina:</label>
+    <select class="text2 subject-select" id="disciplinaSelect">
+      <option value="">Todas</option>
+      <!-- opções via JS/API -->
+    </select>
+  </div>
+
+  <!-- Abas -->
+  <div class="container atividades-tabs">
+    <button type="button" class="text2 tab-btn is-active" data-tab="pendentes">Pendentes</button>
+    <button type="button" class="text2 tab-btn" data-tab="respondidas">Respondidas</button>
+    <button type="button" class="text2 tab-btn" data-tab="corrigidas">Corrigidas</button>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="container atividades-content">
+    <!-- Pendentes -->
+    <div class="tab-panel" id="tab-pendentes">
+      <table class="atividades-table" id="pendentesTable">
+        <tr class="table-header">
+          <th class="title3 table-title">Disciplina</th>
+          <th class="title3 table-title">Título</th>
+          <th class="title3 table-title">Entrega</th>
+          <th class="title3 table-title">Peso</th>
+          <th class="title3 table-title">Ação</th>
+        </tr>
+        <!-- linhas via JS/API -->
+      </table>
+    </div>
+
+    <!-- Respondidas -->
+    <div class="tab-panel" id="tab-respondidas" style="display:none;">
+      <table class="atividades-table" id="respondidasTable">
+        <tr class="table-header">
+          <th class="title3 table-title">Disciplina</th>
+          <th class="title3 table-title">Título</th>
+          <th class="title3 table-title">Enviada em</th>
+          <th class="title3 table-title">Status</th>
+        </tr>
+        <!-- linhas via JS/API -->
+      </table>
+    </div>
+
+    <!-- Corrigidas -->
+    <div class="tab-panel" id="tab-corrigidas" style="display:none;">
+      <table class="atividades-table" id="corrigidasTable">
+        <tr class="table-header">
+          <th class="title3 table-title">Disciplina</th>
+          <th class="title3 table-title">Título</th>
+          <th class="title3 table-title">Nota</th>
+          <th class="title3 table-title">Correção</th>
+          <th class="title3 table-title">Feedback</th>
+        </tr>
+        <!-- linhas via JS/API -->
+      </table>
+    </div>
+  </div>
+</section>

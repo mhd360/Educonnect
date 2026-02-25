@@ -33,6 +33,12 @@ main{
     justify-content: space-between;
 }
 
+.logo_img {
+    height: 40px;
+    width: auto;
+    margin: 0 1.5rem;
+}
+
 .logo {
     color: var(--color-gray-6);
     padding: 1.5rem;
