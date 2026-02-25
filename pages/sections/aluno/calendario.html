@@ -1,1 +1,36 @@
-<!-- parcial -->
+<section class="calendar-section container with-offset">
+  <h2 class="titleMid section-title with-offset">Calendário</h2>
+
+  <div class="calendar-header">
+    <button class="cal-btn" id="calPrev" aria-label="Mês anterior">‹</button>
+    <div class="calendar-title">
+      <span class="title2" id="calMonth">Mês</span>
+      <span class="text3" id="calYear">Ano</span>
+    </div>
+    <button class="cal-btn" id="calNext" aria-label="Próximo mês">›</button>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="cal-weekday">Dom</div>
+    <div class="cal-weekday">Seg</div>
+    <div class="cal-weekday">Ter</div>
+    <div class="cal-weekday">Qua</div>
+    <div class="cal-weekday">Qui</div>
+    <div class="cal-weekday">Sex</div>
+    <div class="cal-weekday">Sáb</div>
+    <div id="calDays" class="cal-days"></div>
+  </div>
+</section>
+
+<div class="cal-modal" id="calModal" aria-hidden="true">
+  <div class="cal-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="calModalTitle">
+    <div class="cal-modal-header">
+      <div class="cal-modal-header-text">
+        <h3 class="title3" id="calModalTitle">Eventos do dia</h3>
+        <p class="text2" id="calModalDate"></p>
+      </div>
+      <button class="cal-modal__close" id="calModalClose" aria-label="Fechar">✕</button>
+    </div>
+    <ul class="cal-events" id="calModalList"></ul>
+  </div>
+</div>
