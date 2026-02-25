@@ -42,7 +42,6 @@ span {
     color: var(--color-primary);
 }
 
-
 .theme-btn {
     width: 1.75rem;
     height: 1.75rem;
@@ -90,6 +89,10 @@ span {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.text-forget {
+    color: var(--color-gray-6);
 }
 
 input {
@@ -175,11 +178,28 @@ a {
 }
 
 .forgot-password:hover{
-    text-decoration: underline;
     color: var(--color-gray-6);
 }
 
+.top-back-btn {
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 16px;
+  cursor: pointer;
+  text-align: left;
+}
 
+.top-back-btn:hover {
+    color: var(--color-gray-6);
+}
+
+.paragraph-forget {
+    text-align: center;
+    margin: 1rem auto 2rem auto;
+    line-height: 1.25rem;
+}
 
 /* .register {
     display: block;
