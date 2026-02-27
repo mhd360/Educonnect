@@ -419,3 +419,53 @@ footer p {
     width: min(100%, 260px);
   }
 }
+
+.header-nav .nav-link {
+  position: relative;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.header-nav .nav-link:hover {
+  opacity: 0.8;
+}
+
+.header-nav .nav-link.is-active {
+  color: var(--color-gray-6);
+  font-weight: 700;
+}
+
+.header-nav .nav-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.4rem;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: 999px;
+}
+
+.header-nav .nav-link {
+  position: relative;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.header-nav .nav-link:hover {
+  opacity: 0.8;
+}
+
+.header-nav .nav-link.is-active {
+  color: var(--color-gray-6);
+  font-weight: 600;
+}
+
+.header-nav .nav-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.4rem;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: 999px;
+}

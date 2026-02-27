@@ -1,30 +1,79 @@
 // js/aluno-page.js
 
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("[aluno-page] carregou");
-  console.log("[aluno-page] token:", localStorage.getItem("ec_token"));
-  console.log("[aluno-page] user:", localStorage.getItem("ec_usuario"));
-
   const user = getCurrentUser();
   if (!user || (user.perfil || "").toUpperCase() !== "ALUNO") {
     window.location.href = "./index.html";
     return;
   }
 
+  bindHeaderNavigation();
+  await navigateToSection("dashboard", user);
+});
+
+function bindHeaderNavigation() {
+  const navLinks = document.querySelectorAll(".header-nav .nav-link");
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const sectionName = link.dataset.section;
+      const user = getCurrentUser();
+
+      if (!sectionName || !user) return;
+
+      await navigateToSection(sectionName, user);
+    });
+  });
+}
+
+async function navigateToSection(sectionName, user) {
+  setActiveNav(sectionName);
+
+  if (sectionName === "dashboard") {
+    await renderDashboard(user);
+    return;
+  }
+
+  if (sectionName === "notas") {
+    renderPlaceholderSection("Notas", "Seção em construção.");
+    return;
+  }
+
+  if (sectionName === "atividades") {
+    renderPlaceholderSection("Atividades", "Seção em construção.");
+    return;
+  }
+
+  if (sectionName === "calendario") {
+    renderPlaceholderSection("Calendário", "Seção em construção.");
+    return;
+  }
+}
+
+function setActiveNav(sectionName) {
+  const navLinks = document.querySelectorAll(".header-nav .nav-link");
+
+  navLinks.forEach((link) => {
+    const isActive = link.dataset.section === sectionName;
+    link.classList.toggle("is-active", isActive);
+  });
+}
+
+async function renderDashboard(user) {
   const host = document.getElementById("alunoSectionHost");
   if (!host) return;
 
   try {
-    // 1) carrega o HTML da dashboard dentro do host
-    await loadDashboardSection(host);
+    await loadSectionHtml(host, "../pages/sections/aluno/dashboard.html");
 
-    // 2) agora os elementos existem no DOM
     const nameSpan = host.querySelector(".welcome-name span");
     const avgNode = host.querySelector(".avg-number");
     const eventsContainer = host.querySelector(".events-container");
 
     if (nameSpan) {
-      nameSpan.textContent = user.nome.split(" ")[0] || "Aluno";
+      nameSpan.textContent = user.nome || "Aluno";
     }
 
     if (avgNode) {
@@ -32,10 +81,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (eventsContainer) {
-      eventsContainer.innerHTML = `<p class="text2">Carregando...</p>`;
+      eventsContainer.innerHTML = `<p class="title3 welcome-text">Carregando...</p>`;
     }
 
-    // 3) busca dados da API
     const [notas, eventos] = await Promise.all([
       AlunoService.getNotasMe(),
       AlunoService.getProximosEventosMe(3),
@@ -52,20 +100,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (err) {
     console.error(err);
-
     host.innerHTML = `
       <section class="container welcome-section with-offset">
-        <p class="text2">Erro ao carregar dashboard.</p>
+        <p class="title3 welcome-text">Erro ao carregar dashboard.</p>
       </section>
     `;
   }
-});
+}
 
-async function loadDashboardSection(host) {
-  const response = await fetch("../pages/sections/aluno/dashboard.html");
+function renderPlaceholderSection(title, message) {
+  const host = document.getElementById("alunoSectionHost");
+  if (!host) return;
+
+  host.innerHTML = `
+    <section class="container welcome-section with-offset">
+      <h2 class="titleMid section-title with-offset">${escapeHtml(title)}</h2>
+      <p class="title3 welcome-text">${escapeHtml(message)}</p>
+    </section>
+  `;
+}
+
+async function loadSectionHtml(host, path) {
+  const response = await fetch(path);
 
   if (!response.ok) {
-    throw new Error("Não foi possível carregar o HTML da dashboard.");
+    throw new Error(`Não foi possível carregar a seção: ${path}`);
   }
 
   const html = await response.text();
@@ -116,7 +175,7 @@ function renderNextEvents(container, eventos) {
   const lista = Array.isArray(eventos) ? eventos.slice(0, 3) : [];
 
   if (!lista.length) {
-    container.innerHTML = `<p class="text2">Sem eventos próximos.</p>`;
+    container.innerHTML = `<p class="title3 welcome-text">Sem eventos próximos.</p>`;
     return;
   }
 
@@ -154,9 +213,7 @@ function formatDateDDMM(valor) {
   const partes = valor.split("-");
   if (partes.length !== 3) return "--/--";
 
-  const [ano, mes, dia] = partes;
-  if (!ano || !mes || !dia) return "--/--";
-
+  const [, mes, dia] = partes;
   return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}`;
 }
 
