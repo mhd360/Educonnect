@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "./index.html";
     return;
   }
+  initProfileMenu(user);
 
   bindHeaderNavigation();
   await navigateToSection("dashboard", user);
@@ -247,4 +248,73 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+async function initProfileMenu(user) {
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
+
+  const profileNome = document.getElementById("profileNome");
+  const profileMatricula = document.getElementById("profileMatricula");
+  const profileTurma = document.getElementById("profileTurma");
+
+  if (
+    !profileBtn ||
+    !profileDropdown ||
+    !logoutBtn ||
+    !changePasswordBtn ||
+    !profileNome ||
+    !profileMatricula ||
+    !profileTurma
+  ) {
+    return;
+  }
+
+  profileNome.textContent = user.nome || "-";
+  profileMatricula.textContent = user.matricula || "-";
+  profileTurma.textContent = "Carregando...";
+
+  // Busca turma na API
+  try {
+    const turmas = await AlunoService.getTurmasMe();
+
+    if (Array.isArray(turmas) && turmas.length > 0) {
+      profileTurma.textContent = turmas[0]?.nome || "Não informado";
+    } else {
+      profileTurma.textContent = "Não informado";
+    }
+  } catch (error) {
+    console.error(error);
+    profileTurma.textContent = "Não informado";
+  }
+
+  profileBtn.addEventListener("click", function (event) {
+    event.stopPropagation();
+
+    const isOpen = profileDropdown.classList.contains("is-open");
+    profileDropdown.classList.toggle("is-open", !isOpen);
+    profileBtn.setAttribute("aria-expanded", String(!isOpen));
+  });
+
+  profileDropdown.addEventListener("click", function (event) {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", function () {
+    profileDropdown.classList.remove("is-open");
+    profileBtn.setAttribute("aria-expanded", "false");
+  });
+
+  changePasswordBtn.addEventListener("click", function () {
+    alert("A funcionalidade de alterar senha será integrada no próximo passo.");
+  });
+
+  logoutBtn.addEventListener("click", function () {
+    localStorage.removeItem("ec_token");
+    localStorage.removeItem("ec_usuario");
+    localStorage.removeItem("educonnect_current_user");
+    window.location.href = "./index.html";
+  });
 }

@@ -44,8 +44,15 @@ const AlunoService = (function () {
     return request(`/api/eventos/me/proximos?limit=${encodeURIComponent(limit)}`);
   }
 
+  async function getTurmasMe() {
+    return request("/api/Turmas/me");
+  }
+
   return {
     getNotasMe,
     getProximosEventosMe,
+    getTurmasMe,
   };
+
+
 })();

@@ -39,7 +39,40 @@
             <button class="theme-btn" id="theme-btn" type="button">
                 <img src="../icons/white_sun.svg" alt="ícone de sol" id="theme-img" />
             </button>
-            <a class="text2 logout" href="./index.html">sair</a>
+
+            <div class="profile-menu-wrapper">
+                <button type="button" class="profile-btn" id="profileBtn" aria-label="Abrir menu do perfil"
+                    aria-expanded="false">
+                    <svg id="profileIcon" class="profile-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                        <circle cx="12" cy="8" r="4"></circle>
+                    </svg>
+                </svg>
+
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-info">
+                        <p class="text3 profile-label">Nome</p>
+                        <p class="text2 profile-value" id="profileNome">-</p>
+
+                        <p class="text3 profile-label">Matrícula</p>
+                        <p class="text2 profile-value" id="profileMatricula">-</p>
+
+                        <p class="text3 profile-label">Turma</p>
+                        <p class="text2 profile-value" id="profileTurma">-</p>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button type="button" class="text2 profile-action-btn" id="changePasswordBtn">
+                            Alterar senha
+                        </button>
+                        <button type="button" class="text2 profile-action-btn danger" id="logoutBtn">
+                            Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
