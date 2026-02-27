@@ -157,8 +157,20 @@ html {
   justify-content: space-evenly;
   min-height: 90vh;
   width: 85%;
-  max-width: 900px;
+  /* max-width: 900px; */
   gap: 3rem;
+}
+
+.main-container {
+  display: flex;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 70vh;
+  width: min(92%, 1280px);
+  /* gap: 3rem; */
+  padding-top: 2rem;
 }
 
 .welcome-section {
@@ -166,6 +178,7 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-around;
 }
 
 .welcome-first {
@@ -185,7 +198,7 @@ html {
 }
 
 .welcome-container {
-  width: 50%;
+  /* width: 50%; */
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -246,7 +259,7 @@ html {
 .next-event-container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   background-color: var(--color-gray-2);
   height: 12rem;
   width: 12rem;
@@ -276,318 +289,6 @@ html {
 .next-event-description {
   color: var(--color-gray-6);
   line-height: 120%;
-}
-
-/* ========= BOLETIM ========= */
-
-.info-container {
-  width: 100%;
-  background-color: var(--color-gray-2);
-  border-radius: 1.5rem;
-  box-shadow: 0 0 20px var(--color-shadow-1);
-  padding: 1rem 2rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-}
-
-.table-title {
-  color: var(--color-primary);
-}
-
-th,
-td {
-  color: var(--color-gray-6);
-  padding: 0.5rem 1rem;
-  border-right: 2px solid var(--color-gray-4);
-  border-bottom: 2px solid var(--color-gray-4);
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-th:last-child,
-td:last-child {
-  border-right: none;
-}
-
-/* ========= GRÁFICO ========= */
-
-.chart-section {
-  width: 100%;
-  height: 30rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  background-color: var(--color-gray-2);
-  border-radius: 1.5rem;
-  box-shadow: 0 0 20px var(--color-shadow-1);
-  padding: 1rem;
-  color: var(--color-gray-6);
-  align-items: center;
-}
-
-.chart-header {
-  display: flex;
-  gap: 2rem;
-  padding: 1rem 0 0 1rem;
-  align-items: center;
-}
-
-.subject-select {
-  font-family: "Montserrat", sans-serif;
-  background-color: var(--color-primary);
-  color: var(--color-gray-6);
-  border: 1px solid transparent;
-  padding: 0.25rem 0.8rem;
-  border-radius: 50px;
-  width: fit-content;
-}
-
-.subject-select:hover {
-  cursor: pointer;
-  background-color: var(--color-primary-dark);
-  border: 1px solid var(--color-gray-6);
-  box-shadow: 0 0 20px var(--color-shadow-2);
-}
-
-.subject-select:focus {
-  outline: none;
-}
-
-.chart-container {
-  height: 80%;
-  width: 85%;
-  margin: 0 auto;
-}
-
-.gradesChart {
-  height: 100%;
-}
-
-/* ========= CALENDÁRIO ========= */
-
-.calendar-section {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  align-items: start;
-}
-
-.calendar-header {
-  width: 60%;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--color-gray-2);
-  padding: .75rem 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 20px var(--color-shadow-1);
-  color: var(--color-gray-6);
-}
-
-.cal-btn {
-  background: transparent;
-  border: 1px solid var(--color-gray-4);
-  padding: .35rem .75rem;
-  border-radius: .75rem;
-  color: var(--color-gray-6);
-}
-
-.cal-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.calendar-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .1rem;
-}
-
-.calendar-grid {
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: .25rem;
-  background: var(--color-gray-2);
-  border-radius: 1rem;
-  box-shadow: 0 0 20px var(--color-shadow-1);
-  padding: 1rem;
-  width: 80%;
-}
-
-.cal-weekday {
-  display: grid;
-  place-items: center;
-  color: var(--color-gray-6);
-  font-weight: 600;
-  padding: .5rem 0;
-}
-
-.cal-days {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: .25rem;
-  margin-top: .25rem;
-}
-
-.cal-day {
-  min-height: 65px;
-  background: var(--color-gray-3);
-  border: 1px solid var(--color-gray-4);
-  border-radius: .75rem;
-  padding: .5rem;
-  color: var(--color-gray-6);
-  display: flex;
-  flex-direction: column;
-  gap: .35rem;
-}
-
-.cal-day:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 18px rgba(255, 17, 100, .25);
-  cursor: pointer;
-}
-
-.cal-day.is-today {
-  outline: 2px solid var(--color-primary);
-}
-
-.cal-day.is-out {
-  opacity: .45;
-}
-
-.cal-day__num {
-  margin-bottom: .25rem;
-  font-size: .95rem;
-  font-weight: 700;
-}
-
-.cal-day__events {
-  margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .25rem .5rem;
-  align-items: center;
-}
-
-.cal-pill {
-  display: flex;
-  align-items: center;
-  gap: .35rem;
-  font-size: .7rem;
-  line-height: 1;
-  color: var(--color-primary);
-}
-
-.cal-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--color-primary);
-  box-shadow: 0 0 8px var(--color-shadow-2);
-}
-
-.cal-time {
-  opacity: .95;
-}
-
-/* ========= MODAL DE EVENTOS (ALUNO) ========= */
-
-.cal-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, .55);
-  display: none;
-}
-
-.cal-modal[aria-hidden="false"] {
-  display: block;
-}
-
-.cal-modal__dialog {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(92vw, 640px);
-  max-height: calc(100vh - 4rem);
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  background: var(--color-gray-2);
-  color: var(--color-gray-6);
-  border-radius: 1.5rem;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 0 30px var(--color-shadow-1);
-}
-
-.cal-modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.cal-modal-header-text h3 {
-  margin-bottom: .25rem;
-}
-
-.cal-modal-header-text p {
-  color: var(--color-gray-5);
-}
-
-.cal-modal__close {
-  background: transparent;
-  border: none;
-  color: var(--color-gray-6);
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.cal-modal__close:hover {
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.cal-events {
-  list-style: none;
-  padding: 0;
-  margin: .5rem 0 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-}
-
-.cal-event {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border: 1px solid var(--color-gray-4);
-  border-radius: .75rem;
-  padding: .5rem .75rem;
-  background: var(--color-gray-3);
-}
-
-.cal-event__title {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.cal-event__time {
-  opacity: .9;
 }
 
 /* ========= FOOTER ========= */
@@ -623,4 +324,98 @@ footer p {
 
 .direitos {
   color: var(--color-gray-5);
+}
+
+/* ========= AJUSTES DE LAYOUT DO DASHBOARD ========= */
+
+/* host da seção dinâmica */
+#alunoSectionHost {
+  width: 100%;
+}
+
+/* dashboard ocupa a largura disponível */
+#alunoSectionHost .welcome-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+/* bloco superior: boas-vindas + média */
+#alunoSectionHost .welcome-first {
+  width: 100%;
+  max-width: 1200px;
+  gap: 0;
+}
+
+#alunoSectionHost .info-aluno-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 6rem;
+  /* gap: 3rem; */
+}
+
+/* texto de boas-vindas */
+#alunoSectionHost .welcome-container {
+  flex: 1;
+  min-width: 0;
+}
+
+/* card da média */
+#alunoSectionHost .avg-container {
+  width: 220px;
+  min-width: 220px;
+  padding: 1.5rem 2rem;
+}
+
+/* seção de eventos */
+#alunoSectionHost .events-section {
+  width: 100%;
+  margin-top: 5rem;
+  align-items: stretch;
+}
+
+#alunoSectionHost .section-title {
+  margin: 4rem 0 2rem 0;
+  align-self: center;
+}
+
+/* cards de eventos em linha */
+#alunoSectionHost .events-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* tamanho dos cards */
+#alunoSectionHost .next-event-container {
+  width: 200px;
+  min-height: 200px;
+  height: auto;
+}
+
+/* responsivo */
+@media (max-width: 900px) {
+  #alunoSectionHost .info-aluno-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #alunoSectionHost .avg-container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #alunoSectionHost .events-container {
+    justify-content: center;
+  }
+
+  #alunoSectionHost .next-event-container {
+    width: min(100%, 260px);
+  }
 }
