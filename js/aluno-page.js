@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   initProfileMenu(user);
 
+  initPasswordModal();
+
   bindHeaderNavigation();
   await navigateToSection("dashboard", user);
 });
@@ -308,7 +310,9 @@ async function initProfileMenu(user) {
   });
 
   changePasswordBtn.addEventListener("click", function () {
-    alert("A funcionalidade de alterar senha será integrada no próximo passo.");
+    openPasswordModal();
+    profileDropdown.classList.remove("is-open");
+    profileBtn.setAttribute("aria-expanded", "false");
   });
 
   logoutBtn.addEventListener("click", function () {
@@ -317,4 +321,154 @@ async function initProfileMenu(user) {
     localStorage.removeItem("educonnect_current_user");
     window.location.href = "./index.html";
   });
+
+
+}
+function initPasswordModal() {
+  const modal = document.getElementById("passwordModal");
+  const overlay = document.getElementById("passwordModalOverlay");
+  const closeBtn = document.getElementById("passwordModalClose");
+  const form = document.getElementById("changePasswordForm");
+  const submitBtn = document.getElementById("changePasswordSubmitBtn");
+  const novaSenhaInput = document.getElementById("novaSenha");
+  const confirmacaoInput = document.getElementById("confirmacaoSenha");
+  const errorNode = document.getElementById("changePasswordError");
+
+  if (
+    !modal ||
+    !overlay ||
+    !closeBtn ||
+    !form ||
+    !submitBtn ||
+    !novaSenhaInput ||
+    !confirmacaoInput ||
+    !errorNode
+  ) {
+    return;
+  }
+
+  overlay.addEventListener("click", closePasswordModal);
+  closeBtn.addEventListener("click", closePasswordModal);
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && modal.classList.contains("is-open")) {
+      closePasswordModal();
+    }
+  });
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    errorNode.style.display = "none";
+    errorNode.textContent = "";
+
+    const novaSenha = novaSenhaInput.value.trim();
+    const confirmacao = confirmacaoInput.value.trim();
+
+    const validationError = validatePasswordForm(novaSenha, confirmacao);
+    if (validationError) {
+      errorNode.textContent = validationError;
+      errorNode.style.display = "block";
+      return;
+    }
+
+    setButtonLoading(submitBtn, true, "Salvando...", "Salvar");
+
+    try {
+      await AlunoService.alterarSenha(novaSenha, confirmacao);
+
+      closePasswordModal();
+      form.reset();
+
+      if (typeof Toastify === "function") {
+        Toastify({
+          text: "Senha alterada com sucesso.",
+          duration: 3500,
+          gravity: "top",
+          position: "right",
+          close: true,
+          stopOnFocus: true,
+          style: { background: "#2e7d32" },
+        }).showToast();
+      }
+    } catch (error) {
+      errorNode.textContent = error.message || "Erro ao alterar senha.";
+      errorNode.style.display = "block";
+    } finally {
+      setButtonLoading(submitBtn, false, null, "Salvar");
+    }
+  });
+}
+
+function openPasswordModal() {
+  const modal = document.getElementById("passwordModal");
+  const errorNode = document.getElementById("changePasswordError");
+
+  if (!modal) return;
+
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+
+  if (errorNode) {
+    errorNode.style.display = "none";
+    errorNode.textContent = "";
+  }
+}
+
+function closePasswordModal() {
+  const modal = document.getElementById("passwordModal");
+  const form = document.getElementById("changePasswordForm");
+  const errorNode = document.getElementById("changePasswordError");
+
+  if (!modal) return;
+
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+
+  if (form) {
+    form.reset();
+  }
+
+  if (errorNode) {
+    errorNode.style.display = "none";
+    errorNode.textContent = "";
+  }
+}
+
+function validatePasswordForm(novaSenha, confirmacao) {
+  if (!novaSenha || !confirmacao) {
+    return "Preencha os dois campos.";
+  }
+
+  if (novaSenha !== confirmacao) {
+    return "A confirmação da senha não confere.";
+  }
+
+  if (!isStrongPassword(novaSenha)) {
+    return "A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, uma letra minúscula e um número.";
+  }
+
+  return "";
+}
+
+function isStrongPassword(password) {
+  if (password.length < 8) return false;
+  if (!/[A-Z]/.test(password)) return false;
+  if (!/[a-z]/.test(password)) return false;
+  if (!/[0-9]/.test(password)) return false;
+  return true;
+}
+
+function setButtonLoading(button, isLoading, loadingText, defaultText) {
+  if (!button) return;
+
+  if (isLoading) {
+    button.dataset.originalText = button.textContent;
+    button.textContent = loadingText || "Carregando...";
+    button.disabled = true;
+  } else {
+    button.disabled = false;
+    button.textContent =
+      defaultText || button.dataset.originalText || button.textContent;
+  }
 }

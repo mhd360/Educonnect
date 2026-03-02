@@ -48,10 +48,48 @@ const AlunoService = (function () {
     return request("/api/Turmas/me");
   }
 
+  async function alterarSenha(novaSenha, confirmacao) {
+    return requestWithBody("/api/Auth/alterar-senha", "POST", {
+      novaSenha,
+      confirmacao,
+    });
+  }
+
+  async function requestWithBody(path, method, body) {
+    let response;
+
+    try {
+      response = await fetch(`${API_BASE_URL}${path}`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(body),
+      });
+    } catch {
+      throw new Error("Falha de conexão com a API.");
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const msg =
+        (typeof data === "string" && data) ||
+        data?.message ||
+        data?.title ||
+        "Erro ao consultar a API.";
+      throw new Error(msg);
+    }
+
+    return data;
+  }
+
   return {
     getNotasMe,
     getProximosEventosMe,
     getTurmasMe,
+    alterarSenha,
   };
 
 

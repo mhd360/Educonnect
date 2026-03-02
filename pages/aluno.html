@@ -11,7 +11,7 @@
         })();
     </script>
 
-    <link rel="icon" href="../icons/logo_EC.png" type="image/png" />
+    <link rel="icon" href="../icons/EduLogoMini.jpeg" type="image/jpeg" />
     <link rel="stylesheet" href="../styles/reset.css" />
     <link rel="stylesheet" href="../styles/typography.css" />
     <link rel="stylesheet" href="../styles/globalStyles.css" />
@@ -22,8 +22,8 @@
 <body>
     <header class="header site-header container">
         <div class="brand">
-            <h1 class="title1 logo"><span>Edu</span>Connect</h1>
-            <!-- <img src="../icons/EC-Logo-png.png" alt="Logo EduConnect" class="logo_img"> -->
+            <!-- <h1 class="title1 logo"><span>Edu</span>Connect</h1> -->
+            <img src="../icons/EC-Logo-png.png" alt="Logo EduConnect" class="logo_img">
         </div>
 
         <nav class="header-nav" aria-label="Navegação principal">
@@ -83,6 +83,36 @@
         </section>
     </main>
 
+    <div class="password-modal" id="passwordModal" aria-hidden="true">
+        <div class="password-modal__overlay" id="passwordModalOverlay"></div>
+
+        <div class="password-modal__dialog">
+            <button type="button" class="password-modal__close text2" id="passwordModalClose" aria-label="Fechar">
+                ×
+            </button>
+
+            <h2 class="title2 form-title">Alterar senha</h2>
+
+            <form class="form-container container" id="changePasswordForm">
+                <p class="text2 password-modal__text">
+                    Sua nova senha deve conter no mínimo 8 caracteres, uma letra maiúscula, uma letra minúscula e um
+                    número.
+                </p>
+
+                <input class="text2" type="password" name="novaSenha" id="novaSenha" placeholder="NOVA SENHA" required>
+
+                <input class="text2" type="password" name="confirmacaoSenha" id="confirmacaoSenha"
+                    placeholder="CONFIRMAR SENHA" required>
+
+                <p class="text3 password-modal__error" id="changePasswordError" style="display: none;"></p>
+
+                <button type="submit" class="text2 login-btn" id="changePasswordSubmitBtn">
+                    Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+
     <footer>
         <div class="container faq-section">
             <p class="text3">Encontrou algum problema? Entre em contato conosco:</p>
@@ -90,6 +120,7 @@
         </div>
         <p class="text3 direitos">&copy; 2025 EduConnect. Todos os direitos reservados.</p>
     </footer>
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
     <script src="../js/theme.js" defer></script>

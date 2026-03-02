@@ -51,6 +51,12 @@ html {
   color: var(--color-primary);
 }
 
+.logo_img {
+  height: 5rem;
+  object-fit: contain;
+  /* margin: 0 0 0 1rem; */
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -513,12 +519,12 @@ footer p {
   display: none;
   position: absolute;
   top: calc(100% - 1px);
-  right: 40px;
+  right: 0;
   width: 280px;
   background: var(--color-gray-2);
   border: 1px solid var(--color-gray-3);
   border-top: none;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 0 12px;
   box-shadow:
     0 10px 18px -10px var(--color-shadow-1),
     10px 0 18px -14px var(--color-shadow-1),
@@ -593,5 +599,183 @@ footer p {
 
 .profile-action-btn.danger:hover {
   background-color: var(--color-primary);
+  color: var(--color-gray-6);
+}
+
+/* MODAL ALTERAR SENHA */
+
+.password-modal {
+  display: none;
+}
+
+.password-modal.is-open {
+  display: block;
+}
+
+.password-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 300;
+}
+
+.password-modal__dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-gray-3);
+  z-index: 0;
+}
+
+.password-modal__dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92%, 420px);
+  background-color: var(--color-gray-5);
+  /* border: 1px solid transparent; */
+  border-radius: 16px;
+  padding: 2rem 1.5rem 1.5rem;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.password-modal__dialog > * {
+  position: relative;
+  z-index: 1;
+}
+
+.password-modal__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--color-gray-1);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.password-modal__text {
+  color: var(--color-gray-2);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.password-modal__error {
+  color: var(--color-primary);
+  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.password-modal__dialog .form-title {
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-6);
+  text-align: center;
+}
+
+.password-modal__dialog .form-container {
+  height: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.password-modal__dialog input {
+  margin-top: 1rem;
+  background-color: var(--color-gray-4);
+  padding: 0.8rem 1.2rem;
+  border-radius: 50px;
+  border: 1px solid transparent;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-gray-6);
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.password-modal__dialog input:focus {
+  outline: none;
+  box-shadow: 0 0 15px var(--color-shadow-2);
+  background-color: var(--color-primary-dark);
+  color: black;
+}
+
+.password-modal__dialog input:focus::placeholder {
+  color: black;
+}
+
+.password-modal__dialog .login-btn {
+  display: block;
+  box-sizing: border-box;
+  margin: 2.5rem 0 0 0;
+  text-align: center;
+  padding: 1rem 1.2rem;
+  width: 100%;
+  border-radius: 50px;
+  border: 1px solid transparent;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.password-modal__dialog .login-btn:hover {
+  background-color: var(--color-primary-dark);
+  border: 1px solid var(--color-gray-6);
+}
+
+.password-modal__text {
+  color: var(--color-gray-6);
+  margin: 1rem auto 1.5rem auto;
+  text-align: center;
+  line-height: 1.25rem;
+  max-width: 320px;
+}
+
+.password-modal__error {
+  color: var(--color-primary);
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.password-modal__dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92%, 420px);
+  background-color: var(--color-gray-5);
+  border-radius: 24px;
+  padding: 2rem;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-shadow: 0 0 20px var(--color-shadow-2);
+  overflow: hidden;
+}
+
+.password-modal__close {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.password-modal__close:hover {
   color: var(--color-gray-6);
 }

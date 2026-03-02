@@ -34,9 +34,9 @@ main{
 }
 
 .logo_img {
-    height: 40px;
-    width: auto;
-    margin: 0 1.5rem;
+  height: 5rem;
+  object-fit: contain;
+  margin: 0 0 0 1rem;
 }
 
 .logo {
