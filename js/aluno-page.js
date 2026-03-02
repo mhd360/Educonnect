@@ -74,7 +74,7 @@ async function renderDashboard(user) {
     const eventsContainer = host.querySelector(".events-container");
 
     if (nameSpan) {
-      nameSpan.textContent = user.nome || "Aluno";
+      nameSpan.textContent = (user.nome.split(" ")[0] || "Aluno");
     }
 
     if (avgNode) {
