@@ -99,10 +99,49 @@
                     número.
                 </p>
 
-                <input class="text2" type="password" name="novaSenha" id="novaSenha" placeholder="NOVA SENHA" required>
+                <div class="password-input-wrapper">
+                    <input class="text2" type="password" name="novaSenha" id="novaSenha" placeholder="NOVA SENHA"
+                        required>
 
-                <input class="text2" type="password" name="confirmacaoSenha" id="confirmacaoSenha"
-                    placeholder="CONFIRMAR SENHA" required>
+                    <button type="button" class="password-toggle-btn" data-target="novaSenha"
+                        aria-label="Mostrar senha">
+                        <svg class="password-toggle-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+
+                        <svg class="password-toggle-icon eye-closed" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M3 3l18 18"></path>
+                            <path d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"></path>
+                            <path d="M9.88 5.09A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.8 21.8 0 0 1-2.17 3.19"></path>
+                            <path d="M6.71 6.72A21.72 21.72 0 0 0 1 12s4 7 11 7a10.94 10.94 0 0 0 5.29-1.28"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="password-input-wrapper">
+                    <input class="text2" type="password" name="confirmacaoSenha" id="confirmacaoSenha"
+                        placeholder="CONFIRMAR SENHA" required>
+
+                    <button type="button" class="password-toggle-btn" data-target="confirmacaoSenha"
+                        aria-label="Mostrar senha">
+                        <svg class="password-toggle-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+
+                        <svg class="password-toggle-icon eye-closed" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M3 3l18 18"></path>
+                            <path d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"></path>
+                            <path d="M9.88 5.09A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.8 21.8 0 0 1-2.17 3.19"></path>
+                            <path d="M6.71 6.72A21.72 21.72 0 0 0 1 12s4 7 11 7a10.94 10.94 0 0 0 5.29-1.28"></path>
+                        </svg>
+                    </button>
+                </div>
 
                 <p class="text3 password-modal__error" id="changePasswordError" style="display: none;"></p>
 

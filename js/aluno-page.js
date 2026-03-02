@@ -347,6 +347,8 @@ function initPasswordModal() {
     return;
   }
 
+  initPasswordToggles();
+
   overlay.addEventListener("click", closePasswordModal);
   closeBtn.addEventListener("click", closePasswordModal);
 
@@ -433,6 +435,20 @@ function closePasswordModal() {
     errorNode.style.display = "none";
     errorNode.textContent = "";
   }
+
+  const passwordInputs = modal.querySelectorAll('input[type="text"], input[type="password"]');
+  const toggleButtons = modal.querySelectorAll(".password-toggle-btn");
+
+  passwordInputs.forEach((input) => {
+    if (input.id === "novaSenha" || input.id === "confirmacaoSenha") {
+      input.type = "password";
+    }
+  });
+
+  toggleButtons.forEach((button) => {
+    button.classList.remove("is-visible");
+    button.setAttribute("aria-label", "Mostrar senha");
+  });
 }
 
 function validatePasswordForm(novaSenha, confirmacao) {
@@ -471,4 +487,26 @@ function setButtonLoading(button, isLoading, loadingText, defaultText) {
     button.textContent =
       defaultText || button.dataset.originalText || button.textContent;
   }
+}
+
+function initPasswordToggles() {
+  const toggleButtons = document.querySelectorAll(".password-toggle-btn");
+
+  toggleButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const targetId = button.dataset.target;
+      const input = document.getElementById(targetId);
+
+      if (!input) return;
+
+      const willShow = input.type === "password";
+
+      input.type = willShow ? "text" : "password";
+      button.classList.toggle("is-visible", willShow);
+      button.setAttribute(
+        "aria-label",
+        willShow ? "Ocultar senha" : "Mostrar senha"
+      );
+    });
+  });
 }

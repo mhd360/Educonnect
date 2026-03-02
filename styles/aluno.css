@@ -411,6 +411,7 @@ footer p {
   #alunoSectionHost .info-aluno-container {
     padding: 0 2rem;
   }
+
   .welcome-section {
     padding: 0 1rem;
     max-width: 90%;
@@ -643,7 +644,7 @@ footer p {
   align-items: stretch;
 }
 
-.password-modal__dialog > * {
+.password-modal__dialog>* {
   position: relative;
   z-index: 1;
 }
@@ -765,8 +766,8 @@ footer p {
 
 .password-modal__close {
   position: absolute;
-  top: 0.9rem;
-  right: 1rem;
+  top: 1.5rem;
+  right: 1.5rem;
   background: transparent;
   border: none;
   color: var(--color-primary);
@@ -778,4 +779,54 @@ footer p {
 
 .password-modal__close:hover {
   color: var(--color-gray-6);
+}
+
+/* VER SENHA  */
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.password-input-wrapper input {
+  margin-top: 0;
+  padding-right: 3.2rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--color-gray-6);
+  opacity: 0.85;
+}
+
+.password-toggle-btn:hover .password-toggle-icon {
+  opacity: 1;
+}
+
+.password-toggle-btn .eye-closed {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-open {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-closed {
+  display: block;
 }
