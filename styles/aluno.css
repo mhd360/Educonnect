@@ -252,7 +252,7 @@ html {
 .section-title {
   color: var(--color-gray-6);
   align-self: start;
-  margin: 2.5rem auto 0;
+  margin: 1rem auto 0;
 }
 
 .events-container {
@@ -829,4 +829,224 @@ footer p {
 
 .password-toggle-btn.is-visible .eye-closed {
   display: block;
+}
+
+/* ===== NOTAS ===== */
+
+#alunoSectionHost .notas-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .notas-section .section-title {
+  margin: 0;
+  align-self: center;
+  text-align: center;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .notas-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+#alunoSectionHost .chart-side {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* reaproveita visual de card já usado em média/eventos */
+#alunoSectionHost .info-container,
+#alunoSectionHost .chart-container {
+  width: 100%;
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  padding: 1.5rem 2rem;
+}
+
+/* ===== TABELA ===== */
+
+#alunoSectionHost .info-container {
+  width: 90%;
+  overflow-x: auto;
+  margin-top: 0;
+  max-width: none;
+  align-self: center;
+}
+
+#alunoSectionHost #gradesTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+#alunoSectionHost #gradesTable th,
+#alunoSectionHost #gradesTable td {
+  padding: 0.85rem 1rem;
+  border-right: 2px solid var(--color-gray-4);
+  border-bottom: 2px solid var(--color-gray-4);
+  color: var(--color-gray-6);
+  white-space: nowrap;
+}
+
+#alunoSectionHost #gradesTable th:last-child,
+#alunoSectionHost #gradesTable td:last-child {
+  border-right: none;
+}
+
+#alunoSectionHost #gradesTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#alunoSectionHost #gradesTable th {
+  color: var(--color-primary);
+}
+
+/* destaque sutil para coluna final */
+#alunoSectionHost #gradesTable td:last-child {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ===== FILTRO + GRÁFICO ===== */
+
+#alunoSectionHost .chart-header {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+#alunoSectionHost .chart-label {
+  color: var(--color-gray-6);
+  margin: 0;
+}
+
+#alunoSectionHost #subjectSelect {
+  min-width: 180px;
+  height: 3rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  /* border: 1px solid var(--color-gray-6); */
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  /* box-shadow: 0 0 15px var(--color-shadow-2); */
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#alunoSectionHost #subjectSelect:hover {
+  outline: none;
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .chart-wrapper {
+  width: 100%;
+  height: 300px;
+  position: relative;
+}
+
+#alunoSectionHost #gradesChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#alunoSectionHost .chart-container {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: center;
+}
+
+#alunoSectionHost #subjectSelect option {
+  background-color: var(--color-gray-2);
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .chart-header,
+#alunoSectionHost .chart-header * {
+  color: var(--color-gray-6);
+}
+
+.boletim-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.boletim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1.4rem;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.boletim-btn:hover {
+  /* opacity: 0.95; */
+  box-shadow: 0 0 15px var(--color-shadow-2);
+  transition: 0.3s ease;
+}
+
+.boletim-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.boletim-btn-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* ===== RESPONSIVO ===== */
+
+@media (max-width: 1300px) {
+  #alunoSectionHost .notas-section {
+    padding: 0 2rem;
+  }
+
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .notas-section {
+    padding: 0 1rem;
+  }
+
+  #alunoSectionHost .info-container,
+  #alunoSectionHost .chart-container {
+    padding: 1.25rem 1rem;
+  }
+
+  #alunoSectionHost .chart-wrapper {
+    height: 260px;
+  }
+
+  #alunoSectionHost #subjectSelect {
+    width: 100%;
+    min-width: 0;
+  }
 }

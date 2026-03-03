@@ -85,11 +85,71 @@ const AlunoService = (function () {
     return data;
   }
 
+  async function getFrequenciaMe(ofertaId) {
+    return request(`/api/ofertas/${encodeURIComponent(ofertaId)}/frequencia/me`);
+  }
+
+  async function downloadBoletimPdf() {
+    let response;
+
+    try {
+      response = await fetch(`${API_BASE_URL}/api/Boletim/me/pdf`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+    } catch {
+      throw new Error("Falha de conexão com a API.");
+    }
+
+    if (!response.ok) {
+      let errorMessage = "Erro ao baixar boletim.";
+
+      try {
+        const data = await response.json();
+        errorMessage =
+          (typeof data === "string" && data) ||
+          data?.message ||
+          data?.title ||
+          errorMessage;
+      } catch {
+        // mantém mensagem padrão
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get("content-disposition") || "";
+
+    return {
+      blob,
+      fileName: extractFileNameFromDisposition(contentDisposition) || "boletim.pdf",
+    };
+  }
+
+  function extractFileNameFromDisposition(contentDisposition) {
+    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) {
+      return decodeURIComponent(utf8Match[1].replace(/["']/g, ""));
+    }
+
+    const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+    if (fileNameMatch?.[1]) {
+      return fileNameMatch[1];
+    }
+
+    return null;
+  }
+
   return {
     getNotasMe,
     getProximosEventosMe,
     getTurmasMe,
     alterarSenha,
+    getFrequenciaMe,
+    downloadBoletimPdf,
   };
 
 

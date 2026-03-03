@@ -1,29 +1,41 @@
-<h2 id="notas" class="titleMid section-title with-offset">Notas</h2>
+<section class="container notas-section with-offset">
+  <h2 class="titleMid section-title">Notas</h2>
 
-<section class="container notas-section">
-  <!-- Tabela (antigo Boletim) -->
-  <section class="container info-container">
-    <table id="gradesTable">
-      <tr class="table-header">
-        <th class="title3 table-title">Disciplina</th>
-        <th class="title3 table-title">P1</th>
-        <th class="title3 table-title">P2</th>
-        <th class="title3 table-title">P3</th>
-        <th class="title3 table-title">FINAL</th>
-      </tr>
-      <!-- linhas via JS/API -->
-    </table>
-  </section>
+  <div class="notas-content">
+    <section class="container info-container">
+      <table id="gradesTable">
+        <thead>
+          <tr class="table-header">
+            <th class="title3 table-title">Disciplina</th>
+            <th class="title3 table-title">P1</th>
+            <th class="title3 table-title">P2</th>
+            <th class="title3 table-title">P3</th>
+            <th class="title3 table-title">FREQ.</th>
+            <th class="title3 table-title">FINAL</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-  <!-- Gráfico (mantém o mesmo) -->
-  <section class="chart-section container">
-    <div class="chart-header">
-      <label class="title3" for="subjectSelect">Selecione a disciplina:</label>
-      <select class="text2 subject-select" id="subjectSelect"></select>
+    <div class="boletim-actions">
+      <button type="button" id="downloadBoletimBtn" class="boletim-btn text1">
+        <span>Boletim PDF</span>
+        <span class="boletim-btn-icon" aria-hidden="true">⬇</span>
+      </button>
     </div>
 
-    <div class="chart-container">
-      <canvas id="gradesChart"></canvas>
-    </div>
-  </section>
+    <section class="chart-side">
+      
+      <section class="chart-container">
+        <div class="chart-wrapper">
+          <canvas id="gradesChart"></canvas>
+        </div>
+      </section>
+      <div class="chart-header">
+        <label class="title3 chart-label" for="subjectSelect">Selecione a disciplina:</label>
+        <select class="text2 subject-select" id="subjectSelect"></select>
+      </div>
+    </section>
+  </div>
 </section>
