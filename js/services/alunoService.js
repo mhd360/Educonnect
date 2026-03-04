@@ -129,6 +129,34 @@ const AlunoService = (function () {
     };
   }
 
+  async function getOfertasMe() {
+    return request("/api/ofertas/me");
+  }
+
+  async function getTarefasByOferta(ofertaId) {
+    return request(`/api/ofertas/${encodeURIComponent(ofertaId)}/tarefas`);
+  }
+
+  async function enviarRespostaTarefa(ofertaId, tarefaId, conteudo) {
+    return requestWithBody(
+      `/api/ofertas/${encodeURIComponent(ofertaId)}/tarefas/${encodeURIComponent(tarefaId)}/respostas`,
+      "POST",
+      { conteudo }
+    );
+  }
+
+  async function getMinhaRespostaTarefa(ofertaId, tarefaId) {
+    return request(
+      `/api/ofertas/${encodeURIComponent(ofertaId)}/tarefas/${encodeURIComponent(tarefaId)}/respostas/me`
+    );
+  }
+
+  async function getMinhaCorrecaoTarefa(ofertaId, tarefaId) {
+    return request(
+      `/api/ofertas/${encodeURIComponent(ofertaId)}/tarefas/${encodeURIComponent(tarefaId)}/correcoes/me`
+    );
+  }
+
   function extractFileNameFromDisposition(contentDisposition) {
     const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
     if (utf8Match?.[1]) {
@@ -150,6 +178,11 @@ const AlunoService = (function () {
     alterarSenha,
     getFrequenciaMe,
     downloadBoletimPdf,
+    getOfertasMe,
+    getTarefasByOferta,
+    enviarRespostaTarefa,
+    getMinhaRespostaTarefa,
+    getMinhaCorrecaoTarefa,
   };
 
 

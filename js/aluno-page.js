@@ -45,7 +45,7 @@ async function navigateToSection(sectionName, user) {
   }
 
   if (sectionName === "atividades") {
-    renderPlaceholderSection("Atividades", "Seção em construção.");
+    await renderAtividades();
     return;
   }
 
@@ -875,4 +875,232 @@ function formatFrequencia(percentual) {
 function normalizeNotaForChart(nota) {
   if (typeof nota !== "number" || !Number.isFinite(nota)) return 0;
   return nota;
+}
+
+async function renderAtividades() {
+  const host = document.getElementById("alunoSectionHost");
+  if (!host) return;
+
+  try {
+    await loadSectionHtml(host, "../pages/sections/aluno/atividades.html");
+
+    const disciplinasCards = host.querySelector("#disciplinasCards");
+    const tarefasTitulo = host.querySelector("#tarefasTitulo");
+    const tarefasList = host.querySelector("#tarefasList");
+
+    if (disciplinasCards) {
+      disciplinasCards.innerHTML = `<p class="text2">Carregando disciplinas...</p>`;
+    }
+
+    const ofertas = await AlunoService.getOfertasMe();
+
+    renderDisciplinasCards(disciplinasCards, ofertas, async (oferta) => {
+      tarefasTitulo.textContent = `Tarefas - ${oferta.disciplinaNome}`;
+      tarefasList.innerHTML = `<p class="text2">Carregando tarefas...</p>`;
+
+      const tarefasComStatus = await carregarTarefasDaOferta(oferta);
+      renderTarefasList(tarefasList, tarefasComStatus, oferta);
+    });
+
+    if (Array.isArray(ofertas) && ofertas.length > 0) {
+      tarefasTitulo.textContent = "Selecione uma disciplina";
+      tarefasList.innerHTML = `<p class="text2">Clique em uma disciplina para visualizar as tarefas.</p>`;
+    } else {
+      tarefasTitulo.textContent = "Nenhuma disciplina encontrada";
+      tarefasList.innerHTML = `<p class="text2">Você não possui disciplinas matriculadas.</p>`;
+    }
+  } catch (error) {
+    console.error(error);
+    host.innerHTML = `
+      <section class="container atividades-section with-offset">
+        <h2 class="titleMid section-title">Atividades</h2>
+        <p class="text2">Erro ao carregar atividades.</p>
+      </section>
+    `;
+  }
+}
+
+async function carregarTarefasDaOferta(oferta) {
+  const tarefas = await AlunoService.getTarefasByOferta(oferta.ofertaId);
+
+  const resultado = await Promise.all(
+    (Array.isArray(tarefas) ? tarefas : []).map(async (tarefa) => {
+      let resposta = null;
+      let correcao = null;
+
+      try {
+        resposta = await AlunoService.getMinhaRespostaTarefa(oferta.ofertaId, tarefa.id);
+      } catch (error) {
+        resposta = null;
+      }
+
+      if (resposta?.id) {
+        try {
+          correcao = await AlunoService.getMinhaCorrecaoTarefa(oferta.ofertaId, tarefa.id);
+        } catch (error) {
+          correcao = null;
+        }
+      }
+
+      return {
+        ...tarefa,
+        ofertaId: oferta.ofertaId,
+        disciplinaNome: oferta.disciplinaNome,
+        resposta,
+        correcao,
+        status: correcao
+          ? "corrigida"
+          : resposta
+          ? "respondida"
+          : "pendente",
+      };
+    })
+  );
+
+  resultado.sort((a, b) => new Date(a.dataEntrega) - new Date(b.dataEntrega));
+  return resultado;
+}
+
+function renderDisciplinasCards(container, ofertas, onSelect) {
+  if (!container) return;
+
+  if (!Array.isArray(ofertas) || ofertas.length === 0) {
+    container.innerHTML = `<p class="text2">Nenhuma disciplina encontrada.</p>`;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  ofertas.forEach((oferta) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "disciplina-card";
+    button.innerHTML = `
+      <span class="title3">${escapeHtml(oferta.disciplinaNome || "-")}</span>
+      <span class="text2">${escapeHtml(oferta.professorNome || "-")}</span>
+      <span class="text2">${escapeHtml(oferta.turmaNome || "-")}</span>
+    `;
+
+    button.addEventListener("click", () => onSelect(oferta));
+    container.appendChild(button);
+  });
+}
+
+function renderTarefasList(container, tarefas, oferta) {
+  if (!container) return;
+
+  if (!Array.isArray(tarefas) || tarefas.length === 0) {
+    container.innerHTML = `<p class="text2">Nenhuma tarefa encontrada para esta disciplina.</p>`;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  tarefas.forEach((tarefa) => {
+    const article = document.createElement("article");
+    article.className = `tarefa-card tarefa-${tarefa.status}`;
+
+    const prazo = formatDateTime(tarefa.dataEntrega);
+
+    if (tarefa.status === "pendente") {
+      article.innerHTML = `
+        <div class="tarefa-head">
+          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+          <span class="text2 tarefa-status">Pendente</span>
+        </div>
+
+        <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
+        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+        <p class="text2"><strong>Peso:</strong> ${formatNota(tarefa.peso)}</p>
+
+        <div class="tarefa-form">
+          <textarea class="tarefa-textarea text2" rows="5" placeholder="Digite sua resposta"></textarea>
+          <button type="button" class="tarefa-enviar-btn title3">Enviar resposta</button>
+        </div>
+      `;
+
+      const textarea = article.querySelector(".tarefa-textarea");
+      const button = article.querySelector(".tarefa-enviar-btn");
+
+      button?.addEventListener("click", async () => {
+        const conteudo = textarea?.value?.trim();
+
+        if (!conteudo) {
+          alert("Digite uma resposta antes de enviar.");
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Enviando...";
+
+        try {
+          await AlunoService.enviarRespostaTarefa(oferta.ofertaId, tarefa.id, conteudo);
+          const tarefasAtualizadas = await carregarTarefasDaOferta(oferta);
+          renderTarefasList(container, tarefasAtualizadas, oferta);
+        } catch (error) {
+          console.error(error);
+          alert(error.message || "Erro ao enviar resposta.");
+        } finally {
+          button.disabled = false;
+          button.textContent = "Enviar resposta";
+        }
+      });
+    }
+
+    if (tarefa.status === "respondida") {
+      article.innerHTML = `
+        <div class="tarefa-head">
+          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+          <span class="text2 tarefa-status">Respondida</span>
+        </div>
+
+        <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
+        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+        <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
+
+        <div class="tarefa-resposta-box text2">
+          ${escapeHtml(tarefa.resposta?.conteudo || "-")}
+        </div>
+      `;
+    }
+
+    if (tarefa.status === "corrigida") {
+      article.innerHTML = `
+        <div class="tarefa-head">
+          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+          <span class="text2 tarefa-status">Corrigida</span>
+        </div>
+
+        <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
+        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+        <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
+        <p class="text2"><strong>Corrigida em:</strong> ${formatDateTime(tarefa.correcao?.dataCorrecao)}</p>
+        <p class="text2"><strong>Nota:</strong> ${formatNota(tarefa.correcao?.nota)}</p>
+
+        <div class="tarefa-resposta-box text2">
+          <strong>Resposta:</strong><br />
+          ${escapeHtml(tarefa.resposta?.conteudo || "-")}
+        </div>
+
+        <div class="tarefa-feedback-box text2">
+          <strong>Feedback do professor:</strong><br />
+          ${escapeHtml(tarefa.correcao?.feedback || "-")}
+        </div>
+      `;
+    }
+
+    container.appendChild(article);
+  });
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
 }

@@ -1050,3 +1050,210 @@ footer p {
     min-width: 0;
   }
 }
+
+/* ATIVIDADES */
+
+.atividades-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.disciplinas-area,
+.tarefas-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.disciplinas-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2.5rem;
+}
+
+.disciplina-card,
+.tarefa-card {
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  border: none;
+  padding: 1.5rem;
+  color: var(--color-gray-6);
+  gap: 1rem;
+}
+
+.disciplina-card {
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.disciplina-card:hover {
+  transform: translateY(-2px);
+}
+
+.tarefa-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tarefa-status {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tarefa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tarefa-textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-gray-4);
+  background-color: var(--color-gray-1);
+  color: var(--color-gray-6);
+}
+
+.tarefa-enviar-btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  background-color: var(--color-primary);
+  color: var(--color-gray-1);
+  cursor: pointer;
+}
+
+.tarefa-resposta-box,
+.tarefa-feedback-box {
+  background-color: var(--color-gray-1);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+#alunoSectionHost .atividades-section .section-title,
+#alunoSectionHost .disciplinas-area > .title3,
+#alunoSectionHost .tarefas-header > .title3,
+#alunoSectionHost #tarefasTitulo {
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .tarefas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .tarefa-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-head .title3,
+#alunoSectionHost .tarefa-card h4 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .tarefa-status {
+  color: var(--color-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#alunoSectionHost .tarefa-card > .text2,
+#alunoSectionHost .tarefa-card p {
+  margin: 0;
+  color: var(--color-gray-6);
+  line-height: 1.45;
+}
+
+#alunoSectionHost .tarefa-card strong {
+  color: var(--color-gray-6);
+  font-weight: 700;
+}
+
+#alunoSectionHost .tarefa-resposta-box,
+#alunoSectionHost .tarefa-feedback-box {
+  background-color: var(--color-gray-1);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  color: var(--color-gray-6);
+  line-height: 1.45;
+}
+
+#alunoSectionHost .tarefa-resposta-box strong,
+#alunoSectionHost .tarefa-feedback-box strong {
+  color: var(--color-gray-6);
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+#alunoSectionHost .disciplina-card {
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  border: none;
+  padding: 1.25rem;
+  color: var(--color-gray-6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#alunoSectionHost .disciplina-card:hover {
+  transform: translateY(-2px);
+}
+
+#alunoSectionHost .disciplina-card .title3 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .disciplina-card .text2 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-pendente {
+  border-left: 4px solid var(--color-primary);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-respondida {
+  border-left: 4px solid var(--color-gray-4);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-corrigida {
+  border-left: 4px solid var(--color-primary);
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .tarefa-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #alunoSectionHost .tarefa-card {
+    padding: 1.2rem 1rem;
+  }
+}
