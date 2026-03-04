@@ -50,7 +50,7 @@ async function navigateToSection(sectionName, user) {
   }
 
   if (sectionName === "calendario") {
-    renderPlaceholderSection("Calendário", "Seção em construção.");
+    await renderCalendario();
     return;
   }
 }
@@ -889,6 +889,12 @@ async function renderAtividades() {
     const disciplinasCards = host.querySelector("#disciplinasCards");
     const tarefasTitulo = host.querySelector("#tarefasTitulo");
     const tarefasList = host.querySelector("#tarefasList");
+    const tarefasStatusFilter = host.querySelector("#tarefasStatusFilter");
+
+    if (tarefasStatusFilter) {
+      tarefasStatusFilter.value = "todas";
+      tarefasStatusFilter.disabled = true;
+    }
 
     if (disciplinasCards) {
       disciplinasCards.innerHTML = `<p class="text2">Carregando disciplinas...</p>`;
@@ -896,12 +902,38 @@ async function renderAtividades() {
 
     const ofertas = await AlunoService.getOfertasMe();
 
+    let ofertaSelecionada = null;
+    let tarefasDaOfertaAtual = [];
+
+    function aplicarFiltroERenderizarTarefas() {
+      if (!ofertaSelecionada) return;
+
+      const filtro = tarefasStatusFilter?.value || "todas";
+
+      const tarefasFiltradas =
+        filtro === "todas"
+          ? tarefasDaOfertaAtual
+          : tarefasDaOfertaAtual.filter((tarefa) => tarefa.status === filtro);
+
+      renderTarefasList(tarefasList, tarefasFiltradas, ofertaSelecionada);
+    }
+
     renderDisciplinasCards(disciplinasCards, ofertas, async (oferta) => {
-      tarefasTitulo.textContent = `Tarefas - ${oferta.disciplinaNome}`;
+      ofertaSelecionada = oferta;
+
+      if (tarefasStatusFilter) {
+        tarefasStatusFilter.disabled = false;
+      }
+
+      tarefasTitulo.textContent = `Atividades - ${oferta.disciplinaNome}`;
       tarefasList.innerHTML = `<p class="text2">Carregando tarefas...</p>`;
 
-      const tarefasComStatus = await carregarTarefasDaOferta(oferta);
-      renderTarefasList(tarefasList, tarefasComStatus, oferta);
+      tarefasDaOfertaAtual = await carregarTarefasDaOferta(oferta);
+      aplicarFiltroERenderizarTarefas();
+    });
+
+    tarefasStatusFilter?.addEventListener("change", () => {
+      aplicarFiltroERenderizarTarefas();
     });
 
     if (Array.isArray(ofertas) && ofertas.length > 0) {
@@ -910,6 +942,9 @@ async function renderAtividades() {
     } else {
       tarefasTitulo.textContent = "Nenhuma disciplina encontrada";
       tarefasList.innerHTML = `<p class="text2">Você não possui disciplinas matriculadas.</p>`;
+      if (tarefasStatusFilter) {
+        tarefasStatusFilter.disabled = true;
+      }
     }
   } catch (error) {
     console.error(error);
