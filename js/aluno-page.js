@@ -884,6 +884,8 @@ async function renderAtividades() {
   try {
     await loadSectionHtml(host, "../pages/sections/aluno/atividades.html");
 
+    document.body.classList.add("aluno-atividades-scroll");
+
     const disciplinasCards = host.querySelector("#disciplinasCards");
     const tarefasTitulo = host.querySelector("#tarefasTitulo");
     const tarefasList = host.querySelector("#tarefasList");
@@ -951,13 +953,13 @@ async function carregarTarefasDaOferta(oferta) {
         status: correcao
           ? "corrigida"
           : resposta
-          ? "respondida"
-          : "pendente",
+            ? "respondida"
+            : "pendente",
       };
     })
   );
 
-  resultado.sort((a, b) => new Date(a.dataEntrega) - new Date(b.dataEntrega));
+  resultado.sort((a, b) => new Date(b.dataEntrega) - new Date(a.dataEntrega));
   return resultado;
 }
 
@@ -971,14 +973,33 @@ function renderDisciplinasCards(container, ofertas, onSelect) {
 
   container.innerHTML = "";
 
-  ofertas.forEach((oferta) => {
+  const ofertasOrdenadas = [...ofertas].sort((a, b) => {
+    const anoA = Number(a?.ano || 0);
+    const anoB = Number(b?.ano || 0);
+    const semestreA = Number(a?.semestre || 0);
+    const semestreB = Number(b?.semestre || 0);
+
+    if (anoB !== anoA) return anoB - anoA;
+    return semestreB - semestreA;
+  });
+
+  ofertasOrdenadas.forEach((oferta) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "disciplina-card";
     button.innerHTML = `
-      <span class="title3">${escapeHtml(oferta.disciplinaNome || "-")}</span>
-      <span class="text2">${escapeHtml(oferta.professorNome || "-")}</span>
-      <span class="text2">${escapeHtml(oferta.turmaNome || "-")}</span>
+      <div class="disciplina-card-top">
+        <span class="title3 disciplina-card-title">${escapeHtml(oferta.disciplinaNome || "-")}</span>
+      </div>
+      <div class="disciplina-card-bottom">
+      <div class="disciplina-card-bottom-left">
+        <span class="text2">${escapeHtml(oferta.professorNome || "-")}</span>
+        <span class="text2">${escapeHtml(oferta.periodo || "-")}</span>
+      </div>
+      <span class="text2 disciplina-card-year-semester">
+          ${formatAnoSemestre(oferta.ano, oferta.semestre)}
+      </span>
+      </div>
     `;
 
     button.addEventListener("click", () => onSelect(oferta));
@@ -1000,94 +1021,131 @@ function renderTarefasList(container, tarefas, oferta) {
     const article = document.createElement("article");
     article.className = `tarefa-card tarefa-${tarefa.status}`;
 
+    const statusLabel =
+      tarefa.status === "corrigida"
+        ? "Corrigida"
+        : tarefa.status === "respondida"
+          ? "Respondida"
+          : "Pendente";
+
     const prazo = formatDateTime(tarefa.dataEntrega);
 
-    if (tarefa.status === "pendente") {
-      article.innerHTML = `
-        <div class="tarefa-head">
-          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
-          <span class="text2 tarefa-status">Pendente</span>
-        </div>
+    let bodyHtml = "";
 
+    if (tarefa.status === "pendente") {
+      bodyHtml = `
         <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
-        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
-        <p class="text2"><strong>Peso:</strong> ${formatNota(tarefa.peso)}</p>
+        <div class="tarefa-meta">
+          <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+          <p class="text2"><strong>Peso:</strong> ${formatNota(tarefa.peso)}</p>
+        </div>
 
         <div class="tarefa-form">
           <textarea class="tarefa-textarea text2" rows="5" placeholder="Digite sua resposta"></textarea>
           <button type="button" class="tarefa-enviar-btn title3">Enviar resposta</button>
         </div>
       `;
-
-      const textarea = article.querySelector(".tarefa-textarea");
-      const button = article.querySelector(".tarefa-enviar-btn");
-
-      button?.addEventListener("click", async () => {
-        const conteudo = textarea?.value?.trim();
-
-        if (!conteudo) {
-          alert("Digite uma resposta antes de enviar.");
-          return;
-        }
-
-        button.disabled = true;
-        button.textContent = "Enviando...";
-
-        try {
-          await AlunoService.enviarRespostaTarefa(oferta.ofertaId, tarefa.id, conteudo);
-          const tarefasAtualizadas = await carregarTarefasDaOferta(oferta);
-          renderTarefasList(container, tarefasAtualizadas, oferta);
-        } catch (error) {
-          console.error(error);
-          alert(error.message || "Erro ao enviar resposta.");
-        } finally {
-          button.disabled = false;
-          button.textContent = "Enviar resposta";
-        }
-      });
     }
 
     if (tarefa.status === "respondida") {
-      article.innerHTML = `
-        <div class="tarefa-head">
-          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
-          <span class="text2 tarefa-status">Respondida</span>
+      bodyHtml = `
+        <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
+        <div class="tarefa-meta">
+          <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+          <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
         </div>
 
-        <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
-        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
-        <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
-
         <div class="tarefa-resposta-box text2">
+          <strong>Resposta:</strong><br />
           ${escapeHtml(tarefa.resposta?.conteudo || "-")}
         </div>
       `;
     }
 
     if (tarefa.status === "corrigida") {
-      article.innerHTML = `
-        <div class="tarefa-head">
-          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
-          <span class="text2 tarefa-status">Corrigida</span>
-        </div>
-
+      bodyHtml = `
         <p class="text2">${escapeHtml(tarefa.descricao || "-")}</p>
-        <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
-        <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
-        <p class="text2"><strong>Corrigida em:</strong> ${formatDateTime(tarefa.correcao?.dataCorrecao)}</p>
-        <p class="text2"><strong>Nota:</strong> ${formatNota(tarefa.correcao?.nota)}</p>
 
-        <div class="tarefa-resposta-box text2">
-          <strong>Resposta:</strong><br />
-          ${escapeHtml(tarefa.resposta?.conteudo || "-")}
-        </div>
+<div class="tarefa-info-row">
+  <div class="tarefa-meta">
+    <p class="text2"><strong>Entrega:</strong> ${prazo}</p>
+    <p class="text2"><strong>Resposta enviada em:</strong> ${formatDateTime(tarefa.resposta?.dataEnvio)}</p>
+    <p class="text2"><strong>Corrigida em:</strong> ${formatDateTime(tarefa.correcao?.dataCorrecao)}</p>
+  </div>
 
-        <div class="tarefa-feedback-box text2">
-          <strong>Feedback do professor:</strong><br />
-          ${escapeHtml(tarefa.correcao?.feedback || "-")}
-        </div>
+  <div class="tarefa-nota-box">
+    <span class="tarefa-nota-label text2">Nota</span>
+    <span class="tarefa-nota-value">${formatNota(tarefa.correcao?.nota)}</span>
+  </div>
+</div>
+
+<div class="tarefa-resposta-box text2">
+  <strong>Resposta:</strong><br />
+  ${escapeHtml(tarefa.resposta?.conteudo || "-")}
+</div>
+
+<div class="tarefa-feedback-box text2">
+  <strong>Feedback do professor:</strong><br />
+  ${escapeHtml(tarefa.correcao?.feedback || "-")}
+</div>
       `;
     }
+
+    article.innerHTML = `
+      <button type="button" class="tarefa-toggle" aria-expanded="false">
+        <div class="tarefa-head">
+          <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+          <div class="tarefa-head-right">
+            <span class="text2 tarefa-status">${statusLabel}</span>
+            <span class="tarefa-chevron" aria-hidden="true"></span>
+          </div>
+        </div>
+      </button>
+
+      <div class="tarefa-body" hidden>
+        ${bodyHtml}
+      </div>
+    `;
+
+    const toggle = article.querySelector(".tarefa-toggle");
+    const body = article.querySelector(".tarefa-body");
+
+    toggle?.addEventListener("click", () => {
+      const isOpen = article.classList.contains("is-open");
+
+      article.classList.toggle("is-open", !isOpen);
+      toggle.setAttribute("aria-expanded", String(!isOpen));
+      body.hidden = isOpen;
+    });
+
+    const textarea = article.querySelector(".tarefa-textarea");
+    const button = article.querySelector(".tarefa-enviar-btn");
+
+    button?.addEventListener("click", async (event) => {
+      event.stopPropagation();
+
+      const conteudo = textarea?.value?.trim();
+
+      if (!conteudo) {
+        alert("Digite uma resposta antes de enviar.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Enviando...";
+
+      try {
+        await AlunoService.enviarRespostaTarefa(oferta.ofertaId, tarefa.id, conteudo);
+        const tarefasAtualizadas = await carregarTarefasDaOferta(oferta);
+        renderTarefasList(container, tarefasAtualizadas, oferta);
+      } catch (error) {
+        console.error(error);
+        alert(error.message || "Erro ao enviar resposta.");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Enviar resposta";
+      }
+    });
 
     container.appendChild(article);
   });
@@ -1103,4 +1161,15 @@ function formatDateTime(value) {
     dateStyle: "short",
     timeStyle: "short",
   });
+}
+
+function formatAnoSemestre(ano, semestre) {
+  const anoFormatado = Number(ano || 0);
+  const semestreFormatado = Number(semestre || 0);
+
+  if (!anoFormatado && !semestreFormatado) return "-";
+  if (!anoFormatado) return `-/${semestreFormatado || "-"}`;
+  if (!semestreFormatado) return `${anoFormatado}/-`;
+
+  return `${anoFormatado}/${semestreFormatado}`;
 }

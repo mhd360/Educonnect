@@ -3,6 +3,7 @@
 html {
   font-size: 80%;
   scroll-behavior: smooth;
+  color: var(--color-gray-6);
 }
 
 .container {
@@ -379,7 +380,7 @@ footer p {
 /* seção de eventos */
 #alunoSectionHost .events-section {
   width: 100%;
-  margin-top: 5rem;
+  margin-top: 14rem;
   align-items: stretch;
 }
 
@@ -1072,7 +1073,28 @@ footer p {
 .disciplinas-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2.5rem;
+  gap: 3rem;
+}
+
+#alunoSectionHost .disciplina-card-year-semester {
+  color: var(--color-gray-6);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+#alunoSectionHost .disciplina-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#alunoSectionHost .disciplina-card-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .disciplina-card,
@@ -1083,19 +1105,7 @@ footer p {
   border: none;
   padding: 1.5rem;
   color: var(--color-gray-6);
-  gap: 1rem;
-}
-
-.disciplina-card {
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.disciplina-card:hover {
-  transform: translateY(-2px);
+  gap: 2rem;
 }
 
 .tarefa-head {
@@ -1105,38 +1115,65 @@ footer p {
   align-items: center;
 }
 
-.tarefa-status {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
 .tarefa-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.tarefa-textarea {
+#alunoSectionHost .tarefa-textarea {
   width: 100%;
+  max-width: 100%;
   min-height: 140px;
   resize: vertical;
+  box-sizing: border-box;
   border-radius: 1rem;
   padding: 1rem;
-  border: 1px solid var(--color-gray-4);
+  /* border: 1px solid var(--color-gray-4); */
   background-color: var(--color-gray-1);
   color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  line-height: 1.45;
+  outline: none;
+  display: block;
 }
 
-.tarefa-enviar-btn {
+#alunoSectionHost .tarefa-textarea::placeholder {
+  color: var(--color-gray-5);
+  font-family: "Montserrat", sans-serif;
+}
+
+#alunoSectionHost .tarefa-textarea:focus {
+  /* border-color: var(--color-primary); */
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-enviar-btn {
   align-self: flex-start;
   border: none;
   border-radius: 999px;
   padding: 0.85rem 1.25rem;
   background-color: var(--color-primary);
-  color: var(--color-gray-1);
+  color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
+
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
+#alunoSectionHost .tarefa-enviar-btn:hover {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-enviar-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
 .tarefa-resposta-box,
 .tarefa-feedback-box {
   background-color: var(--color-gray-1);
@@ -1150,6 +1187,15 @@ footer p {
 #alunoSectionHost .tarefas-header > .title3,
 #alunoSectionHost #tarefasTitulo {
   color: var(--color-gray-6);
+  /* margin: 0 0 0 4rem; */
+  align-self: center;
+  margin: 2rem 0 1rem;
+}
+
+#alunoSectionHost .section-title {
+  margin: 0;
+  align-self: center;
+  text-align: center;
 }
 
 #alunoSectionHost .tarefas-list {
@@ -1169,12 +1215,6 @@ footer p {
 #alunoSectionHost .tarefa-card h4 {
   margin: 0;
   color: var(--color-gray-6);
-}
-
-#alunoSectionHost .tarefa-status {
-  color: var(--color-primary);
-  font-weight: 700;
-  white-space: nowrap;
 }
 
 #alunoSectionHost .tarefa-card > .text2,
@@ -1222,12 +1262,12 @@ footer p {
 }
 
 #alunoSectionHost .disciplina-card:hover {
-  transform: translateY(-2px);
+  box-shadow: 0 0 15px var(--color-shadow-2);
 }
 
 #alunoSectionHost .disciplina-card .title3 {
   margin: 0;
-  color: var(--color-gray-6);
+  color: var(--color-primary);
 }
 
 #alunoSectionHost .disciplina-card .text2 {
@@ -1237,14 +1277,17 @@ footer p {
 
 #alunoSectionHost .tarefa-card.tarefa-pendente {
   border-left: 4px solid var(--color-primary);
+  border-right: 4px solid var(--color-primary);
 }
 
 #alunoSectionHost .tarefa-card.tarefa-respondida {
-  border-left: 4px solid var(--color-gray-4);
+  border-left: 4px solid var(--color-gray-5);
+  border-right: 4px solid var(--color-gray-5);
 }
 
 #alunoSectionHost .tarefa-card.tarefa-corrigida {
-  border-left: 4px solid var(--color-primary);
+  border-left: 4px solid #3EEB40;
+  border-right: 4px solid #3EEB40;
 }
 
 @media (max-width: 900px) {
@@ -1255,5 +1298,176 @@ footer p {
 
   #alunoSectionHost .tarefa-card {
     padding: 1.2rem 1rem;
+  }
+}
+
+#alunoSectionHost .tarefa-card {
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  border: none;
+  padding: 0;
+  color: var(--color-gray-6);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+#alunoSectionHost .tarefa-card:hover {
+box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.3rem 1.5rem;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  display: block;
+  transition: background-color 0.18s ease;
+
+}
+
+#alunoSectionHost .tarefa-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-head .title3,
+#alunoSectionHost .tarefa-card h4 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .tarefa-head-right {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .tarefa-status {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#alunoSectionHost .tarefa-card.tarefa-corrigida .tarefa-status {
+  color: #3EEB40;
+}
+
+#alunoSectionHost .tarefa-card.tarefa-respondida .tarefa-status {
+  color: var(--color-gray-5);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-pendente .tarefa-status {
+  color: var(--color-primary);
+}
+
+#alunoSectionHost .tarefa-chevron {
+  width: 0.8rem;
+  height: 0.8rem;
+  display: inline-block;
+  border-right: 2px solid var(--color-gray-6);
+  border-bottom: 2px solid var(--color-gray-6);
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+  margin-top: -0.15rem;
+}
+
+#alunoSectionHost .tarefa-card.is-open .tarefa-chevron {
+  transform: rotate(225deg);
+}
+
+/* fechado por padrão */
+#alunoSectionHost .tarefa-body {
+  display: none;
+  padding: 0 1.5rem 1.5rem;
+}
+
+/* aberto quando o card recebe is-open */
+#alunoSectionHost .tarefa-card.is-open .tarefa-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+#alunoSectionHost .tarefa-card > .text2,
+#alunoSectionHost .tarefa-card p,
+#alunoSectionHost .tarefa-body p {
+  margin: 0;
+  color: var(--color-gray-6);
+  line-height: 1.45;
+}
+
+body.aluno-atividades-scroll {
+  overflow-y: scroll;
+}
+
+#alunoSectionHost .tarefa-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+#alunoSectionHost .tarefa-nota-box {
+  min-width: 120px;
+  max-width: 140px;
+  background-color: var(--color-gray-1);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .tarefa-nota-label {
+  color: var(--color-gray-6);
+  margin: 0;
+  line-height: 1.2;
+}
+
+#alunoSectionHost .tarefa-nota-value {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .tarefa-info-row {
+    flex-direction: column;
+  }
+
+  #alunoSectionHost .tarefa-nota-box {
+    max-width: none;
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
   }
 }
