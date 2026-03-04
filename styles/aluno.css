@@ -302,7 +302,9 @@ html {
 
 footer {
   padding-top: 2rem;
-  margin: 2rem auto;
+  padding-bottom: 1rem;
+  margin: 5rem auto;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1505,4 +1507,316 @@ body.aluno-atividades-scroll {
 #alunoSectionHost .tarefas-status-filter:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ========= CALENDÁRIO ========= */
+
+#alunoSectionHost .calendar-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .calendar-header {
+  width: min(100%, 820px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  background: var(--color-gray-2);
+  padding: 0.9rem 1.2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .calendar-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+#alunoSectionHost .calendar-title h2,
+#alunoSectionHost .calendar-title h3,
+#alunoSectionHost #calMonth {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost #calYear {
+  color: var(--color-gray-6);
+  opacity: 0.95;
+}
+
+#alunoSectionHost .cal-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  color: var(--color-gray-6);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+#alunoSectionHost .calendar-grid {
+  margin: 0 auto;
+  width: 100%;
+  background: var(--color-gray-2);
+  border-radius: 1.75rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+#alunoSectionHost .cal-weekday {
+  display: grid;
+  place-items: center;
+  color: var(--color-gray-6);
+  font-weight: 700;
+  padding: 0.6rem 0;
+}
+
+#alunoSectionHost .cal-days {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+
+#alunoSectionHost .cal-day {
+  min-height: 102px;
+  background: var(--color-gray-3);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 0.75rem 0.65rem;
+  color: var(--color-gray-6);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-day:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 18px var(--color-shadow-2);
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+#alunoSectionHost .cal-day--outside {
+  opacity: 0.45;
+}
+
+#alunoSectionHost .cal-day__num {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-day__marker {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#alunoSectionHost .cal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-shadow-2);
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .cal-time {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* ========= MODAL ========= */
+
+#alunoSectionHost .cal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+}
+
+#alunoSectionHost .cal-modal.is-open,
+#alunoSectionHost .cal-modal[aria-hidden="false"] {
+  display: block;
+}
+
+#alunoSectionHost .cal-modal__dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 720px);
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--color-gray-2);
+  color: var(--color-gray-6);
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 0 30px var(--color-shadow-1);
+}
+
+#alunoSectionHost .cal-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+#alunoSectionHost .cal-modal-header-text h3,
+#alunoSectionHost .cal-modal-header-text p {
+  margin: 0;
+}
+
+#alunoSectionHost .cal-modal-header-text p {
+  color: var(--color-gray-5);
+}
+
+#alunoSectionHost .cal-modal__close {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-6);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-modal__close:hover {
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+#alunoSectionHost .cal-events {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+#alunoSectionHost .cal-event {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--color-gray-3);
+}
+
+#alunoSectionHost .cal-event__main,
+#alunoSectionHost .cal-event__side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+#alunoSectionHost .cal-event__title {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0;
+}
+
+#alunoSectionHost .cal-event__meta {
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-event__side {
+  align-items: flex-end;
+  text-align: right;
+  color: var(--color-gray-6);
+}
+
+/* ========= RESPONSIVO ========= */
+
+@media (max-width: 900px) {
+  #alunoSectionHost .calendar-grid {
+    padding: 0.85rem;
+    gap: 0.35rem;
+  }
+
+  #alunoSectionHost .cal-days {
+    gap: 0.35rem;
+  }
+
+  #alunoSectionHost .cal-day {
+    min-height: 82px;
+    padding: 0.55rem 0.45rem;
+  }
+
+  #alunoSectionHost .cal-day__num {
+    font-size: 0.95rem;
+  }
+
+  #alunoSectionHost .cal-day__marker {
+    font-size: 0.72rem;
+  }
+
+  #alunoSectionHost .calendar-header {
+    width: 100%;
+  }
+
+  #alunoSectionHost .cal-event {
+    flex-direction: column;
+  }
+
+  #alunoSectionHost .cal-event__side {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  #alunoSectionHost .cal-weekday {
+    font-size: 0.85rem;
+    padding: 0.35rem 0;
+  }
+
+  #alunoSectionHost .cal-day {
+    min-height: 72px;
+  }
+
+  #alunoSectionHost .cal-day__marker {
+    display: none;
+  }
 }
