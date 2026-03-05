@@ -1280,26 +1280,57 @@ async function renderCalendario() {
           return ta.localeCompare(tb);
         });
 
-        const first = sorted[0];
-        const label = first.diaInteiro ? "Dia todo" : formatHora(first.horaInicio);
+        const maxSlots = 4;
 
-        const markerRow = document.createElement("div");
-        markerRow.className = "cal-day__marker";
+        // 5+ eventos: mostra 3 e reserva o 4º slot para "+N"
+        // 1-4 eventos: mostra todos (até 4)
+        const showCount = sorted.length >= 5 ? 3 : Math.min(sorted.length, maxSlots);
+        const show = sorted.slice(0, showCount);
 
-        const dot = document.createElement("span");
-        dot.className = "cal-dot";
-        markerRow.appendChild(dot);
+        // container para múltiplos markers
+        const markers = document.createElement("div");
+        markers.className = "cal-day__markers";
 
-        const time = document.createElement("span");
-        time.className = "cal-time";
-        time.textContent = label;
-        markerRow.appendChild(time);
+        show.forEach((ev) => {
+          const label = ev.diaInteiro ? "Dia todo" : formatHora(ev.horaInicio);
 
-        btn.appendChild(markerRow);
+          const row = document.createElement("div");
+          row.className = "cal-day__marker";
+
+          const dot = document.createElement("span");
+          dot.className = "cal-dot";
+          row.appendChild(dot);
+
+          const time = document.createElement("span");
+          time.className = "cal-time";
+          time.textContent = label;
+          row.appendChild(time);
+
+          markers.appendChild(row);
+        });
+
+        if (sorted.length >= 5) {
+          const remaining = sorted.length - 3;
+
+          const more = document.createElement("div");
+          more.className = "cal-day__more";
+          more.textContent = `+${remaining}`;
+          markers.appendChild(more);
+        }
+
+        btn.appendChild(markers);
 
         btn.addEventListener("click", () => openDayModal(payload.dateKey, sorted));
       } else if (!isOutside) {
         btn.addEventListener("click", () => openDayModal(payload?.dateKey, []));
+      }
+
+      if (!isOutside && payload?.dateKey) {
+        const today = new Date();
+        const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
+        if (payload.dateKey === todayKey) {
+          btn.classList.add("cal-day--today");
+        }
       }
 
       return btn;
@@ -1320,17 +1351,19 @@ async function renderCalendario() {
           const li = document.createElement("li");
           li.className = "cal-event";
 
-          const hora = ev.diaInteiro ? "Dia todo" : `${formatHora(ev.horaInicio)} - ${formatHora(ev.horaFim)}`;
+          const hora = ev.diaInteiro
+            ? "Dia todo"
+            : `${formatHora(ev.horaInicio)} - ${formatHora(ev.horaFim)}`;
+
           li.innerHTML = `
-            <div class="cal-event__main">
-              <span class="title3 cal-event__title">${escapeHtml(ev.titulo || "-")}</span>
-              <span class="text2 cal-event__meta">${escapeHtml(ev.disciplinaNome || "-")}</span>
-            </div>
-            <div class="cal-event__side">
-              <span class="text2">${dateText}</span>
-              <span class="text2">${hora}</span>
-            </div>
-          `;
+              <div class="cal-event__main">
+                <span class="title3 cal-event__title">${escapeHtml(ev.titulo || "-")}</span>
+                <span class="text2 cal-event__meta">${escapeHtml(ev.disciplinaNome || "-")}</span>
+              </div>
+              <div class="cal-event__side">
+                <span class="text2 cal-event__time">${hora}</span>
+              </div>
+            `;
 
           calModalList.appendChild(li);
         });

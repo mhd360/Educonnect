@@ -101,13 +101,38 @@ html {
   transform: scaleX(1);
 }
 
-.nav-link.active {
-  color: var(--color-primary);
+/* .nav-link.active {
+  color: var(--color-gray-6);
+} */
+
+/* .nav-link.active::after {
+    content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(1);
+  transform-origin: center;
+  transition: transform .2s ease-out;
+  border-radius: 1px;
+} */
+
+.nav-link.is-active::after {
+    content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(1);
+  transform-origin: center;
+  transition: transform .2s ease-out;
+  border-radius: 1px;
 }
 
-.nav-link.active::after {
-  transform: scaleX(1);
-}
 
 .menu {
   justify-self: end;
@@ -382,7 +407,7 @@ footer p {
 /* seção de eventos */
 #alunoSectionHost .events-section {
   width: 100%;
-  margin-top: 14rem;
+  margin-top: 10rem;
   align-items: stretch;
 }
 
@@ -447,7 +472,7 @@ footer p {
 }
 
 
-.header-nav .nav-link {
+/* .header-nav .nav-link {
   position: relative;
   transition: opacity 0.2s ease, color 0.2s ease;
 }
@@ -495,7 +520,7 @@ footer p {
   height: 2px;
   background-color: var(--color-primary);
   border-radius: 999px;
-}
+} */
 
 /* ===== MENU DE PERFIL ===== */
 
@@ -1522,7 +1547,8 @@ body.aluno-atividades-scroll {
 
 #alunoSectionHost .calendar-header {
   width: min(100%, 820px);
-  margin: 0 auto;
+  max-width: 50%;
+  margin: 2rem auto 0;
   display: grid;
   grid-template-columns: 56px 1fr 56px;
   align-items: center;
@@ -1602,6 +1628,11 @@ body.aluno-atividades-scroll {
   margin-top: 0.15rem;
 }
 
+#alunoSectionHost .cal-day.cal-day--today {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 18px var(--color-shadow-2);
+}
+
 #alunoSectionHost .cal-day {
   min-height: 102px;
   background: var(--color-gray-3);
@@ -1637,6 +1668,7 @@ body.aluno-atividades-scroll {
 }
 
 #alunoSectionHost .cal-day__marker {
+  min-width: 0;
   margin-top: auto;
   display: inline-flex;
   align-items: center;
@@ -1647,18 +1679,40 @@ body.aluno-atividades-scroll {
   white-space: nowrap;
 }
 
+#alunoSectionHost .cal-day__markers {
+  margin-top: auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* flex-direction: column; */
+  gap: 1.5em 0.5rem;
+  align-items: end;
+}
+
+#alunoSectionHost .cal-day__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
 #alunoSectionHost .cal-dot {
   width: 9px;
   height: 9px;
   border-radius: 999px;
   background: var(--color-primary);
-  box-shadow: 0 0 10px var(--color-shadow-2);
+  /* box-shadow: 0 0 10px var(--color-shadow-2); */
   flex-shrink: 0;
 }
 
 #alunoSectionHost .cal-time {
   color: var(--color-primary);
   font-weight: 500;
+  font-size: small;
 }
 
 /* ========= MODAL ========= */
@@ -1706,8 +1760,21 @@ body.aluno-atividades-scroll {
   margin: 0;
 }
 
+#alunoSectionHost .cal-modal-header-text h3 {
+  /* título "Eventos do dia" menor e mais discreto */
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0.9;
+  color: var(--color-gray-6);
+}
+
 #alunoSectionHost .cal-modal-header-text p {
-  color: var(--color-gray-5);
+  /* data maior e mais destacada */
+  font-size: 1.35rem;
+  font-weight: 800;
+  opacity: 1;
+  color: var(--color-gray-6);
+  margin-top: 0.15rem;
 }
 
 #alunoSectionHost .cal-modal__close {
@@ -1728,10 +1795,10 @@ body.aluno-atividades-scroll {
 #alunoSectionHost .cal-events {
   list-style: none;
   padding: 0;
-  margin: 0.25rem 0 0 0;
+  margin: 2rem 0 0 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 2.5rem;
 }
 
 #alunoSectionHost .cal-event {
@@ -1739,8 +1806,8 @@ body.aluno-atividades-scroll {
   justify-content: space-between;
   gap: 1rem;
   border: 1px solid var(--color-gray-4);
-  border-radius: 1rem;
-  padding: 0.9rem 1rem;
+  border-radius: 1.2rem;
+  padding: 1.15rem 1.25rem;
   background: var(--color-gray-3);
 }
 
@@ -1748,11 +1815,12 @@ body.aluno-atividades-scroll {
 #alunoSectionHost .cal-event__side {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 1.25rem;
 }
 
 #alunoSectionHost .cal-event__title {
   color: var(--color-primary);
+  line-height: 1.2;
   font-weight: 700;
   margin: 0;
 }
@@ -1765,6 +1833,12 @@ body.aluno-atividades-scroll {
   align-items: flex-end;
   text-align: right;
   color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-event__time {
+  font-weight: 600;
+  font-size: large;
+  white-space: nowrap;
 }
 
 /* ========= RESPONSIVO ========= */
