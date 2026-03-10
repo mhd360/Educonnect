@@ -1909,11 +1909,19 @@ body.professor-atividades-scroll {
   align-items: center;
 }
 
-.nota-edit-btn {
-  background: transparent;
-  border: none;
+.notas-sort-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   cursor: pointer;
-  font-size: 1.1rem;
+}
+
+.notas-sort-icon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  flex-shrink: 0;
 }
 
 .nota-modal-dialog {
@@ -1944,4 +1952,219 @@ body.professor-atividades-scroll {
 
 #professorSectionHost .notas-search {
     background-color: var(--color-gray-3);
+}
+
+.professor-notas-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.professor-notas-page .disciplinas-area {
+  width: 100%;
+  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.professor-notas-page .disciplinas-cards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+}
+
+.professor-notas-page .disciplina-card {
+  min-height: 120px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.professor-notas-page .disciplina-card.is-active {
+  outline: 2px solid var(--color-primary);
+}
+
+.professor-disciplina-card-top,
+.professor-disciplina-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.professor-notas-content {
+  width: 85%;
+  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.professor-notas-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.notas-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.notas-toolbar input,
+.notas-toolbar select {
+  min-width: 220px;
+}
+
+.professor-info-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#professorGradesTable {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+}
+
+#professorGradesTable th,
+#professorGradesTable td {
+  white-space: nowrap;
+}
+
+#professorGradesTable td:first-child,
+#professorGradesTable th:first-child {
+  text-align: left;
+}
+
+#professorGradesTable thead th {
+  padding: 1.2rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#professorGradesTable tbody td {
+  padding: 1.1rem 1.5rem;
+  /* border-top: 10px solid transparent; */
+}
+
+/* #professorGradesTable tbody tr:first-child td {
+  border-top: 14px solid transparent;
+} */
+
+#professorGradesTable tbody tr:nth-child(odd) td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+#professorGradesTable tbody tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+#professorGradesTable tbody tr td:first-child {
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
+#professorGradesTable tbody tr td:last-child {
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+.nota-edit-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gray-6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nota-edit-btn:hover {
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.nota-edit-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 0.4rem;
+}
+
+.nota-edit-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.professor-notas-pagination {
+  width: 100%;
+  justify-content: center;
+}
+
+.nota-modal-dialog {
+  width: min(92vw, 420px);
+}
+
+.nota-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nota-form-row {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nota-form-row input {
+  width: 100%;
+}
+
+.nota-last-update,
+.nota-form-error {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 1100px) {
+  .professor-notas-page .disciplinas-cards {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .professor-notas-page .disciplinas-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .professor-notas-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notas-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notas-toolbar input,
+  .notas-toolbar select {
+    width: 100%;
+    min-width: 0;
+  }
 }

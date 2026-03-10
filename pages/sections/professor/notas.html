@@ -1,103 +1,90 @@
-<section class="container atividades-section with-offset">
-  <section class="disciplinas-area">
-    <h3 class="title3">Minhas disciplinas</h3>
-    <div id="ofertasCards" class="disciplinas-cards"></div>
-  </section>
-
-  <section class="tarefas-area">
-    <div class="tarefas-header">
-      <h3 class="title3" id="notasTitulo">Selecione uma disciplina</h3>
-
-      <div class="notas-toolbar">
-        <input
-          type="text"
-          id="notasSearchInput"
-          class="text2 tarefas-status-filter notas-search"
-          placeholder="BUSCA POR NOME"
-        />
-
-        <select id="notasSortSelect" class="text2 tarefas-status-filter">
-          <option value="nome-asc">Nome A → Z</option>
-          <option value="nome-desc">Nome Z → A</option>
-        </select>
-      </div>
-    </div>
-
-    <section class="container info-container">
-      <table id="professorGradesTable">
-        <thead>
-          <tr class="table-header">
-            <th class="title3 table-title">Nome</th>
-            <th class="title3 table-title">P1</th>
-            <th class="title3 table-title">P2</th>
-            <th class="title3 table-title">P3</th>
-            <th class="title3 table-title">Média</th>
-            <th class="title3 table-title">Ações</th>
-          </tr>
-        </thead>
-        <tbody id="professorGradesTableBody">
-          <tr>
-            <td colspan="6" class="text2">Selecione uma disciplina.</td>
-          </tr>
-        </tbody>
-      </table>
+<section class="container atividades-section with-offset professor-notas-page">
+    <section class="disciplinas-area">
+        <h3 class="title3">Minhas disciplinas</h3>
+        <div id="ofertasCards" class="disciplinas-cards"></div>
     </section>
 
-    <div id="notasPagination" class="boletim-actions"></div>
-  </section>
+    <section class="notas-content professor-notas-content">
+        <div class="tarefas-header professor-notas-header">
+            <h3 class="title3" id="notasTitulo">Selecione uma disciplina</h3>
+
+            <div class="notas-toolbar">
+                <input type="text" id="notasSearchInput" class="text2 tarefas-status-filter notas-search"
+                    placeholder="BUSCA POR NOME" />
+
+                <button type="button" id="notasSortToggle" class="text2 tarefas-status-filter notas-sort-toggle"
+                    aria-label="Alternar ordenação" title="Alternar ordenação">
+                    <span id="notasSortLabel">Nome A → Z</span>
+
+                    <svg class="notas-sort-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 14l5 5 5-5H7zm0-4h10L12 5 7 10z" fill="currentColor"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <section class="container info-container professor-info-container">
+            <table id="professorGradesTable">
+                <thead>
+                    <tr class="table-header">
+                        <th class="title3 table-title">Nome</th>
+                        <th class="title3 table-title">P1</th>
+                        <th class="title3 table-title">P2</th>
+                        <th class="title3 table-title">P3</th>
+                        <th class="title3 table-title">Média</th>
+                        <th class="title3 table-title">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="professorGradesTableBody">
+                    <tr>
+                        <td colspan="6" class="text2">Selecione uma disciplina.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div id="notasPagination" class="boletim-actions professor-notas-pagination"></div>
+    </section>
 </section>
 
 <div class="cal-modal" id="notaModal" aria-hidden="true">
-  <div
-    class="cal-modal__dialog nota-modal-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="notaModalAlunoNome"
-  >
-    <div class="cal-modal-header">
-      <div class="cal-modal-header-text">
-        <h3 class="title3" id="notaModalAlunoNome">Aluno</h3>
-        <p class="text2">Notas</p>
-      </div>
-      <button
-        class="cal-modal__close"
-        id="notaModalClose"
-        aria-label="Fechar"
-        type="button"
-      >
-        ✕
-      </button>
+    <div class="cal-modal__dialog nota-modal-dialog" role="dialog" aria-modal="true"
+        aria-labelledby="notaModalAlunoNome">
+        <div class="cal-modal-header">
+            <div class="cal-modal-header-text">
+                <h3 class="title3" id="notaModalAlunoNome">Aluno</h3>
+                <p class="text2">Notas</p>
+            </div>
+
+            <button class="cal-modal__close" id="notaModalClose" aria-label="Fechar" type="button">
+                ✕
+            </button>
+        </div>
+
+        <form id="notaForm" class="nota-form">
+            <div class="nota-form-row">
+                <label class="text2" for="notaA1">P1</label>
+                <input type="number" id="notaA1" step="0.1" min="0" max="10" class="text2" />
+            </div>
+
+            <div class="nota-form-row">
+                <label class="text2" for="notaA2">P2</label>
+                <input type="number" id="notaA2" step="0.1" min="0" max="10" class="text2" />
+            </div>
+
+            <div class="nota-form-row">
+                <label class="text2" for="notaA3">P3</label>
+                <input type="number" id="notaA3" step="0.1" min="0" max="10" class="text2" />
+            </div>
+
+            <p class="text2 nota-last-update" id="notaUltimaAlteracao">Última alteração -</p>
+            <p class="text2 nota-form-error" id="notaFormError" style="display: none;"></p>
+
+            <div class="boletim-actions">
+                <button type="submit" id="notaConfirmBtn" class="boletim-btn text1" disabled>
+                    Confirmar
+                </button>
+            </div>
+        </form>
     </div>
-
-    <form id="notaForm" class="nota-form">
-      <div class="nota-form-row">
-        <label class="text2" for="notaA1">P1</label>
-        <input type="number" id="notaA1" step="0.1" min="0" max="10" class="text2" />
-      </div>
-
-      <div class="nota-form-row">
-        <label class="text2" for="notaA2">P2</label>
-        <input type="number" id="notaA2" step="0.1" min="0" max="10" class="text2" />
-      </div>
-
-      <div class="nota-form-row">
-        <label class="text2" for="notaA3">P3</label>
-        <input type="number" id="notaA3" step="0.1" min="0" max="10" class="text2" />
-      </div>
-
-      <p class="text2 nota-last-update" id="notaUltimaAlteracao">Última alteração -</p>
-      <p class="text2 nota-form-error" id="notaFormError" style="display: none;"></p>
-
-      <div class="boletim-actions">
-        <button
-          type="submit"
-          id="notaConfirmBtn"
-          class="boletim-btn text1"
-          disabled
-        >
-          Confirmar
-        </button>
-      </div>
-    </form>
-  </div>
 </div>

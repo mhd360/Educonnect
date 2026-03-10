@@ -140,11 +140,11 @@ async function renderNotas() {
         bindNotasFilters();
 
         const searchInput = document.getElementById("notasSearchInput");
-        const sortSelect = document.getElementById("notasSortSelect");
+        const sortLabel = document.getElementById("notasSortLabel");
         const titulo = document.getElementById("notasTitulo");
 
         if (searchInput) searchInput.value = "";
-        if (sortSelect) sortSelect.value = "nome-asc";
+        if (sortLabel) sortLabel.textContent = "Nome A → Z";
         if (titulo) titulo.textContent = "Selecione uma disciplina";
 
         const ofertas = await ProfessorService.getMinhasOfertas();
@@ -560,63 +560,94 @@ function initPasswordToggles() {
 }
 
 function renderOfertasCards() {
-  const cardsContainer = document.getElementById("ofertasCards");
-  if (!cardsContainer) return;
+    const cardsContainer = document.getElementById("ofertasCards");
+    if (!cardsContainer) return;
 
-  cardsContainer.innerHTML = "";
+    cardsContainer.innerHTML = "";
 
-  if (!notasState.ofertas.length) {
-    cardsContainer.innerHTML = `<p class="text2">Nenhuma disciplina disponível.</p>`;
-    return;
-  }
+    if (!notasState.ofertas.length) {
+        cardsContainer.innerHTML = `<p class="text2">Nenhuma disciplina disponível.</p>`;
+        return;
+    }
 
-  for (const oferta of notasState.ofertas) {
-    const isActive = notasState.ofertaSelecionada?.ofertaId === oferta.ofertaId;
+    for (const oferta of notasState.ofertas) {
+        const isActive = notasState.ofertaSelecionada?.ofertaId === oferta.ofertaId;
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `disciplina-card${isActive ? " is-active" : ""}`;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `disciplina-card${isActive ? " is-active" : ""}`;
 
-    btn.innerHTML = `
-      <strong>${escapeHtml(oferta.disciplinaNome || "-")}</strong>
-      <span>${escapeHtml(oferta.disciplinaCodigo || "-")}</span>
-      <span>${escapeHtml(oferta.turmaNome || "-")}</span>
+        btn.innerHTML = `
+      <div class="professor-disciplina-card-top">
+        <h4 class="title3">${escapeHtml(oferta.disciplinaNome || "-")}</h4>
+      </div>
+
+      <div class="professor-disciplina-card-body">
+        <p class="text2">${escapeHtml(oferta.disciplinaCodigo || "-")}</p>
+        <p class="text2">${escapeHtml(oferta.turmaNome || "-")}</p>
+      </div>
     `;
 
-    btn.addEventListener("click", async () => {
-      notasState.ofertaSelecionada = oferta;
-      notasState.page = 1;
-      notasState.search = "";
+        btn.addEventListener("click", async () => {
+            notasState.ofertaSelecionada = oferta;
+            notasState.page = 1;
+            notasState.search = "";
 
-      const searchInput = document.getElementById("notasSearchInput");
-      if (searchInput) searchInput.value = "";
+            const searchInput = document.getElementById("notasSearchInput");
+            if (searchInput) searchInput.value = "";
 
-      renderOfertasCards();
-      await loadAlunosOfertaSelecionada();
-    });
+            updateSortToggleLabel();
+            renderOfertasCards();
+            await loadAlunosOfertaSelecionada();
+        });
 
-    cardsContainer.appendChild(btn);
-  }
+        cardsContainer.appendChild(btn);
+    }
 }
 
 function bindNotasFilters() {
-    const searchInput = document.getElementById("notasSearchInput");
-    const sortSelect = document.getElementById("notasSortSelect");
+  const searchInput = document.getElementById("notasSearchInput");
+  const sortToggle = document.getElementById("notasSortToggle");
 
-    if (searchInput) {
-        searchInput.addEventListener("input", () => {
-            notasState.search = searchInput.value.trim().toLowerCase();
-            renderTabelaAlunos();
-            renderPagination();
-        });
-    }
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      notasState.search = searchInput.value.trim().toLowerCase();
+      renderTabelaAlunos();
+      renderPagination();
+    });
+  }
 
-    if (sortSelect) {
-        sortSelect.addEventListener("change", () => {
-            notasState.sort = sortSelect.value;
-            renderTabelaAlunos();
-        });
-    }
+  if (sortToggle) {
+    sortToggle.addEventListener("click", () => {
+      notasState.sort =
+        notasState.sort === "nome-asc" ? "nome-desc" : "nome-asc";
+
+      updateSortToggleLabel();
+      renderTabelaAlunos();
+    });
+  }
+
+  updateSortToggleLabel();
+}
+
+function updateSortToggleLabel() {
+  const sortLabel = document.getElementById("notasSortLabel");
+  const sortToggle = document.getElementById("notasSortToggle");
+
+  const isAsc = notasState.sort === "nome-asc";
+
+  if (sortLabel) {
+    sortLabel.textContent = isAsc ? "Nome A → Z" : "Nome Z → A";
+  }
+
+  if (sortToggle) {
+    sortToggle.setAttribute(
+      "aria-label",
+      isAsc
+        ? "Ordenação atual: Nome A para Z. Clique para mudar para Z para A."
+        : "Ordenação atual: Nome Z para A. Clique para mudar para A para Z."
+    );
+  }
 }
 
 async function loadAlunosOfertaSelecionada() {
@@ -709,60 +740,70 @@ function renderTabelaSemDados(message) {
 }
 
 function renderTabelaAlunos() {
-  const tbody = document.getElementById("professorGradesTableBody");
-  if (!tbody) return;
+    const tbody = document.getElementById("professorGradesTableBody");
+    if (!tbody) return;
 
-  if (!notasState.ofertaSelecionada) {
-    tbody.innerHTML = `
+    if (!notasState.ofertaSelecionada) {
+        tbody.innerHTML = `
       <tr>
         <td colspan="6" class="text2">Selecione uma disciplina.</td>
       </tr>
     `;
-    return;
-  }
+        return;
+    }
 
-  const rows = getFilteredAndSortedAlunos();
+    const rows = getFilteredAndSortedAlunos();
 
-  if (!rows.length) {
-    tbody.innerHTML = `
+    if (!rows.length) {
+        tbody.innerHTML = `
       <tr>
         <td colspan="6" class="text2">Nenhum aluno encontrado.</td>
       </tr>
     `;
-    return;
-  }
+        return;
+    }
 
-  tbody.innerHTML = "";
+    tbody.innerHTML = "";
 
-  for (const aluno of rows) {
-    const tr = document.createElement("tr");
+    for (const aluno of rows) {
+        const tr = document.createElement("tr");
 
-    tr.innerHTML = `
+        tr.innerHTML = `
       <td class="text2">${escapeHtml(aluno.nome || "-")}</td>
       <td class="text2">${formatNota(aluno.a1)}</td>
       <td class="text2">${formatNota(aluno.a2)}</td>
       <td class="text2">${formatNota(aluno.a3)}</td>
       <td class="text2">${calcularMediaNotas(aluno.a1, aluno.a2, aluno.a3)}</td>
-      <td>
+      <td class="text2">
         <button
-          type="button"
-          class="nota-edit-btn"
-          data-aluno-id="${aluno.id}"
-          aria-label="Editar notas"
-          title="Editar notas"
+            type="button"
+            class="nota-edit-btn"
+            data-aluno-id="${aluno.id}"
+            aria-label="Editar notas"
+            title="Editar notas"
         >
-          ✏️
+            <svg
+            class="nota-edit-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+            >
+            <path
+                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l8.06-8.06.92.92L5.92 19.58zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.33a1.003 1.003 0 0 0-1.42 0L15.13 5.1l3.75 3.75 1.83-1.81z"
+                fill="currentColor"
+            ></path>
+            </svg>
         </button>
       </td>
     `;
 
-    const editBtn = tr.querySelector(".nota-edit-btn");
-    editBtn.addEventListener("click", async () => {
-      await openNotaModal(aluno);
-    });
+        const editBtn = tr.querySelector(".nota-edit-btn");
+        editBtn.addEventListener("click", async () => {
+            await openNotaModal(aluno);
+        });
 
-    tbody.appendChild(tr);
-  }
+        tbody.appendChild(tr);
+    }
 }
 
 function getFilteredAndSortedAlunos() {
@@ -830,124 +871,127 @@ function renderPagination() {
 }
 
 function bindNotaModal() {
-  const modal = document.getElementById("notaModal");
-  const closeBtn = document.getElementById("notaModalClose");
-  const form = document.getElementById("notaForm");
-  const btnConfirm = document.getElementById("notaConfirmBtn");
+    const modal = document.getElementById("notaModal");
+    const closeBtn = document.getElementById("notaModalClose");
+    const form = document.getElementById("notaForm");
+    const btnConfirm = document.getElementById("notaConfirmBtn");
 
-  if (!modal || !closeBtn || !form || !btnConfirm) return;
+    if (!modal || !closeBtn || !form || !btnConfirm) return;
 
-  modal.classList.remove("is-open");
-  modal.setAttribute("aria-hidden", "true");
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
 
-  form.reset();
-  btnConfirm.disabled = true;
+    form.reset();
+    btnConfirm.disabled = true;
 
-  closeBtn.addEventListener("click", closeNotaModal);
+    closeBtn.addEventListener("click", closeNotaModal);
 
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      closeNotaModal();
-    }
-  });
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeNotaModal();
+        }
+    });
 
-  form.addEventListener("input", () => {
-    syncNotaConfirmButton();
-  });
+    form.addEventListener("input", () => {
+        syncNotaConfirmButton();
+    });
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-    const erro = document.getElementById("notaFormError");
-    const notaA1 = document.getElementById("notaA1");
-    const notaA2 = document.getElementById("notaA2");
-    const notaA3 = document.getElementById("notaA3");
+        const erro = document.getElementById("notaFormError");
+        const notaA1 = document.getElementById("notaA1");
+        const notaA2 = document.getElementById("notaA2");
+        const notaA3 = document.getElementById("notaA3");
 
-    if (erro) {
-      erro.style.display = "none";
-      erro.textContent = "";
-    }
+        if (erro) {
+            erro.style.display = "none";
+            erro.textContent = "";
+        }
 
-    if (!notasState.ofertaSelecionada || !notasState.notaAtual) {
-      if (erro) {
-        erro.textContent = "Não foi possível identificar o aluno.";
-        erro.style.display = "block";
-      }
-      return;
-    }
+        if (!notasState.ofertaSelecionada || !notasState.notaAtual) {
+            if (erro) {
+                erro.textContent = "Não foi possível identificar o aluno.";
+                erro.style.display = "block";
+            }
+            return;
+        }
 
-    const payload = {
-      a1: normalizeNotaInput(notaA1?.value),
-      a2: normalizeNotaInput(notaA2?.value),
-      a3: normalizeNotaInput(notaA3?.value),
-    };
-
-    const isValid = [payload.a1, payload.a2, payload.a3].every(isNotaValidaOuNula);
-
-    if (!isValid) {
-      if (erro) {
-        erro.textContent = "As notas devem estar entre 0 e 10.";
-        erro.style.display = "block";
-      }
-      return;
-    }
-
-    setButtonLoading(btnConfirm, true, "Salvando...", "Confirmar");
-
-    try {
-      await ProfessorService.atualizarNotasAluno(
-        notasState.ofertaSelecionada.ofertaId,
-        notasState.notaAtual.alunoId,
-        payload
-      );
-
-      const alunoIndex = notasState.alunos.findIndex(
-        (item) => item.id === notasState.notaAtual.alunoId
-      );
-
-      const atualizadoEm = new Date().toISOString();
-
-      if (alunoIndex >= 0) {
-        notasState.alunos[alunoIndex] = {
-          ...notasState.alunos[alunoIndex],
-          a1: payload.a1,
-          a2: payload.a2,
-          a3: payload.a3,
-          atualizadoEm,
+        const payload = {
+            a1: normalizeNotaInput(notaA1?.value),
+            a2: normalizeNotaInput(notaA2?.value),
+            a3: normalizeNotaInput(notaA3?.value),
         };
-      }
 
-      renderTabelaAlunos();
-      renderPagination();
-      closeNotaModal();
+        const isValid = [payload.a1, payload.a2, payload.a3].every(isNotaValidaOuNula);
 
-      if (typeof Toastify === "function") {
-        Toastify({
-          text: "Notas atualizadas com sucesso.",
-          duration: 3000,
-          gravity: "top",
-          position: "right",
-          close: true,
-          stopOnFocus: true,
-          style: { background: "#2e7d32" },
-        }).showToast();
-      }
-    } catch (error) {
-      if (erro) {
-        erro.textContent = error.message || "Erro ao atualizar notas.";
-        erro.style.display = "block";
-      }
-    } finally {
-      setButtonLoading(btnConfirm, false, null, "Confirmar");
-      syncNotaConfirmButton();
-    }
-  });
+        if (!isValid) {
+            if (erro) {
+                erro.textContent = "As notas devem estar entre 0 e 10.";
+                erro.style.display = "block";
+            }
+            return;
+        }
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && modal.classList.contains("is-open")) {
-      closeNotaModal();
-    }
-  });
+        setButtonLoading(btnConfirm, true, "Salvando...", "Confirmar");
+
+        try {
+            await ProfessorService.atualizarNotasAluno(
+                notasState.ofertaSelecionada.ofertaId,
+                notasState.notaAtual.alunoId,
+                payload
+            );
+
+            const notaAtualizada = await ProfessorService.getNotasAluno(
+                notasState.ofertaSelecionada.ofertaId,
+                notasState.notaAtual.alunoId
+            );
+
+            const alunoIndex = notasState.alunos.findIndex(
+                (item) => item.id === notasState.notaAtual.alunoId
+            );
+
+            if (alunoIndex >= 0) {
+                notasState.alunos[alunoIndex] = {
+                    ...notasState.alunos[alunoIndex],
+                    a1: notaAtualizada?.a1 ?? payload.a1,
+                    a2: notaAtualizada?.a2 ?? payload.a2,
+                    a3: notaAtualizada?.a3 ?? payload.a3,
+                    atualizadoEm: notaAtualizada?.atualizadoEm ?? null,
+                };
+            }
+
+            renderTabelaAlunos();
+            renderPagination();
+            closeNotaModal();
+
+            if (typeof Toastify === "function") {
+                Toastify({
+                    text: "Notas atualizadas com sucesso.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    close: true,
+                    stopOnFocus: true,
+                    style: { background: "#2e7d32" },
+                }).showToast();
+            }
+        } catch (error) {
+            if (erro) {
+                erro.textContent = error.message || "Erro ao atualizar notas.";
+                erro.style.display = "block";
+            }
+        } finally {
+            setButtonLoading(btnConfirm, false, null, "Confirmar");
+            syncNotaConfirmButton();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && modal.classList.contains("is-open")) {
+            closeNotaModal();
+        }
+    });
 }
 
 async function openNotaModal(aluno) {
@@ -1018,34 +1062,34 @@ async function openNotaModal(aluno) {
 }
 
 function closeNotaModal() {
-  const modal = document.getElementById("notaModal");
-  const form = document.getElementById("notaForm");
-  const erro = document.getElementById("notaFormError");
-  const confirmBtn = document.getElementById("notaConfirmBtn");
-  const ultimaAlteracao = document.getElementById("notaUltimaAlteracao");
+    const modal = document.getElementById("notaModal");
+    const form = document.getElementById("notaForm");
+    const erro = document.getElementById("notaFormError");
+    const confirmBtn = document.getElementById("notaConfirmBtn");
+    const ultimaAlteracao = document.getElementById("notaUltimaAlteracao");
 
-  if (!modal) return;
+    if (!modal) return;
 
-  modal.classList.remove("is-open");
-  modal.setAttribute("aria-hidden", "true");
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
 
-  if (form) form.reset();
+    if (form) form.reset();
 
-  if (erro) {
-    erro.style.display = "none";
-    erro.textContent = "";
-  }
+    if (erro) {
+        erro.style.display = "none";
+        erro.textContent = "";
+    }
 
-  if (ultimaAlteracao) {
-    ultimaAlteracao.textContent = "Última alteração -";
-  }
+    if (ultimaAlteracao) {
+        ultimaAlteracao.textContent = "Última alteração -";
+    }
 
-  if (confirmBtn) {
-    confirmBtn.disabled = true;
-  }
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+    }
 
-  notasState.notaAtual = null;
-  notasState.notaOriginal = null;
+    notasState.notaAtual = null;
+    notasState.notaOriginal = null;
 }
 
 function syncNotaConfirmButton() {
@@ -1100,7 +1144,20 @@ function calcularMediaNotas(a1, a2, a3) {
 function formatDateTimeBr(value) {
     if (!value) return "-";
 
-    const dt = new Date(value);
+    let dt;
+
+    if (typeof value === "string") {
+        const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/.test(value);
+
+        if (hasTimezone) {
+            dt = new Date(value);
+        } else {
+            dt = new Date(`${value}Z`);
+        }
+    } else {
+        dt = new Date(value);
+    }
+
     if (isNaN(dt.getTime())) return "-";
 
     const dia = String(dt.getDate()).padStart(2, "0");
