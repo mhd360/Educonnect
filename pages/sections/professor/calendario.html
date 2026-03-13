@@ -1,4 +1,11 @@
 <section class="calendar-section container with-offset">
+
+  <div class="cal-actions">
+    <button type="button" class="boletim-btn text1" id="calNewEventBtn">
+      Novo evento
+    </button>
+  </div>
+
   <div class="calendar-header">
     <button class="cal-btn" id="calPrev" aria-label="Mês anterior">‹</button>
     <div class="calendar-title">
@@ -18,8 +25,6 @@
     <div class="cal-weekday">Sáb</div>
     <div id="calDays" class="cal-days"></div>
   </div>
-
-  <button>Novo Evento</button>
 </section>
 
 <div class="cal-modal" id="calModal" aria-hidden="true">
@@ -32,5 +37,68 @@
       <button class="cal-modal__close" id="calModalClose" aria-label="Fechar">✕</button>
     </div>
     <ul class="cal-events" id="calModalList"></ul>
+  </div>
+</div>
+
+<div class="cal-modal" id="calEventModal" aria-hidden="true">
+  <div class="cal-modal__dialog cal-event-modal__dialog" role="dialog" aria-modal="true"
+    aria-labelledby="calEventModalTitle">
+    <div class="cal-modal-header">
+      <div class="cal-modal-header-text">
+        <h3 class="title3" id="calEventModalTitle">Novo evento</h3>
+        <p class="text2" id="calEventModalSubtitle"></p>
+      </div>
+      <button class="cal-modal__close" id="calEventModalClose" aria-label="Fechar">✕</button>
+    </div>
+
+    <form id="calEventForm" class="cal-event-form">
+      <label class="text2 cal-form-label">
+        <strong>Disciplina</strong>
+        <select id="calEventOferta" class="text2 cal-input"></select>
+      </label>
+
+      <label class="text2 cal-form-label">
+        <strong>Título</strong>
+        <input id="calEventTitulo" class="text2 cal-input" />
+      </label>
+
+      <label class="text2 cal-form-label">
+        <strong>Descrição</strong>
+        <textarea id="calEventDescricao" class="text2 cal-input" rows="4"></textarea>
+      </label>
+
+      <label class="text2 cal-form-check">
+        <input type="checkbox" id="calEventDiaInteiro" checked />
+        <strong>Dia todo</strong>
+      </label>
+
+      <label class="text2 cal-form-label">
+        <strong>Data</strong>
+        <input type="date" id="calEventData" class="text2 cal-input" />
+      </label>
+
+      <div class="cal-form-row">
+        <label class="text2 cal-form-label">
+          <strong>Início</strong>
+          <input type="time" id="calEventInicio" class="text2 cal-input" disabled />
+        </label>
+
+        <label class="text2 cal-form-label">
+          <strong>Fim</strong>
+          <input type="time" id="calEventFim" class="text2 cal-input" disabled />
+        </label>
+      </div>
+
+      <p class="text2" id="calEventError" style="display:none;"></p>
+
+      <div class="cal-form-actions">
+        <button type="button" class="boletim-btn text1" id="calEventDeleteBtn" style="display:none;">
+          Excluir evento
+        </button>
+        <button type="submit" class="boletim-btn text1" id="calEventSubmitBtn">
+          Criar evento
+        </button>
+      </div>
+    </form>
   </div>
 </div>

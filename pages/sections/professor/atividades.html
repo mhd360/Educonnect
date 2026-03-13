@@ -1,0 +1,107 @@
+<section class="container atividades-section with-offset professor-atividades-page">
+  <section class="disciplinas-area">
+    <h3 class="title3">Minhas disciplinas</h3>
+    <div id="atividadesOfertasCards" class="disciplinas-cards"></div>
+  </section>
+
+  <section class="tarefas-area professor-atividades-content">
+    <div class="tarefas-header professor-atividades-header">
+      <h3 class="title3" id="atividadesTitulo">Selecione uma disciplina</h3>
+
+      <div class="professor-atividades-toolbar">
+        <button
+          type="button"
+          id="criarTarefaBtn"
+          class="boletim-btn text1"
+          disabled
+        >
+          Criar nova tarefa
+        </button>
+
+        <select id="atividadesStatusSelect" class="text2 tarefas-status-filter" disabled>
+          <option value="para-corrigir">Para corrigir</option>
+          <option value="corrigidas">Corrigidas</option>
+          <option value="criadas">Criadas</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="atividadesList" class="tarefas-list">
+      <p class="text2">Selecione uma disciplina.</p>
+    </div>
+  </section>
+</section>
+
+<div class="cal-modal" id="tarefaModal" aria-hidden="true">
+  <div
+    class="cal-modal__dialog tarefa-modal-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tarefaModalTitulo"
+  >
+    <div class="cal-modal-header">
+      <div class="cal-modal-header-text">
+        <h3 class="title3" id="tarefaModalTitulo">Tarefa</h3>
+        <p class="text2" id="tarefaModalSubtitulo">Detalhes</p>
+      </div>
+
+      <button
+        class="cal-modal__close"
+        id="tarefaModalClose"
+        aria-label="Fechar"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div id="tarefaModalBody" class="tarefa-modal-body"></div>
+  </div>
+</div>
+
+<div class="cal-modal" id="correcaoModal" aria-hidden="true">
+  <div
+    class="cal-modal__dialog correcao-modal-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="correcaoModalTitulo"
+  >
+    <div class="cal-modal-header">
+      <div class="cal-modal-header-text">
+        <h3 class="title3" id="correcaoModalTitulo">Correção</h3>
+        <p class="text2">Resposta do aluno</p>
+      </div>
+
+      <button
+        class="cal-modal__close"
+        id="correcaoModalClose"
+        aria-label="Fechar"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form id="correcaoForm" class="correcao-form">
+      <div id="correcaoRespostaBody" class="correcao-resposta-body"></div>
+
+      <div class="correcao-form-row">
+        <label class="text2" for="correcaoNota">Nota</label>
+        <input type="number" id="correcaoNota" step="0.1" min="0" max="10" class="text2" />
+      </div>
+
+      <div class="correcao-form-row correcao-form-row--textarea">
+        <label class="text2" for="correcaoFeedback">Feedback</label>
+        <textarea id="correcaoFeedback" class="text2"></textarea>
+      </div>
+
+      <p class="text2 nota-form-error" id="correcaoFormError" style="display: none;"></p>
+
+      <div class="boletim-actions">
+        <button type="submit" id="correcaoConfirmBtn" class="boletim-btn text1">
+          Salvar correção
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

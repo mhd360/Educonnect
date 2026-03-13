@@ -126,6 +126,106 @@ const ProfessorService = (function () {
         return data;
     }
 
+    async function getTarefasDaOferta(ofertaId) {
+        return request(`/api/ofertas/${ofertaId}/tarefas`);
+    }
+
+    async function criarTarefa(ofertaId, payload) {
+        return requestWithBody(`/api/ofertas/${ofertaId}/tarefas`, "POST", payload);
+    }
+
+    async function excluirTarefa(ofertaId, tarefaId) {
+        let response;
+
+        try {
+            response = await fetch(`${API_BASE_URL}/api/ofertas/${ofertaId}/tarefas/${tarefaId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+            });
+        } catch {
+            throw new Error("Falha de conexão com a API.");
+        }
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => null);
+            const msg =
+                (typeof data === "string" && data) ||
+                data?.message ||
+                data?.title ||
+                "Erro ao excluir atividade.";
+            throw new Error(msg);
+        }
+
+        return true;
+    }
+
+    async function getTarefasParaCorrigir() {
+        return request("/api/tarefas/me/para-corrigir");
+    }
+
+    async function getTarefasCorrigidas(ofertaId) {
+        return request(`/api/ofertas/${ofertaId}/tarefas/corrigidas`);
+    }
+
+    async function getRespostasDaTarefa(ofertaId, tarefaId) {
+        return request(`/api/ofertas/${ofertaId}/tarefas/${tarefaId}/respostas`);
+    }
+
+    async function corrigirTarefa(ofertaId, tarefaId, alunoId, payload) {
+        return requestWithBody(
+            `/api/ofertas/${ofertaId}/tarefas/${tarefaId}/correcoes/${alunoId}`,
+            "POST",
+            payload
+        );
+    }
+
+    async function getCorrecaoAluno(ofertaId, tarefaId, alunoId) {
+        return request(`/api/ofertas/${ofertaId}/tarefas/${tarefaId}/alunos/${alunoId}/correcao`);
+    }
+
+    async function getEventosProfessorMe() {
+        return request("/api/eventos/professor/me");
+    }
+
+    async function criarEvento(ofertaId, payload) {
+        return requestWithBody(`/api/ofertas/${ofertaId}/eventos`, "POST", payload);
+    }
+
+    async function atualizarEvento(ofertaId, eventoId, payload) {
+        return requestWithBody(`/api/ofertas/${ofertaId}/eventos/${eventoId}`, "PUT", payload);
+    }
+
+    async function excluirEvento(ofertaId, eventoId) {
+        let response;
+
+        try {
+            response = await fetch(`${API_BASE_URL}/api/ofertas/${ofertaId}/eventos/${eventoId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+            });
+        } catch {
+            throw new Error("Falha de conexão com a API.");
+        }
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => null);
+            const msg =
+                (typeof data === "string" && data) ||
+                data?.message ||
+                data?.title ||
+                "Erro ao excluir evento.";
+            throw new Error(msg);
+        }
+
+        return true;
+    }
+
     return {
         getMediasDashboard,
         getProximosEventosMe,
@@ -134,5 +234,17 @@ const ProfessorService = (function () {
         getAlunosDaOferta,
         getNotasAluno,
         atualizarNotasAluno,
+        getTarefasDaOferta,
+        criarTarefa,
+        excluirTarefa,
+        getTarefasParaCorrigir,
+        corrigirTarefa,
+        getTarefasCorrigidas,
+        getRespostasDaTarefa,
+        getCorrecaoAluno,
+        getEventosProfessorMe,
+        criarEvento,
+        atualizarEvento,
+        excluirEvento,
     };
 })();

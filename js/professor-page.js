@@ -182,10 +182,36 @@ function resetNotasState() {
 }
 
 async function renderAtividades() {
-    renderPlaceholderSection(
-        "Atividades",
-        "Seção de atividades do professor em construção."
-    );
+    const host = getSectionHost();
+    if (!host) return;
+
+    try {
+        await loadSectionHtml(host, "../pages/sections/professor/atividades.html");
+
+        resetAtividadesState();
+        bindAtividadesEvents();
+        bindTarefaModal();
+        bindCorrecaoModal();
+
+        const ofertas = await ProfessorService.getMinhasOfertas();
+        atividadesState.ofertas = Array.isArray(ofertas) ? ofertas : [];
+
+        renderAtividadesOfertasCards();
+
+        if (!atividadesState.ofertas.length) {
+            renderAtividadesEmptyState("Nenhuma disciplina encontrada.");
+            return;
+        }
+
+        renderAtividadesEmptyState("Selecione uma disciplina.");
+    } catch (error) {
+        console.error(error);
+        host.innerHTML = `
+      <section class="container welcome-section with-offset">
+        <p class="title3 welcome-text">Erro ao carregar a seção de atividades.</p>
+      </section>
+    `;
+    }
 }
 
 async function renderCalendario() {
@@ -606,48 +632,48 @@ function renderOfertasCards() {
 }
 
 function bindNotasFilters() {
-  const searchInput = document.getElementById("notasSearchInput");
-  const sortToggle = document.getElementById("notasSortToggle");
+    const searchInput = document.getElementById("notasSearchInput");
+    const sortToggle = document.getElementById("notasSortToggle");
 
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      notasState.search = searchInput.value.trim().toLowerCase();
-      renderTabelaAlunos();
-      renderPagination();
-    });
-  }
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            notasState.search = searchInput.value.trim().toLowerCase();
+            renderTabelaAlunos();
+            renderPagination();
+        });
+    }
 
-  if (sortToggle) {
-    sortToggle.addEventListener("click", () => {
-      notasState.sort =
-        notasState.sort === "nome-asc" ? "nome-desc" : "nome-asc";
+    if (sortToggle) {
+        sortToggle.addEventListener("click", () => {
+            notasState.sort =
+                notasState.sort === "nome-asc" ? "nome-desc" : "nome-asc";
 
-      updateSortToggleLabel();
-      renderTabelaAlunos();
-    });
-  }
+            updateSortToggleLabel();
+            renderTabelaAlunos();
+        });
+    }
 
-  updateSortToggleLabel();
+    updateSortToggleLabel();
 }
 
 function updateSortToggleLabel() {
-  const sortLabel = document.getElementById("notasSortLabel");
-  const sortToggle = document.getElementById("notasSortToggle");
+    const sortLabel = document.getElementById("notasSortLabel");
+    const sortToggle = document.getElementById("notasSortToggle");
 
-  const isAsc = notasState.sort === "nome-asc";
+    const isAsc = notasState.sort === "nome-asc";
 
-  if (sortLabel) {
-    sortLabel.textContent = isAsc ? "Nome A → Z" : "Nome Z → A";
-  }
+    if (sortLabel) {
+        sortLabel.textContent = isAsc ? "Nome A → Z" : "Nome Z → A";
+    }
 
-  if (sortToggle) {
-    sortToggle.setAttribute(
-      "aria-label",
-      isAsc
-        ? "Ordenação atual: Nome A para Z. Clique para mudar para Z para A."
-        : "Ordenação atual: Nome Z para A. Clique para mudar para A para Z."
-    );
-  }
+    if (sortToggle) {
+        sortToggle.setAttribute(
+            "aria-label",
+            isAsc
+                ? "Ordenação atual: Nome A para Z. Clique para mudar para Z para A."
+                : "Ordenação atual: Nome Z para A. Clique para mudar para A para Z."
+        );
+    }
 }
 
 async function loadAlunosOfertaSelecionada() {
@@ -1167,4 +1193,919 @@ function formatDateTimeBr(value) {
     const minuto = String(dt.getMinutes()).padStart(2, "0");
 
     return `${dia}/${mes}/${ano} - ${hora}:${minuto}`;
+}
+
+const atividadesState = {
+    ofertas: [],
+    ofertaSelecionada: null,
+    status: "para-corrigir", // para-corrigir | corrigidas | criadas
+    tarefas: [],
+    tarefaSelecionada: null,
+    entregas: [],
+    respostaSelecionada: null,
+
+    respostasCache: {},      // { [tarefaId]: respostas[] }
+    correcaoSelecionada: null
+};
+
+function resetAtividadesState() {
+    atividadesState.ofertas = [];
+    atividadesState.ofertaSelecionada = null;
+    atividadesState.status = "para-corrigir";
+    atividadesState.tarefas = [];
+    atividadesState.tarefaSelecionada = null;
+    atividadesState.entregas = [];
+    atividadesState.respostaSelecionada = null;
+
+    atividadesState.respostasCache = {};
+    atividadesState.correcaoSelecionada = null;
+}
+
+async function loadAtividadesDaOfertaSelecionada() {
+    const titulo = document.getElementById("atividadesTitulo");
+    const statusSelect = document.getElementById("atividadesStatusSelect");
+    const criarTarefaBtn = document.getElementById("criarTarefaBtn");
+
+    if (!atividadesState.ofertaSelecionada) {
+        renderAtividadesEmptyState("Selecione uma disciplina.");
+        return;
+    }
+
+    if (titulo) {
+        titulo.textContent = `${atividadesState.ofertaSelecionada.disciplinaNome} - ${atividadesState.ofertaSelecionada.turmaNome}`;
+    }
+
+    if (statusSelect) {
+        statusSelect.disabled = false;
+        statusSelect.value = atividadesState.status;
+    }
+
+    if (criarTarefaBtn) {
+        criarTarefaBtn.disabled = false;
+    }
+
+    renderAtividadesLoading();
+
+    try {
+        if (atividadesState.status === "criadas") {
+            const tarefas = await ProfessorService.getTarefasDaOferta(
+                atividadesState.ofertaSelecionada.ofertaId
+            );
+
+            atividadesState.tarefas = (Array.isArray(tarefas) ? tarefas : []).sort(
+                (a, b) => new Date(a.dataEntrega).getTime() - new Date(b.dataEntrega).getTime()
+            );
+
+            renderListaTarefasCriadas();
+            return;
+        }
+
+        if (atividadesState.status === "para-corrigir") {
+            const pendencias = await ProfessorService.getTarefasParaCorrigir();
+            const filtradas = (Array.isArray(pendencias) ? pendencias : [])
+                .filter((x) => x.ofertaId === atividadesState.ofertaSelecionada.ofertaId);
+
+            atividadesState.tarefas = groupPendenciasByTarefa(filtradas);
+            renderListaTarefasParaCorrigir();
+            return;
+        }
+
+        if (atividadesState.status === "corrigidas") {
+            const corrigidas = await ProfessorService.getTarefasCorrigidas(atividadesState.ofertaSelecionada.ofertaId);
+            atividadesState.tarefas = groupCorrigidasByTarefa(Array.isArray(corrigidas) ? corrigidas : []);
+            renderListaTarefasCorrigidas();
+            return;
+        }
+    } catch (err) {
+        console.error(err);
+        renderAtividadesEmptyState("Erro ao carregar atividades.");
+    }
+}
+
+function groupCorrigidasByTarefa(items) {
+    const map = new Map();
+
+    for (const item of items) {
+        const tarefaId = item.tarefaId;
+
+        if (!map.has(tarefaId)) {
+            map.set(tarefaId, {
+                tarefaId: item.tarefaId,
+                ofertaId: item.ofertaId,
+                tarefaTitulo: item.tarefaTitulo,
+                // info agregada só para exibição
+                ultimaCorrecaoEm: item.dataCorrecao,
+            });
+        } else {
+            const current = map.get(tarefaId);
+            if (String(item.dataCorrecao) > String(current.ultimaCorrecaoEm)) {
+                current.ultimaCorrecaoEm = item.dataCorrecao;
+            }
+        }
+    }
+
+    return [...map.values()].sort((a, b) => {
+        const da = new Date(a.ultimaCorrecaoEm).getTime();
+        const db = new Date(b.ultimaCorrecaoEm).getTime();
+        return da - db;
+    });
+}
+
+function bindAtividadesEvents() {
+    const statusSelect = document.getElementById("atividadesStatusSelect");
+    const criarTarefaBtn = document.getElementById("criarTarefaBtn");
+
+    if (statusSelect) {
+        statusSelect.addEventListener("change", async () => {
+            atividadesState.status = statusSelect.value;
+            await loadAtividadesDaOfertaSelecionada();
+        });
+    }
+
+    if (criarTarefaBtn) {
+        criarTarefaBtn.addEventListener("click", () => {
+            openCriarTarefaModal();
+        });
+    }
+}
+
+function renderAtividadesEmptyState(message) {
+    const list = document.getElementById("atividadesList");
+    const titulo = document.getElementById("atividadesTitulo");
+    const statusSelect = document.getElementById("atividadesStatusSelect");
+    const criarTarefaBtn = document.getElementById("criarTarefaBtn");
+
+    if (titulo && !atividadesState.ofertaSelecionada) {
+        titulo.textContent = "Selecione uma disciplina";
+    }
+
+    if (list) {
+        list.innerHTML = `<p class="text2">${escapeHtml(message)}</p>`;
+    }
+
+    if (statusSelect) {
+        statusSelect.disabled = !atividadesState.ofertaSelecionada;
+        statusSelect.value = atividadesState.status;
+    }
+
+    if (criarTarefaBtn) {
+        criarTarefaBtn.disabled = !atividadesState.ofertaSelecionada;
+    }
+}
+
+function renderAtividadesOfertasCards() {
+    const cardsContainer = document.getElementById("atividadesOfertasCards");
+    if (!cardsContainer) return;
+
+    cardsContainer.innerHTML = "";
+
+    if (!atividadesState.ofertas.length) {
+        cardsContainer.innerHTML = `<p class="text2">Nenhuma disciplina disponível.</p>`;
+        return;
+    }
+
+    for (const oferta of atividadesState.ofertas) {
+        const isActive = atividadesState.ofertaSelecionada?.ofertaId === oferta.ofertaId;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `disciplina-card${isActive ? " is-active" : ""}`;
+
+        btn.innerHTML = `
+      <div class="professor-disciplina-card-top">
+        <h4 class="title3">${escapeHtml(oferta.disciplinaNome || "-")}</h4>
+      </div>
+      <div class="professor-disciplina-card-body">
+        <p class="text2">${escapeHtml(oferta.disciplinaCodigo || "-")}</p>
+        <p class="text2">${escapeHtml(oferta.turmaNome || "-")}</p>
+      </div>
+    `;
+
+        btn.addEventListener("click", async () => {
+            atividadesState.ofertaSelecionada = oferta;
+            atividadesState.status = "para-corrigir";
+            atividadesState.tarefaSelecionada = null;
+            atividadesState.entregas = [];
+            atividadesState.respostaSelecionada = null;
+
+            renderAtividadesOfertasCards();
+            await loadAtividadesDaOfertaSelecionada();
+        });
+
+        cardsContainer.appendChild(btn);
+    }
+}
+
+function renderAtividadesLoading() {
+    const list = document.getElementById("atividadesList");
+    if (!list) return;
+
+    list.innerHTML = `<p class="text2">Carregando...</p>`;
+}
+
+function groupPendenciasByTarefa(items) {
+    const map = new Map();
+
+    for (const item of items) {
+        const key = item.tarefaId;
+
+        if (!map.has(key)) {
+            map.set(key, {
+                tarefaId: item.tarefaId,
+                ofertaId: item.ofertaId,
+                titulo: item.tarefaTitulo,
+                dataEntrega: item.dataEntrega,
+                disciplinaCodigo: item.disciplinaCodigo,
+                disciplinaNome: item.disciplinaNome,
+                alunos: [],
+            });
+        }
+
+        map.get(key).alunos.push({
+            alunoId: item.alunoId,
+            alunoNome: item.alunoNome,
+            alunoMatricula: item.alunoMatricula,
+            respostaId: item.respostaId,
+            dataEnvio: item.dataEnvio,
+        });
+    }
+
+    return [...map.values()].sort((a, b) => {
+        const da = new Date(a.dataEntrega).getTime();
+        const db = new Date(b.dataEntrega).getTime();
+        return da - db;
+    });
+}
+
+function renderListaTarefasCriadas() {
+    const list = document.getElementById("atividadesList");
+    if (!list) return;
+
+    if (!atividadesState.tarefas.length) {
+        list.innerHTML = `<p class="text2">Nenhuma tarefa criada.</p>`;
+        return;
+    }
+
+    list.innerHTML = "";
+
+    for (const tarefa of atividadesState.tarefas) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "atividade-card";
+        btn.classList.add("card-status--criada");
+
+        btn.innerHTML = `
+      <div>
+        <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+        <p class="text2">Entrega: ${formatDateTimeBr(tarefa.dataEntrega)}</p>
+      </div>
+      <p class="text2">Peso: ${formatOneDecimal(tarefa.peso ?? 0)}</p>
+    `;
+
+        btn.addEventListener("click", () => {
+            openTarefaCriadaModal(tarefa);
+        });
+
+        list.appendChild(btn);
+    }
+}
+
+function renderListaTarefasParaCorrigir() {
+    const list = document.getElementById("atividadesList");
+    if (!list) return;
+
+    if (!atividadesState.tarefas.length) {
+        list.innerHTML = `<p class="text2">Nenhuma tarefa para corrigir.</p>`;
+        return;
+    }
+
+    list.innerHTML = "";
+
+    for (const tarefa of atividadesState.tarefas) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "atividade-card";
+        btn.classList.add("card-status--para-corrigir");
+        btn.innerHTML = `
+      <div>
+        <h4 class="title3">${escapeHtml(tarefa.titulo || "-")}</h4>
+        <p class="text2">Entrega: ${formatDateTimeBr(tarefa.dataEntrega)}</p>
+      </div>
+      <p class="text2">${tarefa.alunos.length} resposta(s)</p>
+    `;
+
+        btn.addEventListener("click", async () => {
+            await openTarefaParaCorrigirModal(tarefa);
+        });
+
+        list.appendChild(btn);
+    }
+}
+
+function renderListaTarefasCorrigidas() {
+    const list = document.getElementById("atividadesList");
+    if (!list) return;
+
+    if (!atividadesState.tarefas.length) {
+        list.innerHTML = `<p class="text2">Nenhuma tarefa corrigida.</p>`;
+        return;
+    }
+
+    list.innerHTML = "";
+
+    for (const item of atividadesState.tarefas) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "atividade-card";
+        btn.classList.add("card-status--corrigida");
+        btn.innerHTML = `
+      <div>
+        <h4 class="title3">${escapeHtml(item.tarefaTitulo || "-")}</h4>
+        <p class="text2">Última correção: ${formatDateTimeBr(item.ultimaCorrecaoEm)}</p>
+      </div>
+      <p class="text2">Ver alunos</p>
+    `;
+
+        btn.addEventListener("click", async () => {
+            await openTarefaCorrigidaModal(item);
+        });
+
+        list.appendChild(btn);
+    }
+}
+
+function bindTarefaModal() {
+    const modal = document.getElementById("tarefaModal");
+    const closeBtn = document.getElementById("tarefaModalClose");
+
+    if (!modal || !closeBtn) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    closeBtn.addEventListener("click", closeTarefaModal);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeTarefaModal();
+        }
+    });
+}
+
+function closeTarefaModal() {
+    const modal = document.getElementById("tarefaModal");
+    const body = document.getElementById("tarefaModalBody");
+    const dialog = document.querySelector("#tarefaModal .tarefa-modal-dialog");
+    dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+
+    if (!modal) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    if (body) {
+        body.innerHTML = "";
+    }
+}
+
+function openCriarTarefaModal() {
+    const modal = document.getElementById("tarefaModal");
+    const titulo = document.getElementById("tarefaModalTitulo");
+    const subtitulo = document.getElementById("tarefaModalSubtitulo");
+    const body = document.getElementById("tarefaModalBody");
+
+    if (!modal || !titulo || !subtitulo || !body || !atividadesState.ofertaSelecionada) return;
+
+    const disc = atividadesState.ofertaSelecionada?.disciplinaNome || "-";
+
+    titulo.textContent = "Nova tarefa";
+    subtitulo.innerHTML = `Para: <span style="color: var(--color-primary); font-weight: 700;">${escapeHtml(disc)}</span>`;
+
+    body.innerHTML = `
+    <form id="criarTarefaForm" class="correcao-form">
+      <div class="correcao-form-row correcao-form-row--textarea">
+        <label class="text2" for="tarefaTituloInput">Título</label>
+        <input id="tarefaTituloInput" class="text2" />
+      </div>
+
+      <div class="correcao-form-row correcao-form-row--textarea">
+        <label class="text2" for="tarefaDescricaoInput">Descrição</label>
+        <textarea id="tarefaDescricaoInput" class="text2"></textarea>
+      </div>
+
+      <div class="correcao-form-row">
+        <label class="text2" for="tarefaDataEntregaInput">Entrega</label>
+        <input id="tarefaDataEntregaInput" type="datetime-local" class="text2" />
+      </div>
+
+      <div class="correcao-form-row">
+        <label class="text2" for="tarefaPesoInput">Peso</label>
+        <input id="tarefaPesoInput" type="number" min="0" max="10" step="0.1" class="text2" />
+      </div>
+
+      <p class="text2 nota-form-error" id="criarTarefaError" style="display:none;"></p>
+
+      <div class="boletim-actions">
+        <button type="submit" id="criarTarefaSubmit" class="boletim-btn text1">Criar tarefa</button>
+      </div>
+    </form>
+  `;
+
+    const form = document.getElementById("criarTarefaForm");
+    form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const errorNode = document.getElementById("criarTarefaError");
+        const submitBtn = document.getElementById("criarTarefaSubmit");
+        const tituloInput = document.getElementById("tarefaTituloInput");
+        const descricaoInput = document.getElementById("tarefaDescricaoInput");
+        const dataEntregaInput = document.getElementById("tarefaDataEntregaInput");
+        const pesoInput = document.getElementById("tarefaPesoInput");
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
+        }
+
+        const payload = {
+            titulo: tituloInput?.value?.trim() || "",
+            descricao: descricaoInput?.value?.trim() || "",
+            dataEntrega: dataEntregaInput?.value ? new Date(dataEntregaInput.value).toISOString() : "",
+            peso: Number(String(pesoInput?.value || "").replace(",", ".")),
+        };
+
+        if (!payload.titulo || !payload.descricao || !payload.dataEntrega || !Number.isFinite(payload.peso) || payload.peso < 0 || payload.peso > 10) {
+            if (errorNode) {
+                errorNode.textContent = "Preencha os campos corretamente.";
+                errorNode.style.display = "block";
+            }
+            return;
+        }
+
+        setButtonLoading(submitBtn, true, "Criando...", "Criar tarefa");
+
+        try {
+            await ProfessorService.criarTarefa(
+                atividadesState.ofertaSelecionada.ofertaId,
+                payload
+            );
+
+            closeTarefaModal();
+            atividadesState.status = "criadas";
+
+            const statusSelect = document.getElementById("atividadesStatusSelect");
+            if (statusSelect) {
+                statusSelect.value = "criadas";
+            }
+
+            await loadAtividadesDaOfertaSelecionada();
+
+            if (typeof Toastify === "function") {
+                Toastify({
+                    text: "Tarefa criada com sucesso.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    close: true,
+                    stopOnFocus: true,
+                    style: { background: "#2e7d32" },
+                }).showToast();
+            }
+        } catch (error) {
+            if (errorNode) {
+                errorNode.textContent = error.message || "Erro ao criar tarefa.";
+                errorNode.style.display = "block";
+            }
+        } finally {
+            setButtonLoading(submitBtn, false, null, "Criar tarefa");
+        }
+    });
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+function openTarefaCriadaModal(tarefa) {
+    const modal = document.getElementById("tarefaModal");
+    const titulo = document.getElementById("tarefaModalTitulo");
+    const subtitulo = document.getElementById("tarefaModalSubtitulo");
+    const body = document.getElementById("tarefaModalBody");
+    const dialog = document.querySelector("#tarefaModal .tarefa-modal-dialog");
+    dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+    dialog?.classList.add("modal-status--criada");
+
+    if (!modal || !titulo || !subtitulo || !body) return;
+
+    titulo.textContent = tarefa.titulo || "Tarefa";
+    subtitulo.textContent = "Detalhes";
+
+    body.innerHTML = `
+    <div class="tarefa-detail-block">
+      <p class="text2"><strong>Descrição:</strong> ${escapeHtml(tarefa.descricao || "-")}</p>
+      <p class="text2"><strong>Entrega:</strong> ${formatDateTimeBr(tarefa.dataEntrega)}</p>
+      <p class="text2"><strong>Peso:</strong> ${formatOneDecimal(tarefa.peso ?? 0)}</p>
+      <p class="text2"><strong>Status:</strong> ${tarefa.ativa ? "Ativa" : "Inativa"}</p>
+
+      <div class="boletim-actions">
+        <button type="button" id="excluirTarefaBtn" class="boletim-btn text1">Excluir tarefa</button>
+      </div>
+    </div>
+  `;
+
+    const excluirBtn = document.getElementById("excluirTarefaBtn");
+    excluirBtn?.addEventListener("click", async () => {
+        const confirmDelete = window.confirm("Deseja excluir esta tarefa?");
+        if (!confirmDelete) return;
+
+        setButtonLoading(excluirBtn, true, "Excluindo...", "Excluir tarefa");
+
+        try {
+            await ProfessorService.excluirTarefa(
+                atividadesState.ofertaSelecionada.ofertaId,
+                tarefa.id
+            );
+
+            closeTarefaModal();
+            await loadAtividadesDaOfertaSelecionada();
+        } catch (error) {
+            alert(error.message || "Erro ao excluir tarefa.");
+        } finally {
+            setButtonLoading(excluirBtn, false, null, "Excluir tarefa");
+        }
+    });
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+async function openTarefaParaCorrigirModal(tarefa) {
+    const modal = document.getElementById("tarefaModal");
+    const titulo = document.getElementById("tarefaModalTitulo");
+    const subtitulo = document.getElementById("tarefaModalSubtitulo");
+    const body = document.getElementById("tarefaModalBody");
+    const dialog = document.querySelector("#tarefaModal .tarefa-modal-dialog");
+    dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+    dialog?.classList.add("modal-status--para-corrigir");
+
+    if (!modal || !titulo || !subtitulo || !body) return;
+
+    titulo.textContent = tarefa.titulo || "Tarefa";
+    subtitulo.textContent = "Para corrigir";
+
+    body.innerHTML = `
+    <div class="tarefa-detail-block">
+      <p class="text2"><strong>Entrega:</strong> ${formatDateTimeBr(tarefa.dataEntrega)}</p>
+      <h4 class="title3">Alunos que responderam</h4>
+      <div id="tarefaPendenciasList" class="tarefas-list"></div>
+    </div>
+  `;
+
+    const list = document.getElementById("tarefaPendenciasList");
+    if (list) {
+        list.innerHTML = "";
+
+        for (const aluno of tarefa.alunos) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "atividade-card";
+            btn.innerHTML = `
+        <div>
+          <h4 class="title3">${escapeHtml(aluno.alunoNome || "-")}</h4>
+          <p class="text2">${escapeHtml(aluno.alunoMatricula || "-")}</p>
+        </div>
+        <p class="text2">Enviado em ${formatDateTimeBr(aluno.dataEnvio)}</p>
+      `;
+
+            btn.addEventListener("click", async () => {
+                await openCorrecaoModalFromPendencia(tarefa, aluno);
+            });
+
+            list.appendChild(btn);
+        }
+    }
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+async function openTarefaCorrigidaModal(item) {
+    const modal = document.getElementById("tarefaModal");
+    const titulo = document.getElementById("tarefaModalTitulo");
+    const subtitulo = document.getElementById("tarefaModalSubtitulo");
+    const body = document.getElementById("tarefaModalBody");
+
+    if (!modal || !titulo || !subtitulo || !body || !atividadesState.ofertaSelecionada) return;
+
+    // normaliza tarefa selecionada para o submit da correção
+    atividadesState.tarefaSelecionada = {
+        tarefaId: item.tarefaId,
+        ofertaId: atividadesState.ofertaSelecionada.ofertaId,
+        titulo: item.tarefaTitulo,
+    };
+
+    titulo.textContent = item.tarefaTitulo || "Tarefa";
+    subtitulo.textContent = "Corrigidas";
+
+    body.innerHTML = `
+    <div class="tarefa-detail-block">
+      <p class="text2">Selecione um aluno para ver a resposta e a correção.</p>
+      <div id="tarefaCorrigidasAlunosList" class="tarefas-list"></div>
+    </div>
+  `;
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+
+    try {
+        // 1) respostas (para ter conteudo + alunoId)
+        const ofertaId = atividadesState.ofertaSelecionada.ofertaId;
+        const tarefaId = item.tarefaId;
+
+        let respostas = atividadesState.respostasCache[tarefaId];
+
+        if (!respostas) {
+            respostas = await ProfessorService.getRespostasDaTarefa(ofertaId, tarefaId);
+            respostas = Array.isArray(respostas) ? respostas : [];
+            atividadesState.respostasCache[tarefaId] = respostas;
+        }
+
+        const list = document.getElementById("tarefaCorrigidasAlunosList");
+        if (!list) return;
+
+        if (!respostas.length) {
+            list.innerHTML = `<p class="text2">Nenhuma resposta encontrada.</p>`;
+            return;
+        }
+
+        list.innerHTML = "";
+
+        for (const r of respostas) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "atividade-card";
+
+            btn.innerHTML = `
+        <div>
+          <h4 class="title3">${escapeHtml(r.alunoNome || "-")}</h4>
+          <p class="text2">${escapeHtml(r.alunoMatricula || "-")}</p>
+        </div>
+        <p class="text2">Enviado em ${formatDateTimeBr(r.dataEnvio)}</p>
+      `;
+
+            btn.addEventListener("click", async () => {
+                await openCorrecaoModalFromCorrigida(ofertaId, tarefaId, r.alunoId);
+            });
+
+            list.appendChild(btn);
+        }
+    } catch (err) {
+        console.error(err);
+        body.innerHTML = `<p class="text2">Erro ao carregar respostas da tarefa.</p>`;
+    }
+}
+
+async function openCorrecaoModalFromCorrigida(ofertaId, tarefaId, alunoId) {
+    try {
+        // resposta (conteudo)
+        let respostas = atividadesState.respostasCache[tarefaId];
+        if (!respostas) {
+            respostas = await ProfessorService.getRespostasDaTarefa(ofertaId, tarefaId);
+            respostas = Array.isArray(respostas) ? respostas : [];
+            atividadesState.respostasCache[tarefaId] = respostas;
+        }
+
+        const resposta = respostas.find((x) => x.alunoId === alunoId);
+        if (!resposta) {
+            alert("Resposta não encontrada.");
+            return;
+        }
+
+        const dialog = document.querySelector("#correcaoModal .correcao-modal-dialog");
+        dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+        dialog?.classList.add("modal-status--corrigida");
+
+        // correção (nota/feedback/data)
+        const correcao = await ProfessorService.getCorrecaoAluno(ofertaId, tarefaId, alunoId);
+
+        atividadesState.respostaSelecionada = resposta;
+        atividadesState.correcaoSelecionada = correcao;
+
+        const modal = document.getElementById("correcaoModal");
+        const titulo = document.getElementById("correcaoModalTitulo");
+        const body = document.getElementById("correcaoRespostaBody");
+        const notaInput = document.getElementById("correcaoNota");
+        const feedbackInput = document.getElementById("correcaoFeedback");
+        const errorNode = document.getElementById("correcaoFormError");
+
+        if (!modal || !titulo || !body || !notaInput || !feedbackInput) return;
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
+        }
+
+        titulo.textContent = resposta.alunoNome || "Correção";
+
+        body.innerHTML = `
+        <div class="tarefa-detail-block">
+            <p class="text2"><strong>Matrícula:</strong> ${escapeHtml(resposta.alunoMatricula || "-")}</p>
+            <p class="text2"><strong>Enviado em:</strong> ${formatDateTimeBr(resposta.dataEnvio)}</p>
+
+            <p class="text2 modal-label-strong">Resposta</p>
+            <div class="tarefa-resposta-box text2">
+            ${escapeHtml(resposta.conteudo || "-")}
+            </div>
+
+            <p class="text2"><strong>Corrigido em:</strong> ${formatDateTimeBr(correcao?.dataCorrecao)}</p>
+
+            <p class="text2 modal-label-strong">Feedback</p>
+            <div class="tarefa-feedback-box text2">
+            ${escapeHtml(correcao?.feedback || "-")}
+            </div>
+        </div>
+        `;
+
+        notaInput.value = correcao?.nota ?? "";
+        feedbackInput.value = correcao?.feedback ?? "";
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao carregar correção.");
+    }
+}
+
+function bindCorrecaoModal() {
+    const modal = document.getElementById("correcaoModal");
+    const closeBtn = document.getElementById("correcaoModalClose");
+    const form = document.getElementById("correcaoForm");
+
+    if (!modal || !closeBtn || !form) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    closeBtn.addEventListener("click", closeCorrecaoModal);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeCorrecaoModal();
+        }
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const errorNode = document.getElementById("correcaoFormError");
+        const submitBtn = document.getElementById("correcaoConfirmBtn");
+        const notaInput = document.getElementById("correcaoNota");
+        const feedbackInput = document.getElementById("correcaoFeedback");
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
+        }
+
+        if (!atividadesState.respostaSelecionada || !atividadesState.ofertaSelecionada || !atividadesState.tarefaSelecionada) {
+            if (errorNode) {
+                errorNode.textContent = "Não foi possível identificar a resposta.";
+                errorNode.style.display = "block";
+            }
+            return;
+        }
+
+        const nota = Number(String(notaInput?.value || "").replace(",", "."));
+        const feedback = feedbackInput?.value?.trim() || "";
+
+        if (!Number.isFinite(nota) || nota < 0 || nota > 10) {
+            if (errorNode) {
+                errorNode.textContent = "A nota deve estar entre 0 e 10.";
+                errorNode.style.display = "block";
+            }
+            return;
+        }
+
+        setButtonLoading(submitBtn, true, "Salvando...", "Salvar correção");
+
+        try {
+            await ProfessorService.corrigirTarefa(
+                atividadesState.ofertaSelecionada.ofertaId,
+                await ProfessorService.corrigirTarefa(
+                    atividadesState.ofertaSelecionada.ofertaId,
+                    atividadesState.tarefaSelecionada.tarefaId,
+                    atividadesState.respostaSelecionada.alunoId,
+                    { nota, feedback }
+                ),
+                atividadesState.respostaSelecionada.alunoId,
+                { nota, feedback }
+            );
+
+            closeCorrecaoModal();
+            closeTarefaModal();
+            await loadAtividadesDaOfertaSelecionada();
+
+            if (typeof Toastify === "function") {
+                Toastify({
+                    text: "Correção salva com sucesso.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    close: true,
+                    stopOnFocus: true,
+                    style: { background: "#2e7d32" },
+                }).showToast();
+            }
+        } catch (error) {
+            if (errorNode) {
+                errorNode.textContent = error.message || "Erro ao salvar correção.";
+                errorNode.style.display = "block";
+            }
+        } finally {
+            setButtonLoading(submitBtn, false, null, "Salvar correção");
+        }
+    });
+}
+
+function closeCorrecaoModal() {
+    const modal = document.getElementById("correcaoModal");
+    const form = document.getElementById("correcaoForm");
+    const errorNode = document.getElementById("correcaoFormError");
+    const body = document.getElementById("correcaoRespostaBody");
+    const dialog = document.querySelector("#correcaoModal .correcao-modal-dialog");
+    dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+
+    if (!modal) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    if (form) form.reset();
+
+    if (errorNode) {
+        errorNode.style.display = "none";
+        errorNode.textContent = "";
+    }
+
+    if (body) {
+        body.innerHTML = "";
+    }
+
+    atividadesState.respostaSelecionada = null;
+    atividadesState.correcaoSelecionada = null;
+}
+
+async function openCorrecaoModalFromPendencia(tarefa, alunoPendente) {
+    const respostas = await ProfessorService.getRespostasDaTarefa(
+        atividadesState.ofertaSelecionada.ofertaId,
+        tarefa.tarefaId
+    );
+
+    const resposta = (Array.isArray(respostas) ? respostas : []).find(
+        (item) => item.alunoId === alunoPendente.alunoId
+    );
+
+    if (!resposta) {
+        alert("Resposta não encontrada.");
+        return;
+    }
+
+    atividadesState.tarefaSelecionada = {
+        tarefaId: tarefa.tarefaId,
+        ofertaId: atividadesState.ofertaSelecionada.ofertaId,
+        titulo: tarefa.titulo,
+    };
+    atividadesState.respostaSelecionada = resposta;
+
+    const dialog = document.querySelector("#correcaoModal .correcao-modal-dialog");
+    dialog?.classList.remove("modal-status--para-corrigir", "modal-status--criada", "modal-status--corrigida");
+    dialog?.classList.add("modal-status--para-corrigir");
+
+    const modal = document.getElementById("correcaoModal");
+    const titulo = document.getElementById("correcaoModalTitulo");
+    const body = document.getElementById("correcaoRespostaBody");
+    const notaInput = document.getElementById("correcaoNota");
+    const feedbackInput = document.getElementById("correcaoFeedback");
+
+    if (!modal || !titulo || !body || !notaInput || !feedbackInput) return;
+
+    titulo.textContent = resposta.alunoNome || "Correção";
+
+    body.innerHTML = `
+    <div class="tarefa-detail-block">
+        <p class="text2"><strong>Matrícula:</strong> ${escapeHtml(resposta.alunoMatricula || "-")}</p>
+        <p class="text2"><strong>Enviado em:</strong> ${formatDateTimeBr(resposta.dataEnvio)}</p>
+
+        <p class="text2 modal-label-strong">Resposta:</p>
+        <div class="tarefa-resposta-box text2">
+        ${escapeHtml(resposta.conteudo || "-")}
+        </div>
+    </div>
+    `;
+
+    notaInput.value = "";
+    feedbackInput.value = "";
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
 }
