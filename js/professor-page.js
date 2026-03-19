@@ -62,6 +62,7 @@ async function navigateToSection(sectionName, user) {
         notas: () => renderNotas(),
         atividades: () => renderAtividades(),
         calendario: () => renderCalendario(),
+        frequencia: () => renderFrequencia(),
     };
 
     const renderFn = sectionMap[sectionName];
@@ -214,11 +215,965 @@ async function renderAtividades() {
     }
 }
 
-async function renderCalendario() {
-    renderPlaceholderSection(
-        "Calendário",
-        "Seção de calendário do professor em construção."
+async function renderFrequencia() {
+    const host = getSectionHost();
+    if (!host) return;
+
+    try {
+        await loadSectionHtml(host, "../pages/sections/professor/frequencia.html");
+
+        resetFrequenciaState();
+        bindFrequenciaEvents();
+
+        const ofertas = await ProfessorService.getMinhasOfertas();
+        frequenciaState.ofertas = Array.isArray(ofertas) ? ofertas : [];
+
+        renderFrequenciaOfertasCards();
+
+        if (!frequenciaState.ofertas.length) {
+            renderFrequenciaEmpty("Nenhuma disciplina encontrada.");
+            return;
+        }
+
+        renderFrequenciaEmpty("Selecione uma disciplina.");
+    } catch (error) {
+        console.error(error);
+        host.innerHTML = `
+      <section class="container welcome-section with-offset">
+        <p class="title3 welcome-text">Erro ao carregar a seção de frequência.</p>
+      </section>
+    `;
+    }
+}
+
+const frequenciaState = {
+    ofertas: [],
+    ofertaSelecionada: null,
+    alunos: [],
+
+    totalAulas: 0,
+    totalAulasSnapshot: 0,
+
+    numeroAula: 1,
+
+    // alunoId -> presente(true/false)
+    presencas: new Map(),
+    presencasSnapshot: new Map(),
+
+    // numeroAula -> Set(alunoId) ausentes
+    faltasPorAula: new Map(),
+};
+
+function resetFrequenciaState() {
+    frequenciaState.ofertas = [];
+    frequenciaState.ofertaSelecionada = null;
+    frequenciaState.alunos = [];
+    frequenciaState.totalAulas = 0;
+    frequenciaState.numeroAula = 1;
+    frequenciaState.presencas = new Map();
+    frequenciaState.presencasSnapshot = new Map();
+    frequenciaState.faltasPorAula = new Map();
+}
+
+function bindFrequenciaEvents() {
+    const aulaSelect = document.getElementById("frequenciaAulaSelect");
+    const totalAulasInput = document.getElementById("frequenciaTotalAulas");
+    const salvarBtn = document.getElementById("frequenciaSalvarBtn");
+
+    aulaSelect?.addEventListener("change", () => {
+        frequenciaState.numeroAula = Number(aulaSelect.value) || 1;
+
+        applyPresencasFromGrade();
+        renderFrequenciaTable();
+        syncFrequenciaSaveButton();
+    });
+
+    totalAulasInput?.addEventListener("input", () => {
+        const v = Number(totalAulasInput.value);
+        frequenciaState.totalAulas = Number.isFinite(v) ? v : 0;
+
+        rebuildAulaSelectOptions();
+        applyPresencasFromGrade(); // re-marca a aula selecionada
+        renderFrequenciaTable();
+        syncFrequenciaSaveButton();
+    });
+
+    salvarBtn?.addEventListener("click", async () => {
+        await saveFrequencia();
+    });
+}
+
+function applyPresencasFromGrade() {
+    const aula = Number(frequenciaState.numeroAula);
+    const ausentesSet = frequenciaState.faltasPorAula.get(aula) || new Set();
+
+    frequenciaState.presencas = new Map();
+    frequenciaState.presencasSnapshot = new Map();
+
+    for (const aluno of frequenciaState.alunos) {
+        const alunoId = Number(aluno.id);
+        const presente = !ausentesSet.has(alunoId);
+        frequenciaState.presencas.set(alunoId, presente);
+        frequenciaState.presencasSnapshot.set(alunoId, presente);
+    }
+}
+
+function renderFrequenciaEmpty(message) {
+    const tbody = document.getElementById("frequenciaTableBody");
+    const titulo = document.getElementById("frequenciaTitulo");
+    const aulaSelect = document.getElementById("frequenciaAulaSelect");
+    const totalAulasInput = document.getElementById("frequenciaTotalAulas");
+    const salvarBtn = document.getElementById("frequenciaSalvarBtn");
+
+    if (titulo && !frequenciaState.ofertaSelecionada) {
+        titulo.textContent = "Selecione uma disciplina";
+    }
+
+    if (tbody) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="2" class="text2">${escapeHtml(message)}</td>
+      </tr>
+    `;
+    }
+
+    if (aulaSelect) aulaSelect.disabled = !frequenciaState.ofertaSelecionada;
+    if (totalAulasInput) totalAulasInput.disabled = !frequenciaState.ofertaSelecionada;
+    if (salvarBtn) salvarBtn.disabled = true;
+}
+
+function renderFrequenciaOfertasCards() {
+    const cardsContainer = document.getElementById("frequenciaOfertasCards");
+    if (!cardsContainer) return;
+
+    cardsContainer.innerHTML = "";
+
+    if (!frequenciaState.ofertas.length) {
+        cardsContainer.innerHTML = `<p class="text2">Nenhuma disciplina disponível.</p>`;
+        return;
+    }
+
+    for (const oferta of frequenciaState.ofertas) {
+        const isActive = frequenciaState.ofertaSelecionada?.ofertaId === oferta.ofertaId;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `disciplina-card${isActive ? " is-active" : ""}`;
+
+        btn.innerHTML = `
+      <div class="professor-disciplina-card-top">
+        <h4 class="title3">${escapeHtml(oferta.disciplinaNome || "-")}</h4>
+      </div>
+      <div class="professor-disciplina-card-body">
+        <p class="text2">${escapeHtml(oferta.disciplinaCodigo || "-")}</p>
+        <p class="text2">${escapeHtml(oferta.turmaNome || "-")}</p>
+      </div>
+    `;
+
+        btn.addEventListener("click", async () => {
+            frequenciaState.ofertaSelecionada = oferta;
+            renderFrequenciaOfertasCards();
+            await loadFrequenciaOferta();
+        });
+
+        cardsContainer.appendChild(btn);
+    }
+}
+
+async function loadFrequenciaOferta() {
+    const titulo = document.getElementById("frequenciaTitulo");
+    const aulaSelect = document.getElementById("frequenciaAulaSelect");
+    const totalAulasInput = document.getElementById("frequenciaTotalAulas");
+    const salvarBtn = document.getElementById("frequenciaSalvarBtn");
+
+    if (!frequenciaState.ofertaSelecionada) {
+        renderFrequenciaEmpty("Selecione uma disciplina.");
+        return;
+    }
+
+    if (titulo) {
+        titulo.textContent = `${frequenciaState.ofertaSelecionada.disciplinaNome} - ${frequenciaState.ofertaSelecionada.turmaNome}`;
+    }
+
+    aulaSelect && (aulaSelect.disabled = false);
+    totalAulasInput && (totalAulasInput.disabled = false);
+    salvarBtn && (salvarBtn.disabled = true);
+
+    renderFrequenciaLoading();
+
+    try {
+        const ofertaId = frequenciaState.ofertaSelecionada.ofertaId;
+
+        const [alunosResp, totalResp, faltasResp] = await Promise.all([
+            // use a rota já usada em Notas
+            ProfessorService.getAlunosDaOferta(ofertaId, 1, 999),
+            ProfessorService.getTotalAulas(ofertaId),
+            ProfessorService.getGradeFaltas(ofertaId),
+        ]);
+
+        frequenciaState.alunos = Array.isArray(alunosResp?.items) ? alunosResp.items : [];
+
+        // total aulas vindo do back
+        const total = Number(totalResp?.totalAulas ?? 0);
+        frequenciaState.totalAulas = Number.isFinite(total) && total > 0 ? total : 1;
+        frequenciaState.totalAulasSnapshot = frequenciaState.totalAulas;
+        if (totalAulasInput) totalAulasInput.value = String(frequenciaState.totalAulas);
+
+        // montar Map(numeroAula -> Set(alunoId))
+        frequenciaState.faltasPorAula = buildFaltasMap(faltasResp);
+
+        // select de aulas e aula atual
+        rebuildAulaSelectOptions();
+
+        // marcar presenças conforme a aula selecionada
+        applyPresencasFromGrade();
+
+        renderFrequenciaTable();
+        syncFrequenciaSaveButton();
+    } catch (err) {
+        console.error(err);
+        renderFrequenciaEmpty("Erro ao carregar alunos.");
+    }
+}
+
+function renderFrequenciaLoading() {
+    const tbody = document.getElementById("frequenciaTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+    <tr>
+      <td colspan="2" class="text2">Carregando...</td>
+    </tr>
+  `;
+}
+
+function buildFaltasMap(apiResponse) {
+    const map = new Map();
+    const arr = Array.isArray(apiResponse) ? apiResponse : [];
+
+    for (const item of arr) {
+        const numeroAula = Number(item?.numeroAula);
+        if (!Number.isFinite(numeroAula)) continue;
+
+        const set = new Set();
+        const alunos = Array.isArray(item?.alunos) ? item.alunos : [];
+        for (const a of alunos) {
+            if (a?.alunoId != null) set.add(Number(a.alunoId));
+        }
+
+        map.set(numeroAula, set);
+    }
+
+    return map;
+}
+
+function rebuildAulaSelectOptions() {
+    const aulaSelect = document.getElementById("frequenciaAulaSelect");
+    if (!aulaSelect) return;
+
+    const total = Math.max(1, Math.floor(Number(frequenciaState.totalAulas || 1)));
+    const current = Math.min(Math.max(1, frequenciaState.numeroAula), total);
+
+    aulaSelect.innerHTML = "";
+    for (let i = 1; i <= total; i++) {
+        const opt = document.createElement("option");
+        opt.value = String(i);
+        opt.textContent = `Aula ${i}`;
+        aulaSelect.appendChild(opt);
+    }
+
+    frequenciaState.numeroAula = current;
+    aulaSelect.value = String(current);
+}
+
+function initPresencasAllPresent() {
+    frequenciaState.presencas = new Map();
+    frequenciaState.presencasSnapshot = new Map();
+
+    for (const aluno of frequenciaState.alunos) {
+        frequenciaState.presencas.set(aluno.id, true);
+        frequenciaState.presencasSnapshot.set(aluno.id, true);
+    }
+}
+
+function renderFrequenciaTable() {
+    const tbody = document.getElementById("frequenciaTableBody");
+    if (!tbody) return;
+
+    if (!frequenciaState.ofertaSelecionada) {
+        renderFrequenciaEmpty("Selecione uma disciplina.");
+        return;
+    }
+
+    if (!frequenciaState.alunos.length) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="2" class="text2">Nenhum aluno matriculado.</td>
+      </tr>
+    `;
+        return;
+    }
+
+    tbody.innerHTML = "";
+
+    const sorted = [...frequenciaState.alunos].sort((a, b) =>
+        String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR")
     );
+
+    for (const aluno of sorted) {
+        const isPresent = frequenciaState.presencas.get(aluno.id) !== false;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+      <td class="text2">${escapeHtml(aluno.nome || "-")}</td>
+      <td class="text2">
+        <input
+          type="checkbox"
+          class="freq-check"
+          data-aluno-id="${aluno.id}"
+          ${isPresent ? "checked" : ""}
+        />
+      </td>
+    `;
+
+        tbody.appendChild(tr);
+    }
+
+    tbody.querySelectorAll(".freq-check").forEach((chk) => {
+        chk.addEventListener("change", () => {
+            const alunoId = Number(chk.dataset.alunoId);
+            frequenciaState.presencas.set(alunoId, chk.checked);
+            syncFrequenciaSaveButton();
+        });
+    });
+}
+
+function syncFrequenciaSaveButton() {
+    const salvarBtn = document.getElementById("frequenciaSalvarBtn");
+    if (!salvarBtn) return;
+
+    if (!frequenciaState.ofertaSelecionada) {
+        salvarBtn.disabled = true;
+        return;
+    }
+
+    const total = Math.floor(Number(frequenciaState.totalAulas || 0));
+    const totalOk = Number.isFinite(total) && total >= 1;
+
+    const totalChanged = total !== Number(frequenciaState.totalAulasSnapshot || 0);
+    const presencasChanged = hasPresencasChanged();
+
+    salvarBtn.disabled = !(totalOk && (totalChanged || presencasChanged));
+}
+
+function hasPresencasChanged() {
+    for (const [alunoId, present] of frequenciaState.presencas.entries()) {
+        const old = frequenciaState.presencasSnapshot.get(alunoId);
+        if (old !== present) return true;
+    }
+    return false;
+}
+
+async function saveFrequencia() {
+    const errorNode = document.getElementById("frequenciaError");
+    const salvarBtn = document.getElementById("frequenciaSalvarBtn");
+
+    if (errorNode) {
+        errorNode.style.display = "none";
+        errorNode.textContent = "";
+    }
+
+    if (!frequenciaState.ofertaSelecionada) return;
+
+    const ofertaId = frequenciaState.ofertaSelecionada.ofertaId;
+    const numeroAula = Number(frequenciaState.numeroAula);
+    const totalAulas = Math.floor(Number(frequenciaState.totalAulas || 0));
+
+    if (!Number.isFinite(numeroAula) || numeroAula < 1) {
+        if (errorNode) {
+            errorNode.textContent = "Selecione a aula.";
+            errorNode.style.display = "block";
+        }
+        return;
+    }
+
+    if (!Number.isFinite(totalAulas) || totalAulas < 1) {
+        if (errorNode) {
+            errorNode.textContent = "Total de aulas deve ser no mínimo 1.";
+            errorNode.style.display = "block";
+        }
+        return;
+    }
+
+    setButtonLoading(salvarBtn, true, "Salvando...", "Salvar");
+
+    try {
+        // 1) salvar total de aulas
+        await ProfessorService.setTotalAulas(ofertaId, totalAulas);
+
+        // 2) salvar faltas (diff)
+        const ops = [];
+
+        for (const aluno of frequenciaState.alunos) {
+            const alunoId = aluno.id;
+            const nowPresent = frequenciaState.presencas.get(alunoId) !== false;
+            const wasPresent = frequenciaState.presencasSnapshot.get(alunoId) !== false;
+
+            if (nowPresent === wasPresent) continue;
+
+            if (!nowPresent) {
+                ops.push(() => ProfessorService.registrarFalta(ofertaId, alunoId, numeroAula));
+            } else {
+                ops.push(() => ProfessorService.removerFalta(ofertaId, alunoId, numeroAula));
+            }
+        }
+
+        // executa em paralelo (limite simples)
+        await Promise.all(ops.map((fn) => fn()));
+
+        // atualiza snapshot
+        frequenciaState.totalAulasSnapshot = Math.floor(Number(frequenciaState.totalAulas));
+        frequenciaState.presencasSnapshot = new Map(frequenciaState.presencas);
+
+        // atualiza cache de faltas da aula atual
+        const aula = Number(frequenciaState.numeroAula);
+        const set = new Set();
+        for (const [alunoId, presente] of frequenciaState.presencas.entries()) {
+            if (presente === false) set.add(Number(alunoId));
+        }
+        frequenciaState.faltasPorAula.set(aula, set);
+
+        syncFrequenciaSaveButton();
+    } catch (err) {
+        if (errorNode) {
+            errorNode.textContent = err.message || "Erro ao salvar frequência.";
+            errorNode.style.display = "block";
+        }
+    } finally {
+        setButtonLoading(salvarBtn, false, null, "Salvar");
+    }
+}
+
+async function renderCalendario() {
+    const host = document.getElementById("professorSectionHost");
+    if (!host) return;
+
+    try {
+        await loadSectionHtml(host, "../pages/sections/professor/calendario.html");
+
+        const calMonth = host.querySelector("#calMonth");
+        const calYear = host.querySelector("#calYear");
+        const calDays = host.querySelector("#calDays");
+        const calPrev = host.querySelector("#calPrev");
+        const calNext = host.querySelector("#calNext");
+
+        const calNewEventBtn = host.querySelector("#calNewEventBtn");
+
+        const calModal = document.getElementById("calModal");
+        const calModalClose = document.getElementById("calModalClose");
+        const calModalDate = document.getElementById("calModalDate");
+        const calModalList = document.getElementById("calModalList");
+
+        const calEventModal = document.getElementById("calEventModal");
+        const calEventModalClose = document.getElementById("calEventModalClose");
+        const calEventForm = document.getElementById("calEventForm");
+        const calEventModalTitle = document.getElementById("calEventModalTitle");
+        const calEventModalSubtitle = document.getElementById("calEventModalSubtitle");
+        const calEventOferta = document.getElementById("calEventOferta");
+        const calEventTitulo = document.getElementById("calEventTitulo");
+        const calEventDescricao = document.getElementById("calEventDescricao");
+        const calEventDiaInteiro = document.getElementById("calEventDiaInteiro");
+        const calEventData = document.getElementById("calEventData");
+        const calEventInicio = document.getElementById("calEventInicio");
+        const calEventFim = document.getElementById("calEventFim");
+        const calEventDeleteBtn = document.getElementById("calEventDeleteBtn");
+        const calEventSubmitBtn = document.getElementById("calEventSubmitBtn");
+        const calEventError = document.getElementById("calEventError");
+        const calDeleteConfirmModal = document.getElementById("calDeleteConfirmModal");
+        const calDeleteClose = document.getElementById("calDeleteClose");
+        const calDeleteDesc = document.getElementById("calDeleteDesc");
+        const calDeleteCancelBtn = document.getElementById("calDeleteCancelBtn");
+        const calDeleteConfirmBtn = document.getElementById("calDeleteConfirmBtn");
+
+        if (!calMonth || !calYear || !calDays || !calPrev || !calNext) return;
+
+        // === cache/estado ===
+        const ofertas = await ProfessorService.getMinhasOfertas();
+        const ofertasArr = Array.isArray(ofertas) ? ofertas : [];
+
+        let eventosArr = [];
+        let eventosPorDia = new Map();
+
+        let selectedDayKey = null;
+        let editingEvent = null; // objeto evento completo
+
+        let cursor = new Date();
+        cursor.setDate(1);
+
+        function indexEventosPorDiaLocal(eventos) {
+            const map = new Map();
+            eventos.forEach((ev) => {
+                const key = ev?.data; // "YYYY-MM-DD"
+                if (!key) return;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(ev);
+            });
+            return map;
+        }
+
+        async function refreshEventos() {
+            eventosArr = await ProfessorService.getEventosProfessorMe();
+            eventosArr = Array.isArray(eventosArr) ? eventosArr : [];
+            eventosPorDia = indexEventosPorDiaLocal(eventosArr);
+        }
+
+        function render() {
+            const year = cursor.getFullYear();
+            const month = cursor.getMonth();
+
+            calMonth.textContent = getMonthNamePt(year, month);
+            calYear.textContent = String(year);
+            calDays.innerHTML = "";
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startWeekday = firstDay.getDay();
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+            for (let i = 0; i < startWeekday; i++) {
+                const dayNumber = prevMonthLastDay - (startWeekday - 1 - i);
+                calDays.appendChild(makeDayCell(dayNumber, true, null));
+            }
+
+            for (let d = 1; d <= lastDay.getDate(); d++) {
+                const dateKey = toDateKey(year, month, d);
+                const dayEvents = eventosPorDia.get(dateKey) || [];
+                calDays.appendChild(makeDayCell(d, false, { dateKey, dayEvents }));
+            }
+
+            const totalCells = startWeekday + lastDay.getDate();
+            const remainder = totalCells % 7;
+            const fillNext = remainder === 0 ? 0 : 7 - remainder;
+
+            for (let i = 1; i <= fillNext; i++) {
+                calDays.appendChild(makeDayCell(i, true, null));
+            }
+        }
+
+        function getMonthNamePt(year, monthZeroBased) {
+            const date = new Date(year, monthZeroBased, 1);
+            const nome = date.toLocaleDateString("pt-BR", { month: "long" });
+            // "dezembro" -> "Dezembro"
+            return nome.charAt(0).toUpperCase() + nome.slice(1);
+        }
+
+        function toDateKey(year, monthZeroBased, day) {
+            const m = String(monthZeroBased + 1).padStart(2, "0");
+            const d = String(day).padStart(2, "0");
+            return `${year}-${m}-${d}`;
+        }
+
+        function makeDayCell(dayNumber, isOutside, payload) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = `cal-day${isOutside ? " cal-day--outside" : ""}`;
+
+            const dayTop = document.createElement("div");
+            dayTop.className = "cal-day__num";
+            dayTop.textContent = String(dayNumber);
+            btn.appendChild(dayTop);
+
+            if (!isOutside && payload?.dayEvents?.length) {
+                const sorted = [...payload.dayEvents].sort((a, b) => {
+                    const ta = getEventStartLabelSortable(a);
+                    const tb = getEventStartLabelSortable(b);
+                    return ta.localeCompare(tb);
+                });
+
+                const maxSlots = 4;
+                const showCount = sorted.length >= 5 ? 3 : Math.min(sorted.length, maxSlots);
+                const show = sorted.slice(0, showCount);
+
+                const markers = document.createElement("div");
+                markers.className = "cal-day__markers";
+
+                show.forEach((ev) => {
+                    const label = ev.diaInteiro ? "Dia todo" : formatHora(ev.horaInicio);
+                    const row = document.createElement("div");
+                    row.className = "cal-day__marker";
+
+                    const dot = document.createElement("span");
+                    dot.className = "cal-dot";
+                    row.appendChild(dot);
+
+                    const time = document.createElement("span");
+                    time.className = "cal-time";
+                    time.textContent = label;
+                    row.appendChild(time);
+
+                    markers.appendChild(row);
+                });
+
+                if (sorted.length >= 5) {
+                    const remaining = sorted.length - 3;
+                    const more = document.createElement("div");
+                    more.className = "cal-day__more";
+                    more.textContent = `+${remaining}`;
+                    markers.appendChild(more);
+                }
+
+                btn.appendChild(markers);
+                btn.addEventListener("click", () => openDayModal(payload.dateKey, sorted));
+            } else if (!isOutside) {
+                btn.addEventListener("click", () => {
+                    // se não há eventos, já abre criação com a data do dia
+                    openEventModalCreate(payload?.dateKey);
+                });
+            }
+
+            if (!isOutside && payload?.dateKey) {
+                const today = new Date();
+                const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
+                if (payload.dateKey === todayKey) btn.classList.add("cal-day--today");
+            }
+
+            return btn;
+        }
+
+        function openDayModal(dateKey, dayEvents) {
+            if (!calModal || !calModalList || !calModalDate) return;
+
+            selectedDayKey = dateKey;
+            calModalList.innerHTML = "";
+            calModalDate.textContent = formatDateBr(dateKey);
+            calModalList.innerHTML = `
+                <li class="cal-modal-actions">
+                    <button type="button" class="boletim-btn text1" id="calDayNewEventBtn">
+                    Novo evento
+                    </button>
+                </li>
+                `;
+
+            const dayNewBtn = document.getElementById("calDayNewEventBtn");
+            dayNewBtn?.addEventListener("click", () => {
+                closeDayModal();
+                openEventModalCreate(dateKey);
+            });
+
+            if (!dayEvents || dayEvents.length === 0) {
+                const empty = document.createElement("li");
+                empty.className = "text2";
+                empty.textContent = "Nenhum evento neste dia.";
+                calModalList.appendChild(empty);
+            } else {
+                dayEvents.forEach((ev) => {
+                    const li = document.createElement("li");
+                    li.className = "cal-event";
+
+                    const hora = ev.diaInteiro
+                        ? "Dia todo"
+                        : `${formatHora(ev.horaInicio)} - ${formatHora(ev.horaFim)}`;
+
+                    li.innerHTML = `
+            <div class="cal-event__main">
+              <span class="title3 cal-event__title">${escapeHtml(ev.titulo || "-")}</span>
+              <span class="text2 cal-event__meta">${escapeHtml(ev.disciplinaNome || "-")}</span>
+            </div>
+            <div class="cal-event__side">
+              <span class="text2 cal-event__time">${hora}</span>
+            </div>
+          `;
+
+                    li.addEventListener("click", () => openEventModalEdit(ev));
+                    calModalList.appendChild(li);
+                });
+            }
+
+            calModal.classList.add("is-open");
+            calModal.setAttribute("aria-hidden", "false");
+        }
+
+        function closeDayModal() {
+            if (!calModal) return;
+            calModal.classList.remove("is-open");
+            calModal.setAttribute("aria-hidden", "true");
+        }
+
+        function setTimeEnabled() {
+            const enabled = !calEventDiaInteiro.checked;
+
+            calEventInicio.disabled = !enabled;
+            calEventFim.disabled = !enabled;
+
+            calEventInicio.classList.toggle("is-disabled", !enabled);
+            calEventFim.classList.toggle("is-disabled", !enabled);
+        }
+
+        function fillOfertaSelect(selectedOfertaId, disabled = false) {
+            calEventOferta.innerHTML = "";
+            ofertasArr.forEach((o) => {
+                const opt = document.createElement("option");
+                opt.value = String(o.ofertaId);
+                opt.textContent = `${o.disciplinaNome} (${o.turmaNome})`;
+                calEventOferta.appendChild(opt);
+            });
+
+            if (selectedOfertaId != null) {
+                calEventOferta.value = String(selectedOfertaId);
+            }
+
+            calEventOferta.disabled = disabled;
+        }
+
+        function openEventModalCreate(dateKey) {
+            editingEvent = null;
+
+            calEventModalTitle.textContent = "Novo evento";
+            calEventModalSubtitle.textContent = "";
+
+            fillOfertaSelect(ofertasArr[0]?.ofertaId ?? null, false);
+
+            calEventTitulo.value = "";
+            calEventDescricao.value = "";
+            calEventDiaInteiro.checked = true;
+
+            calEventData.value = dateKey || toDateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+            calEventInicio.value = "08:00";
+            calEventFim.value = "09:00";
+            setTimeEnabled();
+
+            calEventDeleteBtn.style.display = "none";
+            calEventSubmitBtn.textContent = "Criar evento";
+
+            if (calEventError) {
+                calEventError.style.display = "none";
+                calEventError.textContent = "";
+            }
+
+            calEventModal.classList.add("is-open");
+            calEventModal.setAttribute("aria-hidden", "false");
+        }
+
+        calDeleteConfirmBtn?.addEventListener("click", async () => {
+            if (!editingEvent) return;
+
+            try {
+                await ProfessorService.excluirEvento(editingEvent.ofertaId, editingEvent.eventoId);
+
+                closeDeleteConfirmModal();
+                closeEventModal();
+
+                await refreshEventos();
+                render();
+            } catch (err) {
+                closeDeleteConfirmModal();
+
+                if (calEventError) {
+                    calEventError.textContent = err.message || "Erro ao excluir evento.";
+                    calEventError.style.display = "block";
+                }
+            }
+        });
+
+        function openEventModalEdit(ev) {
+            editingEvent = ev;
+
+            calEventModalTitle.textContent = "Editar evento";
+            calEventModalSubtitle.textContent = `${ev.disciplinaNome || ""}`;
+
+            fillOfertaSelect(ev.ofertaId, true);
+
+            calEventTitulo.value = ev.titulo || "";
+            calEventDescricao.value = ev.descricao || "";
+            calEventDiaInteiro.checked = !!ev.diaInteiro;
+
+            calEventData.value = ev.data;
+
+            calEventInicio.value = timeToHHMM(ev.horaInicio) || "08:00";
+            calEventFim.value = timeToHHMM(ev.horaFim) || "09:00";
+            setTimeEnabled();
+
+            calEventDeleteBtn.style.display = "inline-flex";
+            calEventSubmitBtn.textContent = "Salvar alterações";
+
+            if (calEventError) {
+                calEventError.style.display = "none";
+                calEventError.textContent = "";
+            }
+
+            closeDayModal();
+
+            calEventModal.classList.add("is-open");
+            calEventModal.setAttribute("aria-hidden", "false");
+        }
+
+        function closeEventModal() {
+            calEventModal.classList.remove("is-open");
+            calEventModal.setAttribute("aria-hidden", "true");
+        }
+
+        function timeToApiFormat(hhmm) {
+            if (!hhmm) return null;
+
+            const m = String(hhmm).match(/^(\d{2}):(\d{2})/);
+            if (!m) return null;
+
+            return `${m[1]}:${m[2]}`; // HH:mm
+        }
+
+        function timeToHHMM(value) {
+            if (!value) return "";
+            if (typeof value === "string") {
+                const m = value.match(/^(\d{2}):(\d{2})/);
+                if (m) return `${m[1]}:${m[2]}`;
+            }
+            const dt = new Date(value);
+            if (!Number.isNaN(dt.getTime())) {
+                const hh = String(dt.getHours()).padStart(2, "0");
+                const mm = String(dt.getMinutes()).padStart(2, "0");
+                return `${hh}:${mm}`;
+            }
+            return "";
+        }
+
+        function validateEventForm() {
+            const titulo = (calEventTitulo.value || "").trim();
+            const data = calEventData.value;
+            if (!titulo) return "Informe o título.";
+            if (!data) return "Informe a data.";
+
+            if (!calEventDiaInteiro.checked) {
+                if (!calEventInicio.value || !calEventFim.value) return "Informe início e fim.";
+            }
+            return "";
+        }
+
+        function openDeleteConfirmModal(ev) {
+            if (!calDeleteConfirmModal || !calDeleteDesc) return;
+
+            calDeleteDesc.innerHTML = `
+    <strong>${escapeHtml(ev.titulo || "-")}</strong><br />
+    ${escapeHtml(ev.disciplinaNome || "-")} • ${formatDateBr(ev.data)}
+  `;
+
+            calDeleteConfirmModal.classList.add("is-open");
+            calDeleteConfirmModal.setAttribute("aria-hidden", "false");
+        }
+
+        function closeDeleteConfirmModal() {
+            if (!calDeleteConfirmModal) return;
+            calDeleteConfirmModal.classList.remove("is-open");
+            calDeleteConfirmModal.setAttribute("aria-hidden", "true");
+        }
+
+        // === binds ===
+
+        await refreshEventos();
+        render();
+
+        calPrev.addEventListener("click", () => {
+            cursor.setMonth(cursor.getMonth() - 1);
+            cursor.setDate(1);
+            render();
+        });
+
+        calNext.addEventListener("click", () => {
+            cursor.setMonth(cursor.getMonth() + 1);
+            cursor.setDate(1);
+            render();
+        });
+
+        calModalClose?.addEventListener("click", closeDayModal);
+        calModal?.addEventListener("click", (e) => {
+            if (e.target === calModal) closeDayModal();
+        });
+
+        calEventModalClose?.addEventListener("click", closeEventModal);
+        calEventModal?.addEventListener("click", (e) => {
+            if (e.target === calEventModal) closeEventModal();
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeDayModal();
+                closeEventModal();
+            }
+        });
+
+        calEventDiaInteiro.addEventListener("change", setTimeEnabled);
+
+        calNewEventBtn?.addEventListener("click", () => {
+            openEventModalCreate(selectedDayKey);
+        });
+
+        calEventDeleteBtn.addEventListener("click", async () => {
+            if (!editingEvent) return;
+            openDeleteConfirmModal(editingEvent);
+        });
+
+        calDeleteClose?.addEventListener("click", closeDeleteConfirmModal);
+        calDeleteCancelBtn?.addEventListener("click", closeDeleteConfirmModal);
+
+        calDeleteConfirmModal?.addEventListener("click", (e) => {
+            if (e.target === calDeleteConfirmModal) closeDeleteConfirmModal();
+        });
+
+        calEventForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (calEventError) {
+                calEventError.style.display = "none";
+                calEventError.textContent = "";
+            }
+
+            const msg = validateEventForm();
+            if (msg) {
+                if (calEventError) {
+                    calEventError.textContent = msg;
+                    calEventError.style.display = "block";
+                }
+                return;
+            }
+
+            const ofertaId = Number(calEventOferta.value);
+            const payload = {
+                titulo: (calEventTitulo.value || "").trim(),
+                descricao: (calEventDescricao.value || "").trim(),
+                data: calEventData.value,
+                diaInteiro: !!calEventDiaInteiro.checked,
+                horaInicio: calEventDiaInteiro.checked ? null : timeToApiFormat(calEventInicio.value),
+                horaFim: calEventDiaInteiro.checked ? null : timeToApiFormat(calEventFim.value),
+            };
+
+            try {
+                if (!editingEvent) {
+                    await ProfessorService.criarEvento(ofertaId, payload);
+                } else {
+                    await ProfessorService.atualizarEvento(editingEvent.ofertaId, editingEvent.eventoId, {
+                        ...payload,
+                        ativo: true,
+                    });
+                }
+
+                closeEventModal();
+                await refreshEventos();
+                render();
+            } catch (err) {
+                if (calEventError) {
+                    calEventError.textContent = err.message || "Erro ao salvar evento.";
+                    calEventError.style.display = "block";
+                }
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        host.innerHTML = `
+      <section class="calendar-section container with-offset">
+        <p class="text2">Erro ao carregar calendário.</p>
+      </section>
+    `;
+    }
 }
 
 function renderPlaceholderSection(title, message) {
@@ -288,6 +1243,40 @@ function renderNextEvents(container, eventos) {
     }
 }
 
+function getEventStartLabelSortable(ev) {
+    if (ev?.diaInteiro) return "00:00";
+    return formatHora(ev?.horaInicio);
+}
+
+function formatHora(hora) {
+    if (!hora) return "-";
+
+    // casos esperados:
+    // "17:39:16.425Z" (hora isolada)
+    // ou ISO completo
+    if (typeof hora === "string" && hora.includes("T")) {
+        const dt = new Date(hora);
+        if (!Number.isNaN(dt.getTime())) {
+            return dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        }
+    }
+
+    if (typeof hora === "string") {
+        // pega HH:MM
+        const m = hora.match(/^(\d{2}):(\d{2})/);
+        if (m) return `${m[1]}:${m[2]}`;
+    }
+
+    return "-";
+}
+
+function formatDateBr(dateKey) {
+    if (!dateKey) return "-";
+    const [y, m, d] = dateKey.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString("pt-BR", { dateStyle: "full" });
+}
+
 function formatEvento(evento) {
     const dateLabel = formatDateDDMM(evento?.data);
 
@@ -341,61 +1330,48 @@ function escapeHtml(str) {
         .replaceAll("'", "&#039;");
 }
 
-async function initProfileMenu(user) {
-    const profileBtn = document.getElementById("profileBtn");
-    const profileDropdown = document.getElementById("profileDropdown");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const changePasswordBtn = document.getElementById("changePasswordBtn");
+function initProfileMenu(user) {
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
 
-    const profileNome = document.getElementById("profileNome");
-    const profileMatricula = document.getElementById("profileMatricula");
-    const profileTurma = document.getElementById("profileTurma");
+  const profileNome = document.getElementById("profileNome");
+  const profileMatricula = document.getElementById("profileMatricula");
 
-    if (
-        !profileBtn ||
-        !profileDropdown ||
-        !logoutBtn ||
-        !changePasswordBtn ||
-        !profileNome ||
-        !profileMatricula ||
-        !profileTurma
-    ) {
-        return;
-    }
+  profileNome.textContent = user?.nome || "-";
+  profileMatricula.textContent = user?.matricula || "-";
 
-    profileNome.textContent = user.nome || "-";
-    profileMatricula.textContent = user.matricula || "-";
-    profileTurma.textContent = "Professor";
 
-    profileBtn.addEventListener("click", function (event) {
-        event.stopPropagation();
+  profileBtn.addEventListener("click", function (event) {
+    event.stopPropagation();
 
-        const isOpen = profileDropdown.classList.contains("is-open");
-        profileDropdown.classList.toggle("is-open", !isOpen);
-        profileBtn.setAttribute("aria-expanded", String(!isOpen));
-    });
+    const isOpen = profileDropdown.classList.contains("is-open");
+    profileDropdown.classList.toggle("is-open", !isOpen);
+    profileBtn.setAttribute("aria-expanded", String(!isOpen));
+  });
 
-    profileDropdown.addEventListener("click", function (event) {
-        event.stopPropagation();
-    });
+  profileDropdown.addEventListener("click", function (event) {
+    event.stopPropagation();
+  });
 
-    document.addEventListener("click", function () {
-        profileDropdown.classList.remove("is-open");
-        profileBtn.setAttribute("aria-expanded", "false");
-    });
+  document.addEventListener("click", function () {
+    profileDropdown.classList.remove("is-open");
+    profileBtn.setAttribute("aria-expanded", "false");
+  });
 
-    changePasswordBtn.addEventListener("click", function () {
-        openPasswordModal();
-        profileDropdown.classList.remove("is-open");
-        profileBtn.setAttribute("aria-expanded", "false");
-    });
+  changePasswordBtn.addEventListener("click", function () {
+    openPasswordModal();
+    profileDropdown.classList.remove("is-open");
+    profileBtn.setAttribute("aria-expanded", "false");
+  });
 
-    logoutBtn.addEventListener("click", function () {
-        localStorage.removeItem("ec_token");
-        localStorage.removeItem("ec_usuario");
-        localStorage.removeItem("educonnect_current_user");
-        window.location.href = "./index.html";
-    });
+  logoutBtn.addEventListener("click", function () {
+    localStorage.removeItem("ec_token");
+    localStorage.removeItem("ec_usuario");
+    localStorage.removeItem("educonnect_current_user");
+    window.location.href = "./index.html";
+  });
 }
 
 function initPasswordModal() {

@@ -1,0 +1,48 @@
+<section class="container atividades-section with-offset professor-frequencia-page">
+    <section class="disciplinas-area">
+        <h3 class="title3">Minhas disciplinas</h3>
+        <div id="frequenciaOfertasCards" class="disciplinas-cards"></div>
+    </section>
+
+    <section class="tarefas-area professor-frequencia-content">
+        <div class="tarefas-header professor-frequencia-header">
+            <h3 class="title3" id="frequenciaTitulo">Selecione uma disciplina</h3>
+
+            <div class="professor-frequencia-toolbar">
+                <label class="text2 professor-freq-field">
+                    <strong>Aula</strong>
+                    <select id="frequenciaAulaSelect" class="text2 tarefas-status-filter" disabled></select>
+                </label>
+
+                <label class="text2 professor-freq-field">
+                    <strong>Total de aulas</strong>
+                    <input id="frequenciaTotalAulas" type="number" min="1" step="1" class="text2 tarefas-status-filter"
+                        disabled />
+                </label>
+
+                <button type="button" id="frequenciaSalvarBtn" class="boletim-btn text1" disabled>
+                    Salvar
+                </button>
+            </div>
+        </div>
+
+        <section class="container info-container professor-freq-table-wrap">
+            <table id="frequenciaTable">
+                <thead>
+                    <tr class="table-header">
+                        <th class="title3 table-title">Nome</th>
+                        <th class="title3 table-title">Presente</th>
+                    </tr>
+                </thead>
+
+                <tbody id="frequenciaTableBody">
+                    <tr>
+                        <td colspan="2" class="text2">Selecione uma disciplina.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <p class="text2" id="frequenciaError" style="display:none;"></p>
+    </section>
+</section>

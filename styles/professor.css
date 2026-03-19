@@ -1297,7 +1297,7 @@ footer p {
 }
 
 .disciplina-card.is-active {
-  outline: 1px solid var(--color-primary);
+    outline: 1px solid var(--color-primary);
 }
 
 #professorSectionHost .disciplina-card .title3 {
@@ -1811,12 +1811,14 @@ body.professor-atividades-scroll {
 
 #professorSectionHost .cal-event {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     gap: 1rem;
     border: 1px solid var(--color-gray-4);
     border-radius: 1.2rem;
     padding: 1.15rem 1.25rem;
     background: var(--color-gray-3);
+    cursor: pointer;
 }
 
 #professorSectionHost .cal-event__main,
@@ -1878,10 +1880,6 @@ body.professor-atividades-scroll {
         width: 100%;
     }
 
-    #professorSectionHost .cal-event {
-        flex-direction: column;
-    }
-
     #professorSectionHost .cal-event__side {
         align-items: flex-start;
         text-align: left;
@@ -1932,10 +1930,6 @@ body.professor-atividades-scroll {
     flex-shrink: 0;
 }
 
-.nota-modal-dialog {
-    width: min(92vw, 420px);
-}
-
 .nota-form {
     display: flex;
     flex-direction: column;
@@ -1947,6 +1941,7 @@ body.professor-atividades-scroll {
     grid-template-columns: 48px 1fr;
     align-items: center;
     gap: 1rem;
+    align-self: center;
 }
 
 .nota-form-row input {
@@ -1956,6 +1951,7 @@ body.professor-atividades-scroll {
 .nota-last-update,
 .nota-form-error {
     margin-top: 0.25rem;
+    align-self: center;
 }
 
 #professorSectionHost .notas-search {
@@ -2123,8 +2119,8 @@ body.professor-atividades-scroll {
     justify-content: center;
 }
 
-.nota-modal-dialog {
-    width: min(92vw, 420px);
+.nota-modal-dialog{
+    width: min(40vw, 420px) !important;
 }
 
 .nota-form {
@@ -2203,105 +2199,105 @@ body.professor-atividades-scroll {
 }
 
 .atividade-card {
-  width: 100%;
-  border: none;
-  background: var(--color-gray-2);
-  color: inherit;
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  cursor: pointer;
-  text-align: left;
-  box-shadow: 0 0 20px var(--color-shadow-1);
+    width: 100%;
+    border: none;
+    background: var(--color-gray-2);
+    color: inherit;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 0 20px var(--color-shadow-1);
 }
 
-.atividade-card + .atividade-card {
-  margin-top: 1rem;
+.atividade-card+.atividade-card {
+    margin-top: 1rem;
 }
 
 .tarefa-modal-dialog,
 .correcao-modal-dialog {
-  width: min(92vw, 720px);
+    width: min(92vw, 720px);
 }
 
 .tarefa-modal-body,
 .correcao-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .tarefa-detail-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .correcao-form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-  align-items: stretch;
-  margin-right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    align-items: stretch;
+    margin-right: 2rem;
 }
 
-.correcao-form-row label{
-  font-weight: 700;
-  color: var(--color-gray-6);
+.correcao-form-row label {
+    font-weight: 700;
+    color: var(--color-gray-6);
 }
 
 .correcao-form-row--textarea {
-  align-items: start;
+    align-items: start;
 }
 
 .correcao-form textarea {
-  min-height: 120px;
-  resize: vertical;
-  max-width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    max-width: 100%;
 }
 
 .modal-label-strong {
-  font-weight: 700;
-  color: var(--color-gray-6);
-  margin: 0.25rem 0 0.5rem;
+    font-weight: 700;
+    color: var(--color-gray-6);
+    margin: 0.25rem 0 0.5rem;
 }
 
 .atividade-resposta-box {
-  background: var(--color-gray-2);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  white-space: pre-wrap;
+    background: var(--color-gray-2);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    white-space: pre-wrap;
 }
 
 .atividade-feedback-box {
-  background: var(--color-gray-5);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  white-space: pre-wrap;
+    background: var(--color-gray-5);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    white-space: pre-wrap;
 }
 
 /* ===== Modal base (professor) ===== */
 .correcao-modal-dialog,
 .tarefa-modal-dialog {
-  background: var(--color-gray-2);
-  border-radius: 1.5rem;
-  box-shadow: 0 0 20px var(--color-shadow-1);
-  padding: 1.25rem 1.5rem 1.5rem;
+    background: var(--color-gray-2);
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px var(--color-shadow-1);
+    padding: 1.25rem 1.5rem 1.5rem;
 }
 
 .correcao-form input,
 .correcao-form textarea,
 .correcao-form select {
-  width: 100%;
-  background: var(--color-gray-1);
-  border: 2px solid var(--color-gray-4);
-  color: var(--color-gray-6);
-  border-radius: 0.75rem;
-  padding: 0.75rem 0.9rem;
-  outline: none;
+    width: 100%;
+    background: var(--color-gray-1);
+    border: 2px solid var(--color-gray-4);
+    color: var(--color-gray-6);
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    outline: none;
 }
 
 #correcaoNota {
@@ -2309,67 +2305,282 @@ body.professor-atividades-scroll {
 }
 
 .correcao-form textarea {
-  min-height: 140px;
-  resize: vertical;
+    min-height: 140px;
+    resize: vertical;
 }
 
 .correcao-form input:focus,
 .correcao-form textarea:focus,
 .correcao-form select:focus {
-  border-color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
 /* ===== Bordas por status ===== */
 .atividade-card {
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
 }
 
 .atividade-card.card-status--para-corrigir {
-  border-left-color: var(--color-primary);
-  border-right-color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    border-right-color: var(--color-primary);
 }
 
 .atividade-card.card-status--criada {
-  border-left-color: var(--color-gray-5);
-  border-right-color: var(--color-gray-5);
+    border-left-color: var(--color-gray-5);
+    border-right-color: var(--color-gray-5);
 }
 
 .atividade-card.card-status--corrigida {
-  border-left-color: #3EEB40;
-  border-right-color: #3EEB40;
+    border-left-color: #3EEB40;
+    border-right-color: #3EEB40;
 }
 
 /* ===== Caixas destacadas (padrão aluno) ===== */
 .tarefa-resposta-box,
 .tarefa-feedback-box {
-  background: var(--color-gray-5);
-  border-radius: 0.75rem;
-  padding: 0.5rem;
-  white-space: pre-wrap;
-  line-height: 1.4;
+    background: var(--color-gray-5);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    white-space: pre-wrap;
+    line-height: 1.4;
 }
 
 .tarefa-resposta-box strong,
 .tarefa-feedback-box strong {
-  color: var(--color-gray-6);
+    color: var(--color-gray-6);
 }
 
 .correcao-form input,
 .correcao-form textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--color-gray-6);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.correcao-modal-dialog {
+    max-width: min(92vw, 780px);
+    overflow-x: hidden;
+}
+
+.tarefa-modal-dialog {
+    max-width: min(92vw, 780px);
+    overflow-x: hidden;
+}
+
+.cal-actions,
+.cal-modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.cal-modal-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+#calNewEventBtn,
+#calDayNewEventBtn,
+#calDeleteCancelBtn,
+#calEventSubmitBtn {
+    background: var(--color-gray-6);
+    color: var(--color-gray-1);
+    border: 2px solid var(--color-gray-6);
+}
+
+#calNewEventBtn:hover,
+#calDayNewEventBtn:hover,
+#calDeleteCancelBtn:hover,
+#calEventSubmitBtn:hover {
+    background: transparent;
+    color: var(--color-gray-6);
+    border-color: var(--color-gray-6);
+}
+
+.cal-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cal-form-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cal-form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.cal-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.cal-input {
+    background: var(--color-gray-1);
+    border: 2px solid var(--color-gray-4);
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    color: var(--color-gray-6);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.cal-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.cal-input.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cal-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+    .cal-actions {
+        justify-content: stretch;
+    }
+
+    .cal-actions .boletim-btn {
+        width: 100%;
+    }
+
+    .cal-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .cal-form-actions {
+        justify-content: stretch;
+    }
+
+    .cal-form-actions .boletim-btn {
+        width: 100%;
+    }
+}
+
+.professor-frequencia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.professor-frequencia-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.professor-freq-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.professor-freq-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#frequenciaTable {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+}
+
+#frequenciaTable thead th {
+  padding: 1.2rem 1.5rem 1rem;
+}
+
+#frequenciaTable tbody td {
+  padding: 1.1rem 1.5rem;
+  /* border-top: 10px solid transparent; */
+  margin-top: 0;
+}
+
+#frequenciaTable tbody tr {
+    margin-top: 0;
+}
+
+#frequenciaTable tbody tr:nth-child(odd) td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+#frequenciaTable tbody tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+#frequenciaTable tbody tr td:first-child {
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+  text-align: left;
+}
+
+#frequenciaTable tbody tr td:last-child {
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+#frequenciaTable th:first-child,
+#frequenciaTable td:first-child {
+  text-align: left;
+  width: auto;
+}
+
+/* Frequência: ajustar largura das colunas */
+#frequenciaTable th:last-child,
+#frequenciaTable td:last-child {
+  width: 120px;              /* ajuste fino: 96/110/120 */
+  text-align: right;         /* empurra checkbox para a direita */
+  padding-right: 2.2rem;     /* mais “pra direita” visualmente */
+}
+
+#frequenciaTable td:last-child {
+    padding-right: 4.25rem;
+}
+
+.freq-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Notas (modal): inputs no padrão do site */
+.nota-modal-dialog .nota-form input[type="number"] {
+  width: fit-content;
+  background: var(--color-gray-1);
+  border: 2px solid var(--color-gray-4);
+  color: var(--color-gray-6);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  outline: none;
+
   font-family: inherit;
   font-size: inherit;
-  color: var(--color-gray-6);
   -webkit-appearance: none;
   appearance: none;
 }
 
-.correcao-modal-dialog {
-  max-width: min(92vw, 780px);
-  overflow-x: hidden;
-}
-
-.tarefa-modal-dialog {
-  max-width: min(92vw, 780px);
-  overflow-x: hidden;
+.nota-modal-dialog .nota-form input[type="number"]:focus {
+  border-color: var(--color-primary);
 }

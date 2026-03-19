@@ -226,6 +226,57 @@ const ProfessorService = (function () {
         return true;
     }
 
+    async function getAlunosDaOfertaFrequencia(ofertaId, page = 1, pageSize = 999) {
+        const qs = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+        return request(`/api/Oferta/${ofertaId}/alunos?${qs.toString()}`);
+    }
+
+    async function setTotalAulas(ofertaId, totalAulas) {
+        return requestWithBody(`/api/ofertas/${ofertaId}/frequencia/total-aulas`, "PUT", { totalAulas });
+    }
+
+    async function registrarFalta(ofertaId, alunoId, numeroAula) {
+        return requestWithBody(`/api/ofertas/${ofertaId}/frequencia/faltas`, "POST", { alunoId, numeroAula });
+    }
+
+    async function removerFalta(ofertaId, alunoId, numeroAula) {
+        let response;
+
+        try {
+            response = await fetch(`${API_BASE_URL}/api/ofertas/${ofertaId}/frequencia/faltas`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+                body: JSON.stringify({ alunoId, numeroAula }),
+            });
+        } catch {
+            throw new Error("Falha de conexão com a API.");
+        }
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            const msg =
+                (typeof data === "string" && data) ||
+                data?.message ||
+                data?.title ||
+                "Erro ao remover falta.";
+            throw new Error(msg);
+        }
+
+        return data;
+    }
+
+    async function getTotalAulas(ofertaId) {
+        return request(`/api/ofertas/${ofertaId}/frequencia/total-aulas`);
+    }
+
+    async function getGradeFaltas(ofertaId) {
+        return request(`/api/ofertas/${ofertaId}/frequencia/faltas`);
+    }
+
     return {
         getMediasDashboard,
         getProximosEventosMe,
@@ -246,5 +297,11 @@ const ProfessorService = (function () {
         criarEvento,
         atualizarEvento,
         excluirEvento,
+        getAlunosDaOfertaFrequencia,
+        setTotalAulas,
+        registrarFalta,
+        removerFalta,
+        getTotalAulas,
+        getGradeFaltas,
     };
 })();

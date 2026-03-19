@@ -102,3 +102,28 @@
     </form>
   </div>
 </div>
+
+<div class="cal-modal" id="calDeleteConfirmModal" aria-hidden="true">
+  <div class="cal-modal__dialog cal-delete-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="calDeleteTitle">
+    <div class="cal-modal-header">
+      <div class="cal-modal-header-text">
+        <h3 class="title3" id="calDeleteTitle">Excluir evento</h3>
+        <p class="text2">Essa ação não pode ser desfeita.</p>
+      </div>
+      <button class="cal-modal__close" id="calDeleteClose" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="tarefa-detail-block">
+      <p class="text2" id="calDeleteDesc"></p>
+
+      <div class="cal-form-actions">
+        <button type="button" class="boletim-btn text1" id="calDeleteCancelBtn">
+          Cancelar
+        </button>
+        <button type="button" class="boletim-btn text1" id="calDeleteConfirmBtn">
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
