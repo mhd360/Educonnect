@@ -1,0 +1,1680 @@
+/* ========= BASE ========= */
+
+html {
+  font-size: 80%;
+  scroll-behavior: smooth;
+  color: var(--color-gray-6);
+}
+
+.container {
+  height: fit-content;
+  width: fit-content;
+}
+
+.with-offset {
+  scroll-margin-top: 7.5rem;
+}
+
+/* ========= HEADER / NAV ========= */
+
+.header {
+  width: 100%;
+  height: 6rem;
+  background: linear-gradient(to left, var(--color-gray-2), var(--color-gray-3));
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 6rem;
+  padding: 0 1.25rem;
+  backdrop-filter: saturate(120%) blur(8px);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .30));
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.logo {
+  color: var(--color-gray-6);
+  padding: 1.5rem;
+}
+
+.logo span {
+  color: var(--color-primary);
+}
+
+.logo_img {
+  height: 5rem;
+  object-fit: contain;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.header-nav {
+  justify-self: center;
+}
+
+.header-nav ul {
+  display: flex;
+  gap: 1.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  color: var(--color-gray-6);
+  padding: .25rem 0;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .2s ease-out;
+  border-radius: 1px;
+}
+
+.nav-link:hover::after,
+.nav-link.is-active::after {
+  transform: scaleX(1);
+}
+
+.menu {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.theme-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 100%;
+  background-color: transparent;
+  margin: 0 2rem 0 0;
+}
+
+.logout {
+  width: fit-content;
+  color: var(--color-gray-6);
+  text-decoration: none;
+}
+
+.logout:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* responsivo nav */
+
+@media (max-width: 900px) {
+  .site-header {
+    grid-template-columns: 1fr auto 1fr;
+    padding: 0 .75rem;
+  }
+
+  .header-nav ul {
+    gap: 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .header-nav ul::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ========= LAYOUT PRINCIPAL ========= */
+
+.main-container {
+  display: flex;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 70vh;
+  width: min(92%, 1280px);
+  gap: 3rem;
+  padding-top: 2rem;
+}
+
+.welcome-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.welcome-first {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rem;
+}
+
+.info-aluno-container {
+  display: flex;
+  justify-content: space-between;
+  width: 85%;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.welcome-name,
+.welcome-text {
+  color: var(--color-gray-6);
+}
+
+.welcome-name span {
+  color: var(--color-primary);
+}
+
+.avg-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: var(--color-gray-2);
+  padding: 1rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+}
+
+.avg-text {
+  color: var(--color-gray-6);
+}
+
+.avg-number {
+  color: var(--color-primary);
+}
+
+/* ========= PRÓXIMOS EVENTOS ========= */
+
+.events-section {
+  display: flex;
+  flex-direction: column;
+  width: 85%;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 4rem;
+}
+
+.section-title {
+  color: var(--color-gray-6);
+  align-self: start;
+  margin: 1rem auto 0;
+}
+
+.events-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+}
+
+.next-event-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  background-color: var(--color-gray-2);
+  height: 12rem;
+  width: 12rem;
+  padding: 1rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+}
+
+.next-event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 auto;
+}
+
+.next-event-date,
+.next-event-time,
+.next-event-description {
+  text-align: center;
+}
+
+.next-event-date,
+.next-event-time {
+  color: var(--color-primary);
+}
+
+.next-event-description {
+  color: var(--color-gray-6);
+  line-height: 120%;
+}
+
+/* ========= FOOTER ========= */
+
+footer {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  margin: 5rem auto;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+footer p {
+  margin: 0 auto;
+}
+
+.faq-section {
+  display: flex;
+  color: var(--color-gray-6);
+  gap: 1rem;
+}
+
+.faq-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.faq-link:hover {
+  color: var(--color-gray-6);
+  text-decoration: underline;
+}
+
+.direitos {
+  color: var(--color-gray-5);
+}
+
+/* ========= AJUSTES DE LAYOUT DO DASHBOARD ========= */
+
+/* host da seção dinâmica */
+#alunoSectionHost {
+  width: 100%;
+}
+
+/* dashboard ocupa a largura disponível */
+#alunoSectionHost .welcome-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+/* bloco superior: boas-vindas + média */
+#alunoSectionHost .welcome-first {
+  width: 100%;
+  max-width: 1200px;
+  gap: 0;
+}
+
+#alunoSectionHost .info-aluno-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 6rem;
+}
+
+/* texto de boas-vindas */
+#alunoSectionHost .welcome-container {
+  flex: 1;
+  min-width: 0;
+}
+
+/* card da média */
+#alunoSectionHost .avg-container {
+  width: 220px;
+  min-width: 220px;
+  padding: 1.5rem 2rem;
+}
+
+/* seção de eventos */
+#alunoSectionHost .events-section {
+  width: 100%;
+  margin-top: 10rem;
+  align-items: stretch;
+}
+
+#alunoSectionHost .section-title {
+  margin: 4rem 0 2rem 0;
+  align-self: center;
+}
+
+/* cards de eventos em linha */
+#alunoSectionHost .events-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* tamanho dos cards */
+#alunoSectionHost .next-event-container {
+  width: 200px;
+  min-height: 200px;
+  height: auto;
+}
+
+/* responsivo */
+
+@media (max-width: 1300px) {
+  #alunoSectionHost .info-aluno-container {
+    padding: 0 2rem;
+  }
+
+  .welcome-section {
+    padding: 0 1rem;
+    max-width: 90%;
+  }
+
+  .events-section {
+    padding: 0 1rem;
+    margin: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .info-aluno-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #alunoSectionHost .avg-container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #alunoSectionHost .events-container {
+    justify-content: center;
+  }
+
+  #alunoSectionHost .next-event-container {
+    width: min(100%, 260px);
+  }
+}
+
+/* ===== MENU DE PERFIL ===== */
+
+.profile-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profile-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-gray-6);
+}
+
+.profile-btn:hover .profile-icon {
+  opacity: 0.8;
+}
+
+.profile-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% - 1px);
+  right: 0;
+  width: 280px;
+  background: var(--color-gray-2);
+  border: 1px solid var(--color-gray-3);
+  border-top: none;
+  border-radius: 0 0 0 12px;
+  box-shadow:
+    0 10px 18px -10px var(--color-shadow-1),
+    10px 0 18px -14px var(--color-shadow-1),
+    -10px 0 18px -14px var(--color-shadow-1);
+  padding: 1rem;
+  z-index: 200;
+}
+
+.profile-dropdown.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* usa layout vertical e ocupa largura total */
+.profile-info,
+.profile-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-info {
+  gap: 0.2rem;
+  margin-bottom: 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-gray-3);
+  align-items: center;
+}
+
+.profile-label {
+  margin-top: 0.35rem;
+  opacity: 0.7;
+  color: var(--color-gray-5);
+}
+
+.profile-value {
+  margin-bottom: 0.2rem;
+  word-break: break-word;
+  color: var(--color-gray-6);
+}
+
+/* botões agora realmente ficam DENTRO do dropdown */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  align-items: center;
+}
+
+.profile-action-btn {
+  width: 100%;
+  display: block;
+  border: 1px solid var(--color-gray-3);
+  background: transparent;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  /* text-align: left; */
+  cursor: pointer;
+  color: var(--color-gray-6);
+}
+
+.profile-action-btn:hover {
+  background-color: var(--color-gray-6);
+  color: var(--color-primary);
+}
+
+.profile-action-btn.danger {
+  color: var(--color-primary);
+}
+
+.profile-action-btn.danger:hover {
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+}
+
+/* MODAL ALTERAR SENHA */
+
+.password-modal {
+  display: none;
+}
+
+.password-modal.is-open {
+  display: block;
+}
+
+.password-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 300;
+}
+
+.password-modal__dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92%, 420px);
+  background-color: var(--color-gray-5);
+  border-radius: 24px;
+  padding: 2rem;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-shadow: 0 0 20px var(--color-shadow-2);
+  overflow: hidden;
+}
+
+.password-modal__dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-gray-3);
+  z-index: 0;
+}
+
+.password-modal__dialog > * {
+  position: relative;
+  z-index: 1;
+}
+
+.password-modal__close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.password-modal__close:hover {
+  color: var(--color-gray-6);
+}
+
+.password-modal__text {
+  color: var(--color-gray-6);
+  margin: 1rem auto 1.5rem;
+  text-align: center;
+  line-height: 1.25rem;
+  max-width: 320px;
+}
+
+.password-modal__error {
+  color: var(--color-primary);
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.password-modal__dialog .form-title {
+  margin: 0 0 1rem;
+  color: var(--color-gray-6);
+  text-align: center;
+}
+
+.password-modal__dialog .form-container {
+  height: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.password-modal__dialog input {
+  margin-top: 1rem;
+  background-color: var(--color-gray-4);
+  padding: 0.8rem 1.2rem;
+  border-radius: 50px;
+  border: 1px solid transparent;
+  font-family: "Montserrat", sans-serif;
+  color: var(--color-gray-6);
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.password-modal__dialog input:focus {
+  outline: none;
+  box-shadow: 0 0 15px var(--color-shadow-2);
+  background-color: var(--color-primary-dark);
+  color: black;
+}
+
+.password-modal__dialog input:focus::placeholder {
+  color: black;
+}
+
+.password-modal__dialog .login-btn {
+  display: block;
+  box-sizing: border-box;
+  margin: 2.5rem 0 0;
+  text-align: center;
+  padding: 1rem 1.2rem;
+  width: 100%;
+  border-radius: 50px;
+  border: 1px solid transparent;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+}
+
+.password-modal__dialog .login-btn:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-gray-6);
+}
+
+/* VER SENHA  */
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.password-input-wrapper input {
+  margin-top: 0;
+  padding-right: 3.2rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--color-gray-6);
+  opacity: 0.85;
+}
+
+.password-toggle-btn:hover .password-toggle-icon {
+  opacity: 1;
+}
+
+.password-toggle-btn .eye-closed {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-open {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-closed {
+  display: block;
+}
+
+/* ===== NOTAS ===== */
+
+#alunoSectionHost .notas-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .notas-section .section-title {
+  margin: 0;
+  align-self: center;
+  text-align: center;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .notas-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+#alunoSectionHost .chart-side {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* reaproveita visual de card já usado em média/eventos */
+#alunoSectionHost .info-container,
+#alunoSectionHost .chart-container {
+  width: 100%;
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  padding: 1.5rem 2rem;
+}
+
+/* ===== TABELA ===== */
+
+#alunoSectionHost .info-container {
+  width: 90%;
+  overflow-x: auto;
+  margin-top: 0;
+  max-width: none;
+  align-self: center;
+}
+
+#alunoSectionHost #gradesTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+#alunoSectionHost #gradesTable th,
+#alunoSectionHost #gradesTable td {
+  padding: 0.85rem 1rem;
+  border-right: 2px solid var(--color-gray-4);
+  border-bottom: 2px solid var(--color-gray-4);
+  color: var(--color-gray-6);
+  white-space: nowrap;
+}
+
+#alunoSectionHost #gradesTable th:last-child,
+#alunoSectionHost #gradesTable td:last-child {
+  border-right: none;
+}
+
+#alunoSectionHost #gradesTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#alunoSectionHost #gradesTable th {
+  color: var(--color-primary);
+}
+
+/* destaque sutil para coluna final */
+#alunoSectionHost #gradesTable td:last-child {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ===== FILTRO + GRÁFICO ===== */
+
+#alunoSectionHost .chart-header {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+#alunoSectionHost .chart-label {
+  color: var(--color-gray-6);
+  margin: 0;
+}
+
+#alunoSectionHost #subjectSelect {
+  min-width: 180px;
+  height: 3rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#alunoSectionHost #subjectSelect:hover {
+  outline: none;
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .chart-wrapper {
+  width: 100%;
+  height: 300px;
+  position: relative;
+}
+
+#alunoSectionHost #gradesChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#alunoSectionHost .chart-container {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: center;
+}
+
+#alunoSectionHost #subjectSelect option {
+  background-color: var(--color-gray-2);
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .chart-header,
+#alunoSectionHost .chart-header * {
+  color: var(--color-gray-6);
+}
+
+.boletim-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.boletim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1.4rem;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.boletim-btn:hover {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+  transition: 0.3s ease;
+}
+
+.boletim-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.boletim-btn-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* ===== RESPONSIVO ===== */
+
+@media (max-width: 1300px) {
+  #alunoSectionHost .notas-section {
+    padding: 0 2rem;
+  }
+
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .notas-section {
+    padding: 0 1rem;
+  }
+
+  #alunoSectionHost .info-container,
+  #alunoSectionHost .chart-container {
+    padding: 1.25rem 1rem;
+  }
+
+  #alunoSectionHost .chart-wrapper {
+    height: 260px;
+  }
+
+  #alunoSectionHost #subjectSelect {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* ATIVIDADES */
+
+.atividades-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.disciplinas-area,
+.tarefas-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.disciplinas-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 3rem;
+}
+
+#alunoSectionHost .disciplina-card {
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  border: none;
+  padding: 1.25rem;
+  color: var(--color-gray-6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#alunoSectionHost .disciplina-card:hover {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .disciplina-card .title3 {
+  margin: 0;
+  color: var(--color-primary);
+}
+
+#alunoSectionHost .disciplina-card .text2 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .disciplina-card-year-semester {
+  color: var(--color-gray-6);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+#alunoSectionHost .disciplina-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#alunoSectionHost .disciplina-card-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#alunoSectionHost .atividades-section .section-title,
+#alunoSectionHost .disciplinas-area > .title3,
+#alunoSectionHost .tarefas-header > .title3,
+#alunoSectionHost #tarefasTitulo {
+  color: var(--color-gray-6);
+  align-self: center;
+  margin: 2rem 0 1rem;
+}
+
+#alunoSectionHost .tarefas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-left: 2rem;
+}
+
+#alunoSectionHost .tarefas-status-filter {
+  min-width: 180px;
+  height: 2.8rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 2rem;
+}
+
+#alunoSectionHost .tarefas-status-filter:hover {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefas-status-filter:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#alunoSectionHost .tarefas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .tarefa-card {
+  background-color: var(--color-gray-2);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  padding: 0;
+  color: var(--color-gray-6);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+#alunoSectionHost .tarefa-card:hover {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-pendente {
+  border-left-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-respondida {
+  border-left-color: var(--color-gray-5);
+  border-right-color: var(--color-gray-5);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-corrigida {
+  border-left-color: #3EEB40;
+  border-right-color: #3EEB40;
+}
+
+#alunoSectionHost .tarefa-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.3rem 1.5rem;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  display: block;
+  transition: background-color 0.18s ease;
+}
+
+#alunoSectionHost .tarefa-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-head .title3,
+#alunoSectionHost .tarefa-card h4 {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .tarefa-head-right {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .tarefa-status {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#alunoSectionHost .tarefa-card.tarefa-pendente .tarefa-status {
+  color: var(--color-primary);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-respondida .tarefa-status {
+  color: var(--color-gray-5);
+}
+
+#alunoSectionHost .tarefa-card.tarefa-corrigida .tarefa-status {
+  color: #3EEB40;
+}
+
+#alunoSectionHost .tarefa-chevron {
+  width: 0.8rem;
+  height: 0.8rem;
+  display: inline-block;
+  border-right: 2px solid var(--color-gray-6);
+  border-bottom: 2px solid var(--color-gray-6);
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+  margin-top: -0.15rem;
+}
+
+#alunoSectionHost .tarefa-card.is-open .tarefa-chevron {
+  transform: rotate(225deg);
+}
+
+#alunoSectionHost .tarefa-body {
+  display: none;
+  padding: 0 1.5rem 1.5rem;
+}
+
+#alunoSectionHost .tarefa-card.is-open .tarefa-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-card > .text2,
+#alunoSectionHost .tarefa-card p,
+#alunoSectionHost .tarefa-body p {
+  margin: 0;
+  color: var(--color-gray-6);
+  line-height: 1.45;
+}
+
+#alunoSectionHost .tarefa-card strong {
+  color: var(--color-gray-6);
+  font-weight: 700;
+}
+
+#alunoSectionHost .tarefa-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+#alunoSectionHost .tarefa-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-nota-box {
+  min-width: 120px;
+  max-width: 140px;
+  background-color: var(--color-gray-1);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .tarefa-nota-label {
+  color: var(--color-gray-6);
+  margin: 0;
+  line-height: 1.2;
+}
+
+#alunoSectionHost .tarefa-nota-value {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#alunoSectionHost .tarefa-resposta-box,
+#alunoSectionHost .tarefa-feedback-box {
+  background-color: var(--color-gray-1);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  color: var(--color-gray-6);
+  line-height: 1.45;
+}
+
+#alunoSectionHost .tarefa-resposta-box strong,
+#alunoSectionHost .tarefa-feedback-box strong {
+  color: var(--color-gray-6);
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+#alunoSectionHost .tarefa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#alunoSectionHost .tarefa-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  box-sizing: border-box;
+  border-radius: 1rem;
+  padding: 1rem;
+  background-color: var(--color-gray-1);
+  color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  line-height: 1.45;
+  outline: none;
+  display: block;
+}
+
+#alunoSectionHost .tarefa-textarea::placeholder {
+  color: var(--color-gray-5);
+  font-family: "Montserrat", sans-serif;
+}
+
+#alunoSectionHost .tarefa-textarea:focus {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-enviar-btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  background-color: var(--color-primary);
+  color: var(--color-gray-6);
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#alunoSectionHost .tarefa-enviar-btn:hover {
+  box-shadow: 0 0 15px var(--color-shadow-2);
+}
+
+#alunoSectionHost .tarefa-enviar-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+body.aluno-atividades-scroll {
+  overflow-y: scroll;
+}
+
+@media (max-width: 900px) {
+  #alunoSectionHost .tarefa-head,
+  #alunoSectionHost .tarefa-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #alunoSectionHost .tarefa-nota-box {
+    max-width: none;
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* ========= CALENDÁRIO ========= */
+
+#alunoSectionHost .calendar-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#alunoSectionHost .calendar-header {
+  width: min(100%, 820px);
+  max-width: 50%;
+  margin: 2rem auto 0;
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  background: var(--color-gray-2);
+  padding: 0.9rem 1.2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .calendar-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+#alunoSectionHost .calendar-title h2,
+#alunoSectionHost .calendar-title h3,
+#alunoSectionHost #calMonth {
+  margin: 0;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost #calYear {
+  color: var(--color-gray-6);
+  opacity: 0.95;
+}
+
+#alunoSectionHost .cal-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  color: var(--color-gray-6);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+#alunoSectionHost .calendar-grid {
+  margin: 0 auto;
+  width: 100%;
+  background: var(--color-gray-2);
+  border-radius: 1.75rem;
+  box-shadow: 0 0 20px var(--color-shadow-1);
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+#alunoSectionHost .cal-weekday {
+  display: grid;
+  place-items: center;
+  color: var(--color-gray-6);
+  font-weight: 700;
+  padding: 0.6rem 0;
+}
+
+#alunoSectionHost .cal-days {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+
+#alunoSectionHost .cal-day.cal-day--today {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 18px var(--color-shadow-2);
+}
+
+#alunoSectionHost .cal-day {
+  min-height: 102px;
+  background: var(--color-gray-3);
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1rem;
+  padding: 0.75rem 0.65rem;
+  color: var(--color-gray-6);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-day:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 18px var(--color-shadow-2);
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+#alunoSectionHost .cal-day--outside {
+  opacity: 0.45;
+}
+
+#alunoSectionHost .cal-day__num {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-day__marker {
+  min-width: 0;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#alunoSectionHost .cal-day__markers {
+  margin-top: auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5em 0.5rem;
+  align-items: end;
+}
+
+#alunoSectionHost .cal-day__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+#alunoSectionHost .cal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+#alunoSectionHost .cal-time {
+  color: var(--color-primary);
+  font-weight: 500;
+  font-size: small;
+}
+
+/* ========= MODAL ========= */
+
+#alunoSectionHost .cal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+}
+
+#alunoSectionHost .cal-modal.is-open,
+#alunoSectionHost .cal-modal[aria-hidden="false"] {
+  display: block;
+}
+
+#alunoSectionHost .cal-modal__dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 720px);
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--color-gray-2);
+  color: var(--color-gray-6);
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 0 30px var(--color-shadow-1);
+}
+
+#alunoSectionHost .cal-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+#alunoSectionHost .cal-modal-header-text h3,
+#alunoSectionHost .cal-modal-header-text p {
+  margin: 0;
+}
+
+#alunoSectionHost .cal-modal-header-text h3 {
+  /* título "Eventos do dia" menor e mais discreto */
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0.9;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-modal-header-text p {
+  /* data maior e mais destacada */
+  font-size: 1.35rem;
+  font-weight: 800;
+  opacity: 1;
+  color: var(--color-gray-6);
+  margin-top: 0.15rem;
+}
+
+#alunoSectionHost .cal-modal__close {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-6);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+#alunoSectionHost .cal-modal__close:hover {
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+#alunoSectionHost .cal-events {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+#alunoSectionHost .cal-event {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--color-gray-4);
+  border-radius: 1.2rem;
+  padding: 1.15rem 1.25rem;
+  background: var(--color-gray-3);
+}
+
+#alunoSectionHost .cal-event__main,
+#alunoSectionHost .cal-event__side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+#alunoSectionHost .cal-event__title {
+  color: var(--color-primary);
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0;
+}
+
+#alunoSectionHost .cal-event__meta {
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-event__side {
+  align-items: flex-end;
+  text-align: right;
+  color: var(--color-gray-6);
+}
+
+#alunoSectionHost .cal-event__time {
+  font-weight: 600;
+  font-size: large;
+  white-space: nowrap;
+}
+
+/* ========= RESPONSIVO ========= */
+
+@media (max-width: 900px) {
+  #alunoSectionHost .calendar-grid {
+    padding: 0.85rem;
+    gap: 0.35rem;
+  }
+
+  #alunoSectionHost .cal-days {
+    gap: 0.35rem;
+  }
+
+  #alunoSectionHost .cal-day {
+    min-height: 82px;
+    padding: 0.55rem 0.45rem;
+  }
+
+  #alunoSectionHost .cal-day__num {
+    font-size: 0.95rem;
+  }
+
+  #alunoSectionHost .cal-day__marker {
+    font-size: 0.72rem;
+  }
+
+  #alunoSectionHost .calendar-header {
+    width: 100%;
+  }
+
+  #alunoSectionHost .cal-event {
+    flex-direction: column;
+  }
+
+  #alunoSectionHost .cal-event__side {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  #alunoSectionHost .cal-weekday {
+    font-size: 0.85rem;
+    padding: 0.35rem 0;
+  }
+
+  #alunoSectionHost .cal-day {
+    min-height: 72px;
+  }
+
+  #alunoSectionHost .cal-day__marker {
+    display: none;
+  }
+}

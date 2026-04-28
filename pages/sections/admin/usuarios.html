@@ -1,0 +1,119 @@
+<section class="container notas-section with-offset">
+    <div class="notas-content">
+        <!-- <div class="tarefas-header admin-users-header">
+            <h3 class="title3">Usuários</h3> -->
+
+        <div class="notas-toolbar admin-users-toolbar">
+            <input id="adminUsersSearch"
+                class="text2 tarefas-status-filter admin-filter admin-filter--search notas-search"
+                placeholder="BUSCAR" />
+
+            <select id="adminUsersStatus" class="text2 tarefas-status-filter admin-filter admin-filter--select">
+                <option value="todos">Todos</option>
+                <option value="ativos">Ativos</option>
+                <option value="inativos">Inativos</option>
+            </select>
+
+            <select id="adminUsersPerfil" class="text2 tarefas-status-filter admin-filter admin-filter--select">
+                <option value="todos">Todos</option>
+                <option value="ALUNO">Alunos</option>
+                <option value="PROFESSOR">Professores</option>
+            </select>
+
+            <button type="button" id="adminUsersNewBtn" class="boletim-btn text1">
+                Novo Usuário
+            </button>
+        </div>
+    </div>
+
+    <section class="container info-container">
+        <table id="adminUsersTable">
+            <thead>
+                <tr class="table-header">
+                    <th class="title3 table-title">Nome</th>
+                    <th class="title3 table-title">Matrícula</th>
+                    <th class="title3 table-title">Email</th>
+                    <th class="title3 table-title">Perfil</th>
+                    <th class="title3 table-title">Status</th>
+                    <th class="title3 table-title">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody id="adminUsersTbody">
+                <tr>
+                    <td colspan="6" class="text2">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    </div>
+</section>
+
+<!-- Modal: Novo / Editar usuário -->
+<div class="cal-modal" id="adminUserModal" aria-hidden="true">
+    <div class="cal-modal__dialog admin-user-modal__dialog" role="dialog" aria-modal="true"
+        aria-labelledby="adminUserModalTitle">
+        <div class="cal-modal-header">
+            <div class="cal-modal-header-text">
+                <h3 class="title3" id="adminUserModalTitle">Novo usuário</h3>
+                <p class="text2" id="adminUserModalSubtitle"></p>
+            </div>
+            <button class="cal-modal__close" id="adminUserModalClose" aria-label="Fechar" type="button">✕</button>
+        </div>
+
+        <form id="adminUserForm" class="admin-user-form">
+            <label class="text2 admin-form-label">
+                <strong>Nome</strong>
+                <input id="adminUserNome" class="text2 cal-input" />
+            </label>
+
+            <label class="text2 admin-form-label" id="adminUserCpfWrap">
+                <strong>CPF</strong>
+                <input id="adminUserCpf" class="text2 cal-input" />
+            </label>
+
+            <label class="text2 admin-form-label">
+                <strong>E-mail</strong>
+                <input id="adminUserEmail" class="text2 cal-input" />
+            </label>
+
+            <label class="text2 admin-form-label" id="adminUserPerfilWrap">
+                <strong>Perfil</strong>
+                <select id="adminUserPerfilSelect" class="text2 cal-input">
+                    <option value="ALUNO">ALUNO</option>
+                    <option value="PROFESSOR">PROFESSOR</option>
+                </select>
+            </label>
+
+            <p class="text2" id="adminUserError" style="display:none;"></p>
+
+            <div class="boletim-actions">
+                <button type="submit" id="adminUserSubmitBtn" class="boletim-btn text1">
+                    Cadastrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="cal-modal" id="adminConfirmModal" aria-hidden="true">
+    <div class="cal-modal__dialog admin-confirm-modal__dialog" role="dialog" aria-modal="true"
+        aria-labelledby="adminConfirmTitle">
+        <div class="cal-modal-header">
+            <div class="cal-modal-header-text">
+                <h3 class="title3" id="adminConfirmTitle">Confirmar</h3>
+                <p class="text2" id="adminConfirmSubtitle"></p>
+            </div>
+            <button class="cal-modal__close" id="adminConfirmClose" aria-label="Fechar" type="button">✕</button>
+        </div>
+
+        <div class="tarefa-detail-block">
+            <div class="text2" id="adminConfirmBody"></div>
+
+            <div class="cal-form-actions">
+                <button type="button" class="boletim-btn text1" id="adminConfirmCancelBtn">Cancelar</button>
+                <button type="button" class="boletim-btn text1" id="adminConfirmOkBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>

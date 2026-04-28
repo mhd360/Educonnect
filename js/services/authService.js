@@ -27,7 +27,7 @@ const AuthService = (function () {
     } catch (error) {
       // Erro de rede/CORS/URL/API offline
       throw new Error(
-        "Não foi possível conectar à API. Verifique se a API está rodando, a URL/porta está correta e se o CORS foi liberado."
+        "Não foi possível conectar à API."
       );
     }
 

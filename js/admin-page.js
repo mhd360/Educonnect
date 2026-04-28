@@ -1,657 +1,743 @@
-(function () {
-  const STORAGE_KEY = 'educonnect-registrations';
+const ADMIN_HOST_ID = "adminSectionHost";
 
-  // ===== MODO DEV: senhas fixas por tipo de usuário =====
-  const USE_DEV_DEFAULT_PASSWORDS = true; // depois é só mudar para false
-  const DEV_DEFAULT_PASSWORDS = {
-    professor: 'Profe123',
-    aluno: 'Aluno123'
-  };
+const adminUsersState = {
+    all: [],
+    search: "",
+    status: "ativos",   // todos | ativos | inativos
+    perfil: "todos",   // todos | ALUNO | PROFESSOR
+    editing: null,     // user obj | null
+};
 
-  function resolvePasswordFor(role, cpfDigits) {
-    if (USE_DEV_DEFAULT_PASSWORDS) {
-      return DEV_DEFAULT_PASSWORDS[role] || '1234';
+document.addEventListener("DOMContentLoaded", async () => {
+    const user = getCurrentUser();
+    if (!user || String(user.perfil || "").toUpperCase() !== "ADMIN") {
+        window.location.href = "./index.html";
+        return;
     }
-    // lógica “oficial” (padrão futuro)
-    return cpfDigits ? cpfDigits.slice(-4) : '1234';
-  }
+    await initProfileMenu(user);
+    initPasswordModal();
 
-  function getRegistrations() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
+    bindHeaderNavigation();
+    await navigateToSection("usuarios");
+});
 
-  function saveRegistrations(list) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
+function getSectionHost() {
+    return document.getElementById(ADMIN_HOST_ID);
+}
 
-  function formatDateISOToBR(iso) {
-    if (!iso) return '—';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-      const [y, m, d] = iso.split('-');
-      return `${d}/${m}/${y}`;
-    }
-    return iso;
-  }
-
-  function formatCpfDigits(cpfDigits) {
-    const d = String(cpfDigits || '').replace(/\D/g, '');
-    if (d.length !== 11) return d || '—';
-    return (
-      d.slice(0, 3) + '.' +
-      d.slice(3, 6) + '.' +
-      d.slice(6, 9) + '-' +
-      d.slice(9)
-    );
-  }
-
-  function formatPhoneDigits(phoneDigits) {
-    const d = String(phoneDigits || '').replace(/\D/g, '');
-    if (!d) return '—';
-    if (d.length <= 2) return `(${d}`;
-    if (d.length <= 7) return `(${d.slice(0, 2)})${d.slice(2)}`;
-    return `(${d.slice(0, 2)})${d.slice(2, 7)}-${d.slice(7)}`;
-  }
-
-  function getStatusCode(reg) {
-    const raw = (reg && reg.status) || 'pending';
-    if (raw === 'inactive') return 'inactive';
-    if (raw === 'active' || raw === 'approved') return 'active';
-    return 'pending';
-  }
-
-  function getStatusMeta(reg) {
-    const code = getStatusCode(reg);
-    if (code === 'active') {
-      return {
-        code,
-        label: 'Ativo',
-        badgeClass: 'admin-badge admin-badge--approved'
-      };
-    }
-    if (code === 'inactive') {
-      return {
-        code,
-        label: 'Inativo',
-        badgeClass: 'admin-badge admin-badge--inactive'
-      };
-    }
-    return {
-      code: 'pending',
-      label: 'Pendente',
-      badgeClass: 'admin-badge admin-badge--pending'
-    };
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // ===== ECData / banco em memória =====
-    let ecData = null;
-    let allTeachers = [];
-    let allStudents = [];
-
-    // ===== DOM =====
-    const totalStudentsEl = document.getElementById('adminTotalStudents');
-    const totalTeachersEl = document.getElementById('adminTotalTeachers');
-    const totalPendingEl = document.getElementById('adminTotalPending');
-
-    const reqTableBody = document.querySelector('#adminRequestsTable tbody');
-    const reqEmptyEl = document.getElementById('adminRequestsEmpty');
-
-    const regSearchInput = document.getElementById('adminRegSearch');
-    const regPendOnlyCheck = document.getElementById('adminRegPendOnly');
-
-    // modal de detalhes
-    const modal = document.getElementById('adminRequestModal');
-    const modalClose = document.getElementById('adminModalClose');
-    const modalCancel = document.getElementById('adminModalCancel');
-    const modalGenerate = document.getElementById('adminGenerateMatBtn');
-    const modalDeactivate = document.getElementById('adminDeactivateBtn');
-    const modalReactivate = document.getElementById('adminReactivateBtn');
-    const modalRemove = document.getElementById('adminRemoveBtn');
-
-    const modalTipo = document.getElementById('modalTipo');
-    const modalNome = document.getElementById('modalNome');
-    const modalNascimento = document.getElementById('modalNascimento');
-    const modalCpf = document.getElementById('modalCpf');
-    const modalEmail = document.getElementById('modalEmail');
-    const modalTelefone = document.getElementById('modalTelefone');
-    const modalStatus = document.getElementById('modalStatus');
-    const modalMatricula = document.getElementById('modalMatricula');
-
-    // modal de confirmação genérico
-    const confirmModal = document.getElementById('adminConfirmModal');
-    const confirmCloseBtn = document.getElementById('adminConfirmClose');
-    const confirmCancelBtn = document.getElementById('adminConfirmCancel');
-    const confirmConfirmBtn = document.getElementById('adminConfirmConfirm');
-    const confirmMessage = document.getElementById('adminConfirmMessage');
-
-    let registrations = getRegistrations();
-    let selectedRegistrationId = null;
-    let confirmAction = null;   // 'generate' | 'deactivate' | 'reactivate' | 'remove'
-    let confirmTargetId = null;
-
-    // ===== Carregar ECData =====
-    (function loadEcData() {
-      if (window.ECData && typeof window.ECData.getAll === 'function') {
-        const full = window.ECData.getAll();
-        if (full) {
-          ecData = full;
-
-          const userList = Array.isArray(full.users)
-            ? full.users
-            : Object.values(full.users || {});
-
-          allTeachers = userList.filter((u) => u && u.role === 'professor');
-          allStudents = userList.filter((u) => u && u.role === 'aluno');
-        }
-      }
-    })();
-
-
-    function persistEcData() {
-      if (window.ECData && typeof window.ECData.save === 'function') {
-        window.ECData.save();
-      }
-    }
-
-    // ===== Matrículas: A1001+ (aluno), P2001+ (professor) =====
-    function generateMatricula(tipoCadastro) {
-      if (!ecData) return null;
-
-      const isProf = tipoCadastro === 'professor';
-      const prefix = isProf ? 'P' : 'A';
-      const base = isProf ? 2001 : 1001;
-
-      const users = Array.isArray(ecData.users)
-        ? ecData.users
-        : Object.values(ecData.users || {});
-
-      let maxNum = 0;
-
-      users.forEach((u) => {
-        if (!u || typeof u.matricula !== 'string') return;
-        if (isProf && u.role !== 'professor') return;
-        if (!isProf && u.role !== 'aluno') return;
-        if (!u.matricula.startsWith(prefix)) return;
-
-        const num = parseInt(u.matricula.slice(1), 10);
-        if (Number.isFinite(num) && num > maxNum) {
-          maxNum = num;
-        }
-      });
-
-      const next = Math.max(base, maxNum + 1);
-      return `${prefix}${next}`;
-    }
-
-    function refreshSummary() {
-      if (totalStudentsEl) totalStudentsEl.textContent = allStudents.length.toString();
-      if (totalTeachersEl) totalTeachersEl.textContent = allTeachers.length.toString();
-
-      const pendingCount = registrations.filter((r) => getStatusCode(r) === 'pending').length;
-      if (totalPendingEl) totalPendingEl.textContent = pendingCount.toString();
-    }
-
-    // ===== Renderização da tabela de registros =====
-    function getFilteredRegistrations() {
-  const rawTerm = (regSearchInput && regSearchInput.value || '')
-    .trim()
-    .toLowerCase();
-
-  const term = rawTerm;
-  const termDigits = rawTerm.replace(/\D/g, '');
-  const onlyPending = regPendOnlyCheck && regPendOnlyCheck.checked;
-
-  return registrations
-    .filter((reg) => {
-      const code = getStatusCode(reg);
-      if (onlyPending && code !== 'pending') return false;
-      return true;
-    })
-    .filter((reg) => {
-      if (!term) return true;
-
-      const nome = [reg.firstName, reg.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const mat = String(reg.matricula || '').toLowerCase();
-      const cpfDigits = String(reg.cpf || '').replace(/\D/g, '');
-      const cpfFmt = formatCpfDigits(reg.cpf).toLowerCase();
-
-      return (
-        (nome && nome.includes(term)) ||
-        (mat && mat.includes(term)) ||
-        (termDigits && cpfDigits && cpfDigits.includes(termDigits)) ||
-        (cpfFmt && cpfFmt.includes(term))
-      );
-    })
-    .sort((a, b) => {
-      const aDate = a.createdAt || 0;
-      const bDate = b.createdAt || 0;
-      return aDate > bDate ? -1 : 1;
+function bindHeaderNavigation() {
+    const navLinks = document.querySelectorAll(".header-nav .nav-link");
+    navLinks.forEach((link) => {
+        link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const sectionName = link.dataset.section;
+            await navigateToSection(sectionName);
+        });
     });
 }
 
+async function navigateToSection(sectionName) {
+    setActiveNav(sectionName);
 
-    function renderRequests() {
-      if (!reqTableBody) return;
+    const map = {
+        usuarios: () => renderUsuarios(),
+        // futuras: disciplinas, eventos, ofertas...
+    };
 
-      const list = getFilteredRegistrations();
-      reqTableBody.innerHTML = '';
+    const fn = map[sectionName];
+    if (!fn) return;
 
-      if (!list.length) {
-        if (reqEmptyEl) {
-          reqEmptyEl.textContent = 'Nenhum registro encontrado.';
-          reqEmptyEl.style.display = 'block';
-        }
+    await fn();
+}
+
+function setActiveNav(sectionName) {
+    const navLinks = document.querySelectorAll(".header-nav .nav-link");
+    navLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.dataset.section === sectionName);
+    });
+}
+
+async function loadSectionHtml(host, path) {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`Não foi possível carregar: ${path}`);
+    host.innerHTML = await res.text();
+}
+
+async function initProfileMenu(user) {
+    const profileBtn = document.getElementById("profileBtn");
+    const profileDropdown = document.getElementById("profileDropdown");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const changePasswordBtn = document.getElementById("changePasswordBtn");
+
+    const profileNome = document.getElementById("profileNome");
+    const profileMatricula = document.getElementById("profileMatricula");
+
+    if (!profileBtn || !profileDropdown || !logoutBtn || !changePasswordBtn || !profileNome || !profileMatricula) {
         return;
-      }
-      if (reqEmptyEl) reqEmptyEl.style.display = 'none';
+    }
 
-      list.forEach((reg) => {
-        const tr = document.createElement('tr');
-        const created = reg.createdAt ? new Date(reg.createdAt) : null;
-        const createdStr = created
-          ? created.toLocaleDateString('pt-BR')
-          : '—';
+    profileNome.textContent = user?.nome || "-";
+    profileMatricula.textContent = user?.matricula || "-";
 
-        const tipoStr = reg.tipoCadastro === 'professor'
-          ? 'Professor'
-          : 'Aluno';
+    profileBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
 
-        const nomeStr = [reg.firstName, reg.lastName]
-          .filter(Boolean)
-          .join(' ') || '—';
+        const isOpen = profileDropdown.classList.contains("is-open");
+        profileDropdown.classList.toggle("is-open", !isOpen);
+        profileBtn.setAttribute("aria-expanded", String(!isOpen));
+    });
 
-        const statusMeta = getStatusMeta(reg);
-        const statusBadge = `<span class="${statusMeta.badgeClass}">${statusMeta.label}</span>`;
+    profileDropdown.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    document.addEventListener("click", function () {
+        profileDropdown.classList.remove("is-open");
+        profileBtn.setAttribute("aria-expanded", "false");
+    });
+
+    changePasswordBtn.addEventListener("click", function () {
+        openPasswordModal();
+        profileDropdown.classList.remove("is-open");
+        profileBtn.setAttribute("aria-expanded", "false");
+    });
+
+    logoutBtn.addEventListener("click", function () {
+        localStorage.removeItem("ec_token");
+        localStorage.removeItem("ec_usuario");
+        localStorage.removeItem("educonnect_current_user");
+        window.location.href = "./index.html";
+    });
+}
+
+function initPasswordModal() {
+    const modal = document.getElementById("passwordModal");
+    const overlay = document.getElementById("passwordModalOverlay");
+    const closeBtn = document.getElementById("passwordModalClose");
+    const form = document.getElementById("changePasswordForm");
+    const submitBtn = document.getElementById("changePasswordSubmitBtn");
+    const novaSenhaInput = document.getElementById("novaSenha");
+    const confirmacaoInput = document.getElementById("confirmacaoSenha");
+    const errorNode = document.getElementById("changePasswordError");
+
+    if (!modal || !overlay || !closeBtn || !form || !submitBtn || !novaSenhaInput || !confirmacaoInput || !errorNode) {
+        return;
+    }
+
+    initPasswordToggles();
+
+    overlay.addEventListener("click", closePasswordModal);
+    closeBtn.addEventListener("click", closePasswordModal);
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.classList.contains("is-open")) {
+            closePasswordModal();
+        }
+    });
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        errorNode.style.display = "none";
+        errorNode.textContent = "";
+
+        const novaSenha = (novaSenhaInput.value || "").trim();
+        const confirmacao = (confirmacaoInput.value || "").trim();
+
+        const validationError = validatePasswordForm(novaSenha, confirmacao);
+        if (validationError) {
+            errorNode.textContent = validationError;
+            errorNode.style.display = "block";
+            return;
+        }
+
+        setButtonLoading(submitBtn, true, "Salvando...", "Salvar");
+
+        try {
+            // mesmo endpoint usado no professor
+            await AdminService.alterarSenha(novaSenha, confirmacao);
+
+            closePasswordModal();
+            form.reset();
+
+            if (typeof Toastify === "function") {
+                Toastify({
+                    text: "Senha alterada com sucesso.",
+                    duration: 3500,
+                    gravity: "top",
+                    position: "right",
+                    close: true,
+                    stopOnFocus: true,
+                    style: { background: "#2e7d32" },
+                }).showToast();
+            }
+        } catch (error) {
+            errorNode.textContent = error.message || "Erro ao alterar senha.";
+            errorNode.style.display = "block";
+        } finally {
+            setButtonLoading(submitBtn, false, null, "Salvar");
+        }
+    });
+}
+
+function openPasswordModal() {
+    const modal = document.getElementById("passwordModal");
+    const errorNode = document.getElementById("changePasswordError");
+
+    if (!modal) return;
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+
+    if (errorNode) {
+        errorNode.style.display = "none";
+        errorNode.textContent = "";
+    }
+}
+
+function closePasswordModal() {
+    const modal = document.getElementById("passwordModal");
+    const form = document.getElementById("changePasswordForm");
+    const errorNode = document.getElementById("changePasswordError");
+
+    if (!modal) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    if (form) form.reset();
+
+    if (errorNode) {
+        errorNode.style.display = "none";
+        errorNode.textContent = "";
+    }
+
+    const passwordInputs = modal.querySelectorAll('input[type="text"], input[type="password"]');
+    const toggleButtons = modal.querySelectorAll(".password-toggle-btn");
+
+    passwordInputs.forEach((input) => {
+        if (input.id === "novaSenha" || input.id === "confirmacaoSenha") {
+            input.type = "password";
+        }
+    });
+
+    toggleButtons.forEach((button) => {
+        button.classList.remove("is-visible");
+        button.setAttribute("aria-label", "Mostrar senha");
+    });
+}
+
+function validatePasswordForm(novaSenha, confirmacao) {
+    if (!novaSenha || !confirmacao) return "Preencha os dois campos.";
+    if (novaSenha !== confirmacao) return "A confirmação da senha não confere.";
+
+    if (!isStrongPassword(novaSenha)) {
+        return "A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, uma letra minúscula e um número.";
+    }
+
+    return "";
+}
+
+function isStrongPassword(password) {
+    if (password.length < 8) return false;
+    if (!/[A-Z]/.test(password)) return false;
+    if (!/[a-z]/.test(password)) return false;
+    if (!/[0-9]/.test(password)) return false;
+    return true;
+}
+
+function setButtonLoading(button, isLoading, loadingText, defaultText) {
+    if (!button) return;
+
+    if (isLoading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = loadingText || "Carregando...";
+        button.disabled = true;
+    } else {
+        button.disabled = false;
+        button.textContent = defaultText || button.dataset.originalText || button.textContent;
+    }
+}
+
+function initPasswordToggles() {
+    const toggleButtons = document.querySelectorAll(".password-toggle-btn");
+
+    toggleButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            const targetId = button.dataset.target;
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const willShow = input.type === "password";
+            input.type = willShow ? "text" : "password";
+
+            button.classList.toggle("is-visible", willShow);
+            button.setAttribute("aria-label", willShow ? "Ocultar senha" : "Mostrar senha");
+        });
+    });
+}
+
+async function renderUsuarios() {
+    const host = getSectionHost();
+    if (!host) return;
+
+    await loadSectionHtml(host, "../pages/sections/admin/usuarios.html");
+
+    bindAdminUsersModal();
+    bindAdminUsersFilters();
+    bindAdminConfirmModal();
+
+    await refreshUsuarios();
+    renderUsuariosTable();
+}
+
+async function refreshUsuarios() {
+    const tbody = document.getElementById("adminUsersTbody");
+    if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text2">Carregando...</td></tr>`;
+
+    const data = await AdminService.getUsuarios();
+    const all = Array.isArray(data) ? data : [];
+
+    // remove ADMIN da lista
+    adminUsersState.all = all.filter((u) => String(u.perfil || "").toUpperCase() !== "ADMIN");
+}
+
+function bindAdminUsersFilters() {
+    const search = document.getElementById("adminUsersSearch");
+    const status = document.getElementById("adminUsersStatus");
+    const perfil = document.getElementById("adminUsersPerfil");
+    const newBtn = document.getElementById("adminUsersNewBtn");
+    status.value = "ativos";
+    adminUsersState.status = "ativos";
+
+    search?.addEventListener("input", () => {
+        adminUsersState.search = (search.value || "").trim().toLowerCase();
+        renderUsuariosTable();
+    });
+
+    status?.addEventListener("change", () => {
+        adminUsersState.status = status.value;
+        renderUsuariosTable();
+    });
+
+    perfil?.addEventListener("change", () => {
+        adminUsersState.perfil = perfil.value;
+        renderUsuariosTable();
+    });
+
+    newBtn?.addEventListener("click", () => openAdminUserModalCreate());
+}
+
+function getFilteredUsers() {
+    let items = [...adminUsersState.all];
+
+    if (adminUsersState.search) {
+        const q = adminUsersState.search;
+        items = items.filter((u) => {
+            const nome = String(u.nome || "").toLowerCase();
+            const matricula = String(u.matricula || "").toLowerCase();
+            const email = String(u.email || "").toLowerCase();
+            return nome.includes(q) || matricula.includes(q) || email.includes(q);
+        });
+    }
+
+    if (adminUsersState.status !== "todos") {
+        const want = adminUsersState.status === "ativos";
+        items = items.filter((u) => !!u.ativo === want);
+    }
+
+    if (adminUsersState.perfil !== "todos") {
+        items = items.filter((u) => String(u.perfil || "").toUpperCase() === adminUsersState.perfil);
+    }
+
+    items.sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+    return items;
+}
+
+function renderUsuariosTable() {
+    const tbody = document.getElementById("adminUsersTbody");
+    if (!tbody) return;
+
+    const rows = getFilteredUsers();
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text2">Nenhum usuário encontrado.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = "";
+
+    for (const u of rows) {
+        const tr = document.createElement("tr");
+
+        const statusLabel = u.ativo ? "Ativo" : "Inativo";
+        const statusClass = u.ativo ? "admin-status admin-status--ativo" : "admin-status admin-status--inativo";
+
+        const toggleIcon = u.ativo ? "✕" : "✓";
+        const toggleTitle = u.ativo ? "Desativar usuário" : "Ativar usuário";
 
         tr.innerHTML = `
-          <td>${createdStr}</td>
-          <td>${tipoStr}</td>
-          <td>${nomeStr}</td>
-          <td>${formatCpfDigits(reg.cpf)}</td>
-          <td>${statusBadge}</td>
-          <td>
-            <div class="admin-table-actions">
-              <button
-                type="button"
-                class="admin-btn-link"
-                data-action="view"
-                data-id="${reg.id}"
-              >
-                Ver detalhes
-              </button>
-            </div>
-          </td>
+        <td class="text2">${escapeHtml(u.nome || "-")}</td>
+        <td class="text2">${escapeHtml(u.matricula || "-")}</td>
+        <td class="text2">${escapeHtml(u.email || "-")}</td>
+        <td class="text2">${escapeHtml(String(u.perfil || "").toUpperCase())}</td>
+        <td class="text2"><span class="${statusClass}">${statusLabel}</span></td>
+        <td class="text2 admin-actions">
+            <button
+            type="button"
+            class="admin-toggle-btn"
+            data-action="toggle"
+            data-id="${u.id}"
+            aria-label="${toggleTitle}"
+            title="${toggleTitle}"
+            >
+            ${toggleIcon}
+            </button>
+
+            <button type="button" class="nota-edit-btn" data-action="edit" data-id="${u.id}" aria-label="Editar">
+            ${pencilSvg()}
+            </button>
+        </td>
         `;
 
-        reqTableBody.appendChild(tr);
-      });
+        tr.querySelector('[data-action="toggle"]')?.addEventListener("click", async () => {
+            await toggleUserStatus(u);
+        });
+
+        tr.querySelector('[data-action="edit"]')?.addEventListener("click", () => {
+            openAdminUserModalEdit(u);
+        });
+
+        tbody.appendChild(tr);
+    }
+}
+
+async function toggleUserStatus(u) {
+    const next = !u.ativo;
+
+    const ok = await openAdminConfirm({
+        title: next ? "Ativar usuário" : "Desativar usuário",
+        subtitle: "Confirme a alteração de status",
+        bodyHtml: `
+            <p><strong>Nome:</strong> ${escapeHtml(u.nome || "-")}</p>
+            <p><strong>Matrícula:</strong> ${escapeHtml(u.matricula || "-")}</p>
+            <p><strong>Email:</strong> ${escapeHtml(u.email || "-")}</p>
+            <p><strong>Novo status:</strong> ${next ? "Ativo" : "Inativo"}</p>
+            `,
+        okText: next ? "Ativar" : "Desativar",
+    });
+
+    if (!ok) return;
+    await AdminService.setUsuarioStatus(u.id, !u.ativo);
+    await refreshUsuarios();
+    renderUsuariosTable();
+}
+
+function bindAdminUsersModal() {
+    const modal = document.getElementById("adminUserModal");
+    const closeBtn = document.getElementById("adminUserModalClose");
+    const form = document.getElementById("adminUserForm");
+
+    const title = document.getElementById("adminUserModalTitle");
+    const subtitle = document.getElementById("adminUserModalSubtitle");
+
+    const nome = document.getElementById("adminUserNome");
+    const cpfWrap = document.getElementById("adminUserCpfWrap");
+    const cpf = document.getElementById("adminUserCpf");
+    const email = document.getElementById("adminUserEmail");
+    const perfilWrap = document.getElementById("adminUserPerfilWrap");
+    const perfil = document.getElementById("adminUserPerfilSelect");
+
+    const errorNode = document.getElementById("adminUserError");
+    const submitBtn = document.getElementById("adminUserSubmitBtn");
+
+    function getAdminUserFormData() {
+        return {
+            nome: nome?.value || "",
+            email: email?.value || "",
+            cpf: cpf?.value || "",
+            perfil: perfil?.value || "",
+        };
     }
 
-    // ===== Modal de detalhes =====
-    function openModal(reg) {
-      if (!modal) return;
-
-      selectedRegistrationId = reg.id;
-
-      const statusMeta = getStatusMeta(reg);
-
-      modalTipo.textContent = reg.tipoCadastro === 'professor' ? 'Professor' : 'Aluno';
-      modalNome.textContent = [reg.firstName, reg.lastName].filter(Boolean).join(' ') || '—';
-      modalNascimento.textContent = formatDateISOToBR(reg.birthDate);
-      modalCpf.textContent = formatCpfDigits(reg.cpf);
-      modalEmail.textContent = reg.email || '—';
-      modalTelefone.textContent = formatPhoneDigits(reg.phone);
-      modalStatus.textContent = statusMeta.label;
-      modalStatus.className = `text3 status-text status-text--${statusMeta.code}`;
-      modalMatricula.textContent = reg.matricula || '—';
-
-
-      const code = statusMeta.code;
-      if (modalGenerate) modalGenerate.style.display = code === 'pending' ? 'inline-flex' : 'none';
-      if (modalDeactivate) modalDeactivate.style.display = code === 'active' ? 'inline-flex' : 'none';
-      if (modalReactivate) modalReactivate.style.display = code === 'inactive' ? 'inline-flex' : 'none';
-      if (modalRemove) modalRemove.style.display = code === 'inactive' ? 'inline-flex' : 'none';
-
-      modal.setAttribute('aria-hidden', 'false');
+    function saveAdminUserSnapshot() {
+        modal.dataset.snapshot = JSON.stringify(getAdminUserFormData());
     }
 
-    function closeModal() {
-      if (!modal) return;
-      modal.setAttribute('aria-hidden', 'true');
-      selectedRegistrationId = null;
-    }
+    async function tryCloseUserModal() {
+        const current = JSON.stringify(getAdminUserFormData());
+        const snapshot = modal.dataset.snapshot || "";
 
-    if (modalClose) modalClose.addEventListener('click', closeModal);
-    if (modalCancel) modalCancel.addEventListener('click', closeModal);
-    if (modal) {
-      const backdrop = modal.querySelector('.admin-modal-backdrop');
-      if (backdrop) {
-        backdrop.addEventListener('click', closeModal);
-      }
-    }
+        const hasAnyValue =
+            (nome?.value || "").trim() ||
+            (email?.value || "").trim() ||
+            (cpf?.value || "").trim();
 
-    // ===== Modal de confirmação genérico =====
-    function openConfirm(action, reg) {
-      if (!confirmModal || !confirmMessage) return;
+        if (snapshot && current !== snapshot && hasAnyValue) {
+            const ok = await openAdminConfirm({
+                title: "Descartar alterações?",
+                subtitle: "Você tem alterações não salvas.",
+                bodyHtml: `<p>Ao sair, as alterações serão perdidas.</p>`,
+                okText: "Descartar",
+            });
 
-      confirmAction = action;
-      confirmTargetId = reg.id;
-
-      const nome = [reg.firstName, reg.lastName]
-        .filter(Boolean)
-        .join(' ') || 'este usuário';
-
-      const nomeSpan = `<span class="modal-user-name">${nome}</span>`;
-
-      let msg = '';
-      let btnLabel = '';
-      switch (action) {
-        case 'generate':
-          msg = `Deseja realmente <span class="modal-highlight">gerar a matrícula</span> para ${nomeSpan}?`;
-          btnLabel = 'Sim, gerar matrícula';
-          break;
-        case 'deactivate':
-          msg = `Deseja realmente <span class="modal-highlight">inativar</span> o usuário ${nomeSpan}?`;
-          btnLabel = 'Sim, inativar';
-          break;
-        case 'reactivate':
-          msg = `Deseja realmente <span class="modal-highlight">reativar</span> o usuário ${nomeSpan}?`;
-          btnLabel = 'Sim, reativar';
-          break;
-        case 'remove':
-          msg = `Deseja realmente <span class="modal-highlight">remover do sistema</span> o registro de ${nomeSpan}? Essa ação não poderá ser desfeita.`;
-          btnLabel = 'Sim, remover';
-          break;
-        default:
-          msg = '';
-      }
-
-      confirmMessage.innerHTML = msg;
-      if (confirmConfirmBtn && btnLabel) {
-        confirmConfirmBtn.textContent = btnLabel;
-      }
-
-      confirmModal.setAttribute('aria-hidden', 'false');
-    }
-
-    function closeConfirmModal() {
-      if (!confirmModal) return;
-      confirmModal.setAttribute('aria-hidden', 'true');
-      confirmAction = null;
-      confirmTargetId = null;
-    }
-
-    if (confirmCloseBtn) confirmCloseBtn.addEventListener('click', closeConfirmModal);
-    if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', closeConfirmModal);
-    if (confirmModal) {
-      const backdrop = confirmModal.querySelector('.admin-modal-backdrop');
-      if (backdrop) {
-        backdrop.addEventListener('click', closeConfirmModal);
-      }
-    }
-
-    function withSelectedRegistration(callback) {
-      if (!selectedRegistrationId) return;
-      const reg = registrations.find((r) => r.id === selectedRegistrationId);
-      if (!reg) return;
-      callback(reg);
-    }
-
-    // ===== Ações de dados / usuários =====
-        function createOrUpdateUserFromRegistration(reg, matricula) {
-      if (!ecData || !matricula) return;
-
-      const fullName = [reg.firstName, reg.lastName].filter(Boolean).join(' ') || matricula;
-      const cpfDigits = String(reg.cpf || '').replace(/\D/g, '');
-      const phoneDigits = String(reg.phone || '').replace(/\D/g, '');
-      const role = reg.tipoCadastro === 'professor' ? 'professor' : 'aluno';
-
-      const newUser = {
-        matricula,
-        nome: fullName,
-        email: reg.email || '',
-        role,
-        cpf: cpfDigits || undefined,
-        nascimento: reg.birthDate || undefined,
-        telefone: phoneDigits || undefined,
-        senha: resolvePasswordFor(role, cpfDigits),  // Profe123 / Aluno123 em modo dev
-      };
-
-      // garante estrutura de users
-      if (!ecData.users) {
-        ecData.users = {};
-      }
-
-      if (Array.isArray(ecData.users)) {
-        // caso legado, se users tiver virado array em algum momento
-        const idx = ecData.users.findIndex((u) => u && u.matricula === matricula);
-        if (idx >= 0) ecData.users[idx] = newUser;
-        else ecData.users.push(newUser);
-      } else {
-        // formato oficial: objeto mapeado por matrícula
-        ecData.users[matricula] = newUser;
-      }
-
-      const userList = Array.isArray(ecData.users)
-        ? ecData.users
-        : Object.values(ecData.users || {});
-
-      allTeachers = userList.filter((u) => u && u.role === 'professor');
-      allStudents = userList.filter((u) => u && u.role === 'aluno');
-
-      persistEcData();
-    }
-
-
-        function removeUserByMatricula(matricula) {
-      if (!ecData || !matricula) return;
-
-      if (Array.isArray(ecData.users)) {
-        const idx = ecData.users.findIndex((u) => u && u.matricula === matricula);
-        if (idx >= 0) ecData.users.splice(idx, 1);
-      } else if (ecData.users && typeof ecData.users === 'object') {
-        delete ecData.users[matricula];
-      }
-
-      const userList = Array.isArray(ecData.users)
-        ? ecData.users
-        : Object.values(ecData.users || {});
-
-      allTeachers = userList.filter((u) => u && u.role === 'professor');
-      allStudents = userList.filter((u) => u && u.role === 'aluno');
-
-      persistEcData();
-    }
-
-
-    function handleGenerate(regId) {
-      const idx = registrations.findIndex((r) => r.id === regId);
-      if (idx === -1) return;
-
-      const reg = registrations[idx];
-      const statusCode = getStatusCode(reg);
-      if (statusCode !== 'pending') return;
-
-      const mat = generateMatricula(reg.tipoCadastro);
-      if (!mat) {
-        if (typeof Toastify === 'function') {
-          Toastify({
-            text: 'Não foi possível gerar a matrícula.',
-            duration: 4000,
-            close: true,
-            gravity: 'top',
-            position: 'right',
-            stopOnFocus: true,
-            style: { background: '#e53935', color: '#ffffff' }
-          }).showToast();
-        }
-        return;
-      }
-
-      reg.status = 'active';
-      reg.matricula = mat;
-      reg.approvedAt = new Date().toISOString();
-      registrations[idx] = reg;
-      saveRegistrations(registrations);
-
-      createOrUpdateUserFromRegistration(reg, mat);
-
-      modalStatus.textContent = 'Ativo';
-      modalMatricula.textContent = mat;
-
-      refreshSummary();
-      renderRequests();
-
-      if (typeof Toastify === 'function') {
-        Toastify({
-          text: `Matrícula ${mat} gerada com sucesso.`,
-          duration: 4000,
-          close: true,
-          gravity: 'top',
-          position: 'right',
-          stopOnFocus: true,
-          style: { background: '#16c47f', color: '#ffffff' }
-        }).showToast();
-      }
-
-      closeModal();
-    }
-
-    function handleStatusChange(regId, newCode) {
-      const idx = registrations.findIndex((r) => r.id === regId);
-      if (idx === -1) return;
-
-      const reg = registrations[idx];
-      reg.status = newCode === 'inactive' ? 'inactive' : 'active';
-      registrations[idx] = reg;
-      saveRegistrations(registrations);
-
-      refreshSummary();
-      renderRequests();
-
-      if (typeof Toastify === 'function') {
-        const isInactive = newCode === 'inactive';
-        Toastify({
-          text: isInactive ? 'Usuário inativado com sucesso.' : 'Usuário reativado com sucesso.',
-          duration: 4000,
-          close: true,
-          gravity: 'top',
-          position: 'right',
-          stopOnFocus: true,
-          style: { background: '#16c47f', color: '#ffffff' }
-        }).showToast();
-      }
-
-      closeModal();
-    }
-
-    function handleRemove(regId) {
-      const idx = registrations.findIndex((r) => r.id === regId);
-      if (idx === -1) return;
-
-      const reg = registrations[idx];
-
-      if (reg.matricula) {
-        removeUserByMatricula(reg.matricula);
-      }
-
-      registrations.splice(idx, 1);
-      saveRegistrations(registrations);
-
-      refreshSummary();
-      renderRequests();
-
-      if (typeof Toastify === 'function') {
-        Toastify({
-          text: 'Registro removido do sistema.',
-          duration: 4000,
-          close: true,
-          gravity: 'top',
-          position: 'right',
-          stopOnFocus: true,
-          style: { background: '#e53935', color: '#ffffff' }
-        }).showToast();
-      }
-
-      closeModal();
-    }
-
-    // Clique em "Ver detalhes"
-    if (reqTableBody) {
-      reqTableBody.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action="view"]');
-        if (!btn) return;
-        const id = Number(btn.dataset.id);
-        const reg = registrations.find((r) => r.id === id);
-        if (!reg) return;
-        openModal(reg);
-      });
-    }
-
-    // Botões do modal principal → abrem confirmação
-    if (modalGenerate) {
-      modalGenerate.addEventListener('click', () => {
-        withSelectedRegistration((reg) => openConfirm('generate', reg));
-      });
-    }
-    if (modalDeactivate) {
-      modalDeactivate.addEventListener('click', () => {
-        withSelectedRegistration((reg) => openConfirm('deactivate', reg));
-      });
-    }
-    if (modalReactivate) {
-      modalReactivate.addEventListener('click', () => {
-        withSelectedRegistration((reg) => openConfirm('reactivate', reg));
-      });
-    }
-    if (modalRemove) {
-      modalRemove.addEventListener('click', () => {
-        withSelectedRegistration((reg) => openConfirm('remove', reg));
-      });
-    }
-
-    // Confirmação final
-    if (confirmConfirmBtn) {
-      confirmConfirmBtn.addEventListener('click', () => {
-        if (!confirmTargetId || !confirmAction) {
-          closeConfirmModal();
-          return;
+            if (!ok) return;
         }
 
-        const id = confirmTargetId;
-        const action = confirmAction;
+        closeModal(modal);
+    }
 
-        closeConfirmModal();
+    if (!modal || !closeBtn || !form) return;
 
-        if (action === 'generate') {
-          handleGenerate(id);
-        } else if (action === 'deactivate') {
-          handleStatusChange(id, 'inactive');
-        } else if (action === 'reactivate') {
-          handleStatusChange(id, 'active');
-        } else if (action === 'remove') {
-          handleRemove(id);
+    closeBtn.addEventListener("click", tryCloseUserModal);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) tryCloseUserModal();
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
         }
-      });
-    }
 
-    // ===== Filtros de busca dos registros =====
-    if (regSearchInput) {
-      regSearchInput.addEventListener('input', renderRequests);
-    }
-    if (regPendOnlyCheck) {
-      regPendOnlyCheck.addEventListener('change', renderRequests);
-    }
+        const payloadNome = (nome.value || "").trim();
+        const payloadEmail = (email.value || "").trim();
+        const payloadCpf = (cpf?.value || "").trim();
+        const payloadPerfil = (perfil?.value || "").toUpperCase();
 
-    // ===== Inicialização =====
-    refreshSummary();
-    renderRequests();
-  });
-})();
+        if (!payloadNome || !payloadEmail) {
+            showFormError(errorNode, "Preencha nome e e-mail.");
+            return;
+        }
+
+        if (!adminUsersState.editing) {
+            if (!payloadCpf) {
+                showFormError(errorNode, "CPF é obrigatório no cadastro.");
+                return;
+            }
+
+            if (payloadPerfil === "ADMIN") {
+                showFormError(errorNode, "Não é possível cadastrar usuário ADMIN.");
+                return;
+            }
+        }
+
+        const actionLabel = adminUsersState.editing ? "Salvar alterações" : "Cadastrar";
+
+        const confirmOk = await openAdminConfirm({
+            title: adminUsersState.editing ? "Confirmar edição" : "Confirmar cadastro",
+            subtitle: "Revise os dados abaixo",
+            bodyHtml: `
+      <p><strong>Nome:</strong> ${escapeHtml(payloadNome)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(payloadEmail)}</p>
+      ${adminUsersState.editing
+                    ? ""
+                    : `<p><strong>CPF:</strong> ${escapeHtml(payloadCpf)}</p>
+             <p><strong>Perfil:</strong> ${escapeHtml(payloadPerfil)}</p>`
+                }
+    `,
+            okText: actionLabel,
+        });
+
+        if (!confirmOk) return;
+
+        setButtonLoading(submitBtn, true, "Salvando...", submitBtn.textContent);
+
+        try {
+            if (!adminUsersState.editing) {
+                await AdminService.criarUsuario({
+                    nome: payloadNome,
+                    email: payloadEmail,
+                    cpf: payloadCpf,
+                    perfil: payloadPerfil,
+                });
+            } else {
+                await AdminService.editarUsuario(adminUsersState.editing.id, {
+                    nome: payloadNome,
+                    email: payloadEmail,
+                });
+            }
+
+            closeModal(modal);
+            await refreshUsuarios();
+            renderUsuariosTable();
+        } catch (err) {
+            showFormError(errorNode, err.message || "Erro ao salvar usuário.");
+        } finally {
+            setButtonLoading(submitBtn, false, null, submitBtn.textContent);
+        }
+    });
+
+    // expose functions to open/create
+    window.openAdminUserModalCreate = function () {
+        adminUsersState.editing = null;
+
+        title.textContent = "Novo usuário";
+        subtitle.textContent = "";
+
+        cpfWrap.style.display = "flex";
+        perfilWrap.style.display = "flex";
+
+        nome.value = "";
+        cpf.value = "";
+        email.value = "";
+        perfil.value = "ALUNO";
+
+        submitBtn.textContent = "Cadastrar";
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
+        }
+
+        saveAdminUserSnapshot();
+        openModal(modal);
+    };
+
+    window.openAdminUserModalEdit = function (u) {
+        adminUsersState.editing = u;
+
+        title.textContent = "Editar usuário";
+        subtitle.textContent = u.matricula ? `Matrícula: ${u.matricula}` : "";
+
+        // CPF e Perfil não editam
+        cpfWrap.style.display = "none";
+        perfilWrap.style.display = "none";
+
+        nome.value = u.nome || "";
+        email.value = u.email || "";
+
+        submitBtn.textContent = "Salvar";
+
+        if (errorNode) {
+            errorNode.style.display = "none";
+            errorNode.textContent = "";
+        }
+
+        saveAdminUserSnapshot();
+        openModal(modal);
+    };
+}
+
+// helpers
+function openModal(modal) {
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+function closeModal(modal) {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+}
+
+function showFormError(node, msg) {
+    if (!node) return;
+    node.textContent = msg;
+    node.style.display = "block";
+}
+
+function setButtonLoading(button, isLoading, loadingText, defaultText) {
+    if (!button) return;
+    if (isLoading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = loadingText || "Carregando...";
+        button.disabled = true;
+    } else {
+        button.disabled = false;
+        button.textContent = defaultText || button.dataset.originalText || button.textContent;
+    }
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function getCurrentUser() {
+    const raw = localStorage.getItem("ec_usuario");
+    if (!raw) return null;
+    try {
+        const u = JSON.parse(raw);
+        return {
+            nome: u.nome ?? "",
+            matricula: u.matricula ?? "",
+            perfil: (u.perfil ?? "").toUpperCase(),
+        };
+    } catch {
+        return null;
+    }
+}
+
+function pencilSvg() {
+    return `
+    <svg class="nota-edit-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l8.06-8.06.92.92L5.92 19.58zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.33a1.003 1.003 0 0 0-1.42 0L15.13 5.1l3.75 3.75 1.83-1.81z" fill="currentColor"></path>
+    </svg>
+  `;
+}
+
+let adminConfirmResolver = null;
+
+function openAdminConfirm({ title, subtitle = "", bodyHtml = "", okText = "Confirmar" }) {
+    const modal = document.getElementById("adminConfirmModal");
+    const t = document.getElementById("adminConfirmTitle");
+    const st = document.getElementById("adminConfirmSubtitle");
+    const body = document.getElementById("adminConfirmBody");
+    const okBtn = document.getElementById("adminConfirmOkBtn");
+
+    if (!modal || !t || !st || !body || !okBtn) return Promise.resolve(false);
+
+    t.textContent = title;
+    st.textContent = subtitle;
+    body.innerHTML = bodyHtml;
+    okBtn.textContent = okText;
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+
+    return new Promise((resolve) => {
+        adminConfirmResolver = resolve;
+    });
+}
+
+function closeAdminConfirm(result) {
+    const modal = document.getElementById("adminConfirmModal");
+    if (!modal) return;
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    if (adminConfirmResolver) {
+        adminConfirmResolver(result);
+        adminConfirmResolver = null;
+    }
+}
+
+function bindAdminConfirmModal() {
+    const modal = document.getElementById("adminConfirmModal");
+    const closeBtn = document.getElementById("adminConfirmClose");
+    const cancelBtn = document.getElementById("adminConfirmCancelBtn");
+    const okBtn = document.getElementById("adminConfirmOkBtn");
+
+    if (!modal || !closeBtn || !cancelBtn || !okBtn) return;
+
+    closeBtn.addEventListener("click", () => closeAdminConfirm(false));
+    cancelBtn.addEventListener("click", () => closeAdminConfirm(false));
+    okBtn.addEventListener("click", () => closeAdminConfirm(true));
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeAdminConfirm(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) {
+            closeAdminConfirm(false);
+        }
+    });
+}
